@@ -11,7 +11,7 @@
         <div class="container">
             <h1>🖼️ 壁纸分享站</h1>
             <nav>
-                <button id="uploadBtn" class="btn btn-primary">上传壁纸</button>
+                <button id="uploadBtn" class="btn btn-primary">发布壁纸</button>
             </nav>
         </div>
     </header>
@@ -28,17 +28,17 @@
                 <option value="tech">科技</option>
                 <option value="other">其他</option>
             </select>
-            <button id="searchBtn" class="btn">搜索</button>
+            <button id="searchBtn" class="btn btn-secondary">搜索</button>
         </div>
 
         <!-- 壁纸网格 -->
         <div id="wallpaperGrid" class="wallpaper-grid">
-            <div class="loading">加载中...</div>
+            <div class="loading">正在加载精美壁纸...</div>
         </div>
 
         <!-- 加载更多 -->
         <div class="load-more">
-            <button id="loadMoreBtn" class="btn">加载更多</button>
+            <button id="loadMoreBtn" class="btn btn-secondary">查看更多</button>
         </div>
     </main>
 
@@ -46,18 +46,18 @@
     <div id="uploadModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>上传壁纸</h2>
+            <h2>发布新壁纸</h2>
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="wallpaperFile">选择图片:</label>
+                    <label for="wallpaperFile">选择图片</label>
                     <input type="file" id="wallpaperFile" name="wallpaper" accept="image/*" required>
                 </div>
                 <div class="form-group">
-                    <label for="wallpaperTitle">标题:</label>
-                    <input type="text" id="wallpaperTitle" name="title" placeholder="给你的壁纸起个名字">
+                    <label for="wallpaperTitle">壁纸标题</label>
+                    <input type="text" id="wallpaperTitle" name="title" placeholder="给你的壁纸起个好听的名字">
                 </div>
                 <div class="form-group">
-                    <label for="wallpaperCategory">分类:</label>
+                    <label for="wallpaperCategory">选择分类</label>
                     <select id="wallpaperCategory" name="category">
                         <option value="nature">自然风景</option>
                         <option value="abstract">抽象艺术</option>
@@ -66,7 +66,7 @@
                         <option value="other">其他</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">上传</button>
+                <button type="submit" class="btn btn-primary">发布壁纸</button>
             </form>
         </div>
     </div>

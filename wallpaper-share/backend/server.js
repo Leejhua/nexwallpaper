@@ -2,7 +2,6 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
-const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
@@ -77,17 +76,17 @@ app.post('/api/upload', upload.single('wallpaper'), async (req, res) => {
 
         const { title, category } = req.body;
         const id = uuidv4();
-        const filePath = path.join(uploadDir, req.file.filename);
 
-        // 获取图片信息
-        const metadata = await sharp(filePath).metadata();
+        // 简化版本：使用默认尺寸信息
+        const width = 1920;
+        const height = 1080;
 
         // 保存到数据库
         db.run(
             `INSERT INTO wallpapers (id, title, category, filename, original_name, width, height, size) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [id, title || '未命名', category || 'other', req.file.filename, 
-             req.file.originalname, metadata.width, metadata.height, req.file.size],
+             req.file.originalname, width, height, req.file.size],
             function(err) {
                 if (err) {
                     console.error(err);

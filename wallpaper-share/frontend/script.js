@@ -95,7 +95,12 @@ async function loadWallpapers(reset = false) {
 
         if (wallpapers.length === 0) {
             if (reset) {
-                wallpaperGrid.innerHTML = '<div class="loading">暂无壁纸</div>';
+                wallpaperGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>还没有壁纸</h3>
+                        <p>成为第一个分享精美壁纸的人吧！</p>
+                    </div>
+                `;
             }
             hasMore = false;
         } else {
@@ -108,7 +113,12 @@ async function loadWallpapers(reset = false) {
         updateLoadMoreButton();
     } catch (error) {
         console.error('加载壁纸失败:', error);
-        wallpaperGrid.innerHTML = '<div class="loading">加载失败，请刷新重试</div>';
+        wallpaperGrid.innerHTML = `
+            <div class="empty-state">
+                <h3>加载失败</h3>
+                <p>网络连接出现问题，请刷新页面重试</p>
+            </div>
+        `;
     }
 
     isLoading = false;
@@ -138,9 +148,15 @@ function createWallpaperElement(wallpaper) {
                 <span class="wallpaper-category">${getCategoryName(wallpaper.category)}</span>
                 <span>${wallpaper.width}×${wallpaper.height}</span>
             </div>
-            <div class="wallpaper-meta">
-                <span>下载: ${wallpaper.downloads}</span>
-                <span>${formatDate(wallpaper.upload_date)}</span>
+            <div class="wallpaper-stats">
+                <div class="wallpaper-stat">
+                    <span>📥</span>
+                    <span>${wallpaper.downloads}</span>
+                </div>
+                <div class="wallpaper-stat">
+                    <span>📅</span>
+                    <span>${formatDate(wallpaper.upload_date)}</span>
+                </div>
             </div>
         </div>
     `;
@@ -161,11 +177,11 @@ async function showWallpaperDetail(id) {
                      alt="${wallpaper.title}">
                 <h2>${wallpaper.title}</h2>
                 <div class="detail-info">
-                    <p><strong>分类:</strong> ${getCategoryName(wallpaper.category)}</p>
-                    <p><strong>分辨率:</strong> ${wallpaper.width} × ${wallpaper.height}</p>
-                    <p><strong>文件大小:</strong> ${formatFileSize(wallpaper.size)}</p>
-                    <p><strong>下载次数:</strong> ${wallpaper.downloads}</p>
-                    <p><strong>上传时间:</strong> ${formatDate(wallpaper.upload_date)}</p>
+                    <p><strong>分类：</strong> ${getCategoryName(wallpaper.category)}</p>
+                    <p><strong>分辨率：</strong> ${wallpaper.width} × ${wallpaper.height}</p>
+                    <p><strong>文件大小：</strong> ${formatFileSize(wallpaper.size)}</p>
+                    <p><strong>下载次数：</strong> ${wallpaper.downloads}</p>
+                    <p><strong>发布时间：</strong> ${formatDate(wallpaper.upload_date)}</p>
                 </div>
                 <button class="download-btn" onclick="downloadWallpaper('${wallpaper.id}', '${wallpaper.title}')">
                     下载壁纸
@@ -209,7 +225,7 @@ async function handleUpload(e) {
         const result = await response.json();
 
         if (response.ok) {
-            alert('上传成功！');
+            alert('壁纸发布成功！感谢你的分享 🎉');
             uploadModal.style.display = 'none';
             uploadForm.reset();
             loadWallpapers(true); // 重新加载壁纸列表
