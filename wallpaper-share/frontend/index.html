@@ -3,42 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壁纸分享站</title>
+    <title>Wallpaper Gallery - 精美壁纸分享平台</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>🖼️ 壁纸分享站</h1>
+            <h1>🎨 Wallpaper Gallery</h1>
             <nav>
-                <button id="uploadBtn" class="btn btn-primary">发布壁纸</button>
+                <button id="uploadBtn" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    发布作品
+                </button>
             </nav>
         </div>
     </header>
 
     <main class="container">
+        <!-- 统计信息 -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <span id="totalWallpapers" class="stat-number">0</span>
+                <div class="stat-label">精美壁纸</div>
+            </div>
+            <div class="stat-item">
+                <span id="totalCategories" class="stat-number">0</span>
+                <div class="stat-label">分类标签</div>
+            </div>
+            <div class="stat-item">
+                <span id="totalDownloads" class="stat-number">0</span>
+                <div class="stat-label">下载次数</div>
+            </div>
+        </div>
+
         <!-- 搜索和筛选 -->
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="搜索壁纸..." />
+            <input type="text" id="searchInput" placeholder="🔍 搜索你喜欢的壁纸..." />
             <select id="categoryFilter">
-                <option value="all">所有分类</option>
-                <option value="nature">自然风景</option>
-                <option value="abstract">抽象艺术</option>
-                <option value="anime">动漫</option>
-                <option value="tech">科技</option>
-                <option value="other">其他</option>
+                <option value="all">🌟 所有分类</option>
+                <option value="nature">🌿 自然风景</option>
+                <option value="abstract">🎭 抽象艺术</option>
+                <option value="anime">🎌 动漫二次元</option>
+                <option value="tech">💻 科技未来</option>
+                <option value="other">✨ 其他精选</option>
             </select>
             <button id="searchBtn" class="btn btn-secondary">搜索</button>
         </div>
 
         <!-- 壁纸网格 -->
         <div id="wallpaperGrid" class="wallpaper-grid">
-            <div class="loading">正在加载精美壁纸...</div>
+            <div class="loading">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <div style="width: 20px; height: 20px; border: 2px solid #0096fa; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    正在加载精美壁纸...
+                </div>
+            </div>
         </div>
 
         <!-- 加载更多 -->
         <div class="load-more">
-            <button id="loadMoreBtn" class="btn btn-secondary">查看更多</button>
+            <button id="loadMoreBtn" class="btn btn-secondary">查看更多精彩内容</button>
         </div>
     </main>
 
@@ -46,27 +73,32 @@
     <div id="uploadModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>发布新壁纸</h2>
+            <h2 style="color: #0096fa; margin-bottom: 24px; font-size: 20px;">✨ 分享你的精美壁纸</h2>
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="wallpaperFile">选择图片</label>
+                    <label for="wallpaperFile">📸 选择图片文件</label>
                     <input type="file" id="wallpaperFile" name="wallpaper" accept="image/*" required>
+                    <small style="color: #666; font-size: 12px; margin-top: 4px; display: block;">
+                        支持 JPG、PNG、WEBP 格式，建议尺寸 1920x1080 或更高
+                    </small>
                 </div>
                 <div class="form-group">
-                    <label for="wallpaperTitle">壁纸标题</label>
-                    <input type="text" id="wallpaperTitle" name="title" placeholder="给你的壁纸起个好听的名字">
+                    <label for="wallpaperTitle">🏷️ 作品标题</label>
+                    <input type="text" id="wallpaperTitle" name="title" placeholder="给你的壁纸起个吸引人的标题...">
                 </div>
                 <div class="form-group">
-                    <label for="wallpaperCategory">选择分类</label>
+                    <label for="wallpaperCategory">🎯 选择分类</label>
                     <select id="wallpaperCategory" name="category">
-                        <option value="nature">自然风景</option>
-                        <option value="abstract">抽象艺术</option>
-                        <option value="anime">动漫</option>
-                        <option value="tech">科技</option>
-                        <option value="other">其他</option>
+                        <option value="nature">🌿 自然风景</option>
+                        <option value="abstract">🎭 抽象艺术</option>
+                        <option value="anime">🎌 动漫二次元</option>
+                        <option value="tech">💻 科技未来</option>
+                        <option value="other">✨ 其他精选</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">发布壁纸</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+                    🚀 发布作品
+                </button>
             </form>
         </div>
     </div>
@@ -78,6 +110,36 @@
             <div id="wallpaperDetail"></div>
         </div>
     </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 文件上传样式优化 */
+        input[type="file"] {
+            padding: 12px;
+            border: 2px dashed #e6e6e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #0096fa;
+            background-color: rgba(0, 150, 250, 0.05);
+        }
+        
+        /* 优化小标签样式 */
+        small {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
 
     <script src="script.js"></script>
 </body>

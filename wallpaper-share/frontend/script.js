@@ -16,6 +16,7 @@ const loadMoreBtn = document.getElementById('loadMoreBtn');
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     loadWallpapers();
+    loadStats();
     setupEventListeners();
 });
 
@@ -58,7 +59,60 @@ function setupEventListeners() {
     loadMoreBtn.addEventListener('click', loadMoreWallpapers);
 }
 
-// 加载壁纸
+// 加载统计信息
+async function loadStats() {
+    try {
+        // 获取壁纸总数
+        const wallpapersResponse = await fetch(`${API_BASE}/wallpapers?limit=1`);
+        const wallpapers = await wallpapersResponse.json();
+        
+        // 获取分类信息
+        const categoriesResponse = await fetch(`${API_BASE}/categories`);
+        const categories = await categoriesResponse.json();
+        
+        // 计算总下载数（这里简化处理，实际应该从后端获取）
+        let totalDownloads = 0;
+        const allWallpapersResponse = await fetch(`${API_BASE}/wallpapers?limit=1000`);
+        const allWallpapers = await allWallpapersResponse.json();
+        totalDownloads = allWallpapers.reduce((sum, w) => sum + (w.downloads || 0), 0);
+        
+        // 更新统计显示
+        document.getElementById('totalWallpapers').textContent = allWallpapers.length;
+        document.getElementById('totalCategories').textContent = categories.length;
+        document.getElementById('totalDownloads').textContent = totalDownloads;
+        
+        // 添加数字动画效果
+        animateNumber('totalWallpapers', allWallpapers.length);
+        animateNumber('totalCategories', categories.length);
+        animateNumber('totalDownloads', totalDownloads);
+        
+    } catch (error) {
+        console.error('加载统计信息失败:', error);
+    }
+}
+
+// 数字动画效果
+function animateNumber(elementId, targetNumber) {
+    const element = document.getElementById(elementId);
+    const duration = 1000; // 1秒
+    const startTime = Date.now();
+    const startNumber = 0;
+    
+    function updateNumber() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const currentNumber = Math.floor(startNumber + (targetNumber - startNumber) * progress);
+        element.textContent = currentNumber;
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        }
+    }
+    
+    updateNumber();
+}
 async function loadWallpapers(reset = false) {
     if (isLoading) return;
     
@@ -184,7 +238,7 @@ async function showWallpaperDetail(id) {
                     <p><strong>发布时间：</strong> ${formatDate(wallpaper.upload_date)}</p>
                 </div>
                 <button class="download-btn" onclick="downloadWallpaper('${wallpaper.id}', '${wallpaper.title}')">
-                    下载壁纸
+                    💾 下载高清壁纸
                 </button>
             </div>
         `;
@@ -214,7 +268,7 @@ async function handleUpload(e) {
     const submitBtn = uploadForm.querySelector('button[type="submit"]');
     
     submitBtn.disabled = true;
-    submitBtn.textContent = '上传中...';
+    submitBtn.textContent = '⏳ 发布中...';
 
     try {
         const response = await fetch(`${API_BASE}/upload`, {
@@ -225,10 +279,11 @@ async function handleUpload(e) {
         const result = await response.json();
 
         if (response.ok) {
-            alert('壁纸发布成功！感谢你的分享 🎉');
+            alert('🎉 壁纸发布成功！感谢你的精彩分享！');
             uploadModal.style.display = 'none';
             uploadForm.reset();
             loadWallpapers(true); // 重新加载壁纸列表
+            loadStats(); // 更新统计信息
         } else {
             alert(result.error || '上传失败');
         }
@@ -238,7 +293,7 @@ async function handleUpload(e) {
     }
 
     submitBtn.disabled = false;
-    submitBtn.textContent = '上传';
+    submitBtn.textContent = '🚀 发布作品';
 }
 
 // 处理搜索
@@ -268,13 +323,13 @@ function updateLoadMoreButton() {
 // 工具函数
 function getCategoryName(category) {
     const categories = {
-        'nature': '自然风景',
-        'abstract': '抽象艺术',
-        'anime': '动漫',
-        'tech': '科技',
-        'other': '其他'
+        'nature': '🌿 自然风景',
+        'abstract': '🎭 抽象艺术',
+        'anime': '🎌 动漫二次元',
+        'tech': '💻 科技未来',
+        'other': '✨ 其他精选'
     };
-    return categories[category] || '其他';
+    return categories[category] || '✨ 其他精选';
 }
 
 function formatDate(dateString) {
