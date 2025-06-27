@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壁纸分享站</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🖼️ 壁纸分享站</h1>
+            <nav>
+                <button id="uploadBtn" class="btn btn-primary">上传壁纸</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 搜索和筛选 -->
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="搜索壁纸..." />
+            <select id="categoryFilter">
+                <option value="all">所有分类</option>
+                <option value="nature">自然风景</option>
+                <option value="abstract">抽象艺术</option>
+                <option value="anime">动漫</option>
+                <option value="tech">科技</option>
+                <option value="other">其他</option>
+            </select>
+            <button id="searchBtn" class="btn">搜索</button>
+        </div>
+
+        <!-- 壁纸网格 -->
+        <div id="wallpaperGrid" class="wallpaper-grid">
+            <div class="loading">加载中...</div>
+        </div>
+
+        <!-- 加载更多 -->
+        <div class="load-more">
+            <button id="loadMoreBtn" class="btn">加载更多</button>
+        </div>
+    </main>
+
+    <!-- 上传模态框 -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>上传壁纸</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="wallpaperFile">选择图片:</label>
+                    <input type="file" id="wallpaperFile" name="wallpaper" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label for="wallpaperTitle">标题:</label>
+                    <input type="text" id="wallpaperTitle" name="title" placeholder="给你的壁纸起个名字">
+                </div>
+                <div class="form-group">
+                    <label for="wallpaperCategory">分类:</label>
+                    <select id="wallpaperCategory" name="category">
+                        <option value="nature">自然风景</option>
+                        <option value="abstract">抽象艺术</option>
+                        <option value="anime">动漫</option>
+                        <option value="tech">科技</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">上传</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 壁纸详情模态框 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="wallpaperDetail"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
