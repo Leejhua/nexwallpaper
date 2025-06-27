@@ -62,32 +62,30 @@ function setupEventListeners() {
 // 加载统计信息
 async function loadStats() {
     try {
-        // 获取壁纸总数
-        const wallpapersResponse = await fetch(`${API_BASE}/wallpapers?limit=1`);
-        const wallpapers = await wallpapersResponse.json();
+        // 使用新的统计API
+        const statsResponse = await fetch(`${API_BASE.replace('/api', '')}/api/stats`);
+        const stats = await statsResponse.json();
         
         // 获取分类信息
         const categoriesResponse = await fetch(`${API_BASE}/categories`);
         const categories = await categoriesResponse.json();
         
-        // 计算总下载数（这里简化处理，实际应该从后端获取）
-        let totalDownloads = 0;
-        const allWallpapersResponse = await fetch(`${API_BASE}/wallpapers?limit=1000`);
-        const allWallpapers = await allWallpapersResponse.json();
-        totalDownloads = allWallpapers.reduce((sum, w) => sum + (w.downloads || 0), 0);
-        
         // 更新统计显示
-        document.getElementById('totalWallpapers').textContent = allWallpapers.length;
+        document.getElementById('totalWallpapers').textContent = stats.total;
         document.getElementById('totalCategories').textContent = categories.length;
-        document.getElementById('totalDownloads').textContent = totalDownloads;
+        document.getElementById('totalDownloads').textContent = stats.approved; // 使用通过审核的数量作为可下载数量
         
         // 添加数字动画效果
-        animateNumber('totalWallpapers', allWallpapers.length);
+        animateNumber('totalWallpapers', stats.total);
         animateNumber('totalCategories', categories.length);
-        animateNumber('totalDownloads', totalDownloads);
+        animateNumber('totalDownloads', stats.approved);
         
     } catch (error) {
         console.error('加载统计信息失败:', error);
+        // 设置默认值
+        document.getElementById('totalWallpapers').textContent = '0';
+        document.getElementById('totalCategories').textContent = '0';
+        document.getElementById('totalDownloads').textContent = '0';
     }
 }
 
