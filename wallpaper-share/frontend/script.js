@@ -192,10 +192,17 @@ function createWallpaperElement(wallpaper) {
     div.className = 'wallpaper-item';
     div.onclick = () => showWallpaperDetail(wallpaper.id);
 
+    // 构建正确的图片URL
+    const imageUrl = `http://localhost:3001/uploads/${wallpaper.filename}`;
+
     div.innerHTML = `
-        <img src="${API_BASE.replace('/api', '')}/uploads/${wallpaper.filename}" 
+        <img src="${imageUrl}" 
              alt="${wallpaper.title}" 
-             loading="lazy">
+             loading="lazy"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div style="display:none; height:200px; background:#f5f5f5; align-items:center; justify-content:center; color:#666; font-size:14px;">
+            🖼️ 图片加载失败
+        </div>
         <div class="wallpaper-info">
             <div class="wallpaper-title">${wallpaper.title}</div>
             <div class="wallpaper-meta">
@@ -224,11 +231,18 @@ async function showWallpaperDetail(id) {
         const response = await fetch(`${API_BASE}/wallpapers/${id}`);
         const wallpaper = await response.json();
 
+        // 构建正确的图片URL
+        const imageUrl = `http://localhost:3001/uploads/${wallpaper.filename}`;
+
         const detailContent = document.getElementById('wallpaperDetail');
         detailContent.innerHTML = `
             <div class="wallpaper-detail-content">
-                <img src="${API_BASE.replace('/api', '')}/uploads/${wallpaper.filename}" 
-                     alt="${wallpaper.title}">
+                <img src="${imageUrl}" 
+                     alt="${wallpaper.title}"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; padding:40px; text-align:center; color:#666; background:#f5f5f5; border-radius:12px;">
+                    🖼️ 图片加载失败
+                </div>
                 <h2>${wallpaper.title}</h2>
                 <div class="detail-info">
                     <p><strong>分类：</strong> ${getCategoryName(wallpaper.category)}</p>
