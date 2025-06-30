@@ -119,15 +119,15 @@ const completeImageData = [
     {
         url: "https://labubuwallpaper.com/Labubu-White-Suit-Flashlight-Tablet-Static-Lockscreen,Labubu-Live-Wallpaper.png",
         title: "白色西装手电筒 - 平板锁屏",
-        category: "live",
+        category: "mobile",
         resolution: "平板",
         source: "com",
         type: "原图"
     },
     {
         url: "https://labubuwallpaper.com/Labubu-White-Suit-Flashlight-iPhone-Live-Lockscreen,Labubu-Live-Wallpaper.png",
-        title: "白色西装手电筒 - iPhone动态锁屏",
-        category: "live",
+        title: "白色西装手电筒 - iPhone锁屏",
+        category: "mobile",
         resolution: "iPhone",
         source: "com",
         type: "原图"

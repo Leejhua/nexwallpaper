@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简化版Labubu画廊 - 稳定加载</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-container {
+            position: relative;
+            height: 250px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        .placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .loading {
+            background: linear-gradient(45deg, #ffc107, #ff9800);
+        }
+
+        .error {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+
+        .success {
+            display: none;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .card-info {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .tag {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .tag-category { background: #9b59b6; }
+        .tag-source { background: #4ecdc4; }
+        .tag-local { background: #2ecc71; }
+
+        .retry-btn {
+            background: white;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐰 简化版Labubu画廊</h1>
+            <p>专注稳定加载的壁纸收藏</p>
+        </div>
+
+        <div class="stats">
+            <span>📊 加载统计: </span>
+            <span id="loaded">0</span> 成功 | 
+            <span id="failed">0</span> 失败 | 
+            <span id="total">0</span> 总计
+        </div>
+
+        <div class="gallery" id="gallery"></div>
+    </div>
+
+    <script>
+        class SimpleGallery {
+            constructor() {
+                this.images = [
+                    {
+                        primary: "local_images/rainbow-labubu.jpg",
+                        title: "彩虹Labubu - 本地版",
+                        category: "本地",
+                        source: "local"
+                    },
+                    {
+                        primary: "local_images/hero-labubu.jpg",
+                        title: "英雄Labubu - 本地版", 
+                        category: "本地",
+                        source: "local"
+                    },
+                    {
+                        primary: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/cute-rainbow-labubu-wallpaper---heart-gesture-edition.jpg",
+                        fallback: "local_images/rainbow-labubu.jpg",
+                        title: "彩虹Labubu - 爱心手势",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        primary: "https://labubuwallpaper.com/hero-labubu.jpg",
+                        fallback: "local_images/hero-labubu.jpg",
+                        title: "英雄主题Labubu",
+                        category: "奇幻",
+                        source: "com"
+                    },
+                    {
+                        primary: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-spring-garden-castle-wallpaper---cute-bunny-ear-doll-fantasy-scene-mobile-wallpaper.jpg",
+                        title: "春日花园城堡",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        primary: "https://labubuwallpaper.com/Labubu-with-Swim-Ring,Labubu-Live-Wallpaper.jpg",
+                        title: "游泳圈Labubu",
+                        category: "夏日",
+                        source: "com"
+                    }
+                ];
+
+                this.stats = { loaded: 0, failed: 0, total: this.images.length };
+                this.init();
+            }
+
+            init() {
+                this.updateStats();
+                this.renderGallery();
+            }
+
+            updateStats() {
+                document.getElementById('loaded').textContent = this.stats.loaded;
+                document.getElementById('failed').textContent = this.stats.failed;
+                document.getElementById('total').textContent = this.stats.total;
+            }
+
+            renderGallery() {
+                const gallery = document.getElementById('gallery');
+                
+                this.images.forEach((item, index) => {
+                    const card = this.createCard(item, index);
+                    gallery.appendChild(card);
+                    
+                    // 延迟加载，避免同时请求过多
+                    setTimeout(() => {
+                        this.loadImage(card, item, index);
+                    }, index * 200);
+                });
+            }
+
+            createCard(item, index) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = index;
+
+                card.innerHTML = `
+                    <div class="image-container">
+                        <div class="placeholder loading">
+                            <div class="spinner"></div>
+                            <div>加载中...</div>
+                        </div>
+                        <img class="card-image" style="display: none;">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-meta">
+                            <span class="tag tag-category">${item.category}</span>
+                            <span class="tag tag-source ${item.source === 'local' ? 'tag-local' : ''}">${item.source.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            loadImage(card, item, index) {
+                const img = card.querySelector('.card-image');
+                const placeholder = card.querySelector('.placeholder');
+
+                this.tryLoadImage(img, item.primary)
+                    .then(() => {
+                        this.onImageSuccess(card, img, placeholder);
+                    })
+                    .catch(() => {
+                        if (item.fallback) {
+                            console.log(`主图片失败，尝试备用图片: ${item.fallback}`);
+                            return this.tryLoadImage(img, item.fallback);
+                        } else {
+                            throw new Error('无备用图片');
+                        }
+                    })
+                    .then(() => {
+                        this.onImageSuccess(card, img, placeholder);
+                    })
+                    .catch(() => {
+                        this.onImageError(card, placeholder, item, index);
+                    });
+            }
+
+            tryLoadImage(imgElement, url) {
+                return new Promise((resolve, reject) => {
+                    const testImg = new Image();
+                    
+                    testImg.onload = () => {
+                        imgElement.src = url;
+                        resolve();
+                    };
+                    
+                    testImg.onerror = () => {
+                        reject(new Error(`Failed to load: ${url}`));
+                    };
+
+                    // 设置超时
+                    setTimeout(() => {
+                        if (!testImg.complete) {
+                            reject(new Error(`Timeout: ${url}`));
+                        }
+                    }, 8000);
+
+                    testImg.src = url;
+                });
+            }
+
+            onImageSuccess(card, img, placeholder) {
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+                this.stats.loaded++;
+                this.updateStats();
+                console.log(`图片加载成功: ${img.src}`);
+            }
+
+            onImageError(card, placeholder, item, index) {
+                placeholder.className = 'placeholder error';
+                placeholder.innerHTML = `
+                    <div>🐰</div>
+                    <div>加载失败</div>
+                    <div style="font-size: 0.8rem; margin: 0.5rem 0;">${item.title}</div>
+                    <button class="retry-btn" onclick="gallery.retryImage(${index})">重试</button>
+                `;
+                this.stats.failed++;
+                this.updateStats();
+                console.log(`图片加载失败: ${item.primary}`);
+            }
+
+            retryImage(index) {
+                const card = document.querySelector(`[data-index="${index}"]`);
+                const item = this.images[index];
+                const placeholder = card.querySelector('.placeholder');
+                
+                placeholder.className = 'placeholder loading';
+                placeholder.innerHTML = `
+                    <div class="spinner"></div>
+                    <div>重新加载...</div>
+                `;
+                
+                if (this.stats.failed > 0) {
+                    this.stats.failed--;
+                    this.updateStats();
+                }
+                
+                setTimeout(() => {
+                    this.loadImage(card, item, index);
+                }, 500);
+            }
+        }
+
+        // 初始化画廊
+        const gallery = new SimpleGallery();
+    </script>
+</body>
+</html>

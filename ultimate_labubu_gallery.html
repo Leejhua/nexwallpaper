@@ -432,8 +432,19 @@
             filterMedia() {
                 if (this.currentFilter === 'all') {
                     return this.allMedia;
+                } else if (this.currentFilter === 'live') {
+                    // 对于"动态"筛选，只显示真正的视频文件
+                    return this.allMedia.filter(item => {
+                        const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                        return isVideo;
+                    });
+                } else {
+                    // 对于其他筛选，按分类筛选，但排除视频文件
+                    return this.allMedia.filter(item => {
+                        const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                        return !isVideo && item.category === this.currentFilter;
+                    });
                 }
-                return this.allMedia.filter(item => item.category === this.currentFilter);
             }
 
             createMediaCard(item, index) {

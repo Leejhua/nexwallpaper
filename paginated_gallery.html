@@ -525,8 +525,18 @@
             applyFilter() {
                 if (this.currentFilter === 'all') {
                     this.filteredMedia = [...this.allMedia];
+                } else if (this.currentFilter === 'live') {
+                    // 对于"动态"筛选，只显示真正的视频文件
+                    this.filteredMedia = this.allMedia.filter(item => {
+                        const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                        return isVideo;
+                    });
                 } else {
-                    this.filteredMedia = this.allMedia.filter(item => item.category === this.currentFilter);
+                    // 对于其他筛选，按分类筛选，但排除视频文件
+                    this.filteredMedia = this.allMedia.filter(item => {
+                        const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                        return !isVideo && item.category === this.currentFilter;
+                    });
                 }
                 
                 this.totalPages = Math.ceil(this.filteredMedia.length / this.pageSize);

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>筛选逻辑测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .test-section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 筛选逻辑测试工具</h1>
+        <p>验证动态壁纸筛选是否正确</p>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 数据统计</h3>
+        <div id="stats"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 筛选测试</h3>
+        <button class="btn" onclick="testFiltering()">运行筛选测试</button>
+        <div id="filter-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📝 详细结果</h3>
+        <div id="detailed-results"></div>
+    </div>
+
+    <script src="complete_gallery_data.js"></script>
+    <script>
+        class FilteringTester {
+            constructor() {
+                this.allMedia = [...completeImageData, ...completeVideoData];
+                this.init();
+            }
+
+            init() {
+                this.showStats();
+            }
+
+            showStats() {
+                const statsDiv = document.getElementById('stats');
+                
+                let totalImages = 0;
+                let totalVideos = 0;
+                let staticInLive = 0;
+                let videoNotInLive = 0;
+                
+                const categories = {};
+                
+                this.allMedia.forEach(item => {
+                    const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                    
+                    if (isVideo) {
+                        totalVideos++;
+                        if (item.category !== 'live') {
+                            videoNotInLive++;
+                        }
+                    } else {
+                        totalImages++;
+                        if (item.category === 'live') {
+                            staticInLive++;
+                        }
+                    }
+                    
+                    categories[item.category] = (categories[item.category] || 0) + 1;
+                });
+                
+                let html = `
+                    <div class="test-result info">
+                        <strong>总体统计:</strong><br>
+                        • 总项目数: ${this.allMedia.length}<br>
+                        • 静态图片: ${totalImages}<br>
+                        • 动态视频: ${totalVideos}
+                    </div>
+                    <div class="test-result ${staticInLive > 0 ? 'error' : 'success'}">
+                        <strong>分类问题:</strong><br>
+                        • 静态文件错误分类为live: ${staticInLive}<br>
+                        • 视频文件未分类为live: ${videoNotInLive}
+                    </div>
+                    <div class="test-result info">
+                        <strong>分类分布:</strong><br>
+                `;
+                
+                Object.entries(categories).sort().forEach(([category, count]) => {
+                    html += `• ${category}: ${count} 项<br>`;
+                });
+                
+                html += '</div>';
+                statsDiv.innerHTML = html;
+            }
+
+            testFiltering() {
+                const resultsDiv = document.getElementById('filter-results');
+                const detailedDiv = document.getElementById('detailed-results');
+                
+                const tests = [
+                    { filter: 'all', name: '全部' },
+                    { filter: 'live', name: '动态' },
+                    { filter: 'fantasy', name: '奇幻' },
+                    { filter: 'mobile', name: '手机' },
+                    { filter: 'desktop', name: '桌面' },
+                    { filter: '4k', name: '4K' },
+                    { filter: 'seasonal', name: '季节' }
+                ];
+                
+                let allPassed = true;
+                let resultsHtml = '';
+                let detailedHtml = '';
+                
+                tests.forEach(test => {
+                    const filtered = this.applyFilter(test.filter);
+                    const issues = this.validateFilterResult(filtered, test.filter);
+                    const passed = issues.length === 0;
+                    
+                    if (!passed) allPassed = false;
+                    
+                    resultsHtml += `
+                        <div class="test-result ${passed ? 'success' : 'error'}">
+                            <strong>${test.name} (${test.filter}):</strong> 
+                            ${filtered.length} 项 
+                            ${passed ? '✅ 通过' : `❌ ${issues.length} 个问题`}
+                        </div>
+                    `;
+                    
+                    if (!passed) {
+                        detailedHtml += `<h4>${test.name} 筛选问题:</h4>`;
+                        issues.forEach(issue => {
+                            detailedHtml += `<div class="test-result error">${issue}</div>`;
+                        });
+                    }
+                });
+                
+                resultsHtml = `
+                    <div class="test-result ${allPassed ? 'success' : 'error'}">
+                        <strong>总体结果:</strong> ${allPassed ? '✅ 所有测试通过' : '❌ 发现问题'}
+                    </div>
+                ` + resultsHtml;
+                
+                resultsDiv.innerHTML = resultsHtml;
+                detailedDiv.innerHTML = detailedHtml;
+            }
+
+            applyFilter(filter) {
+                if (filter === 'all') {
+                    return [...this.allMedia];
+                } else if (filter === 'live') {
+                    // 对于"动态"筛选，只显示真正的视频文件
+                    return this.allMedia.filter(item => {
+                        const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                        return isVideo;
+                    });
+                } else {
+                    // 对于其他筛选，按分类筛选，但排除视频文件
+                    return this.allMedia.filter(item => {
+                        const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                        return !isVideo && item.category === filter;
+                    });
+                }
+            }
+
+            validateFilterResult(filtered, filter) {
+                const issues = [];
+                
+                filtered.forEach((item, index) => {
+                    const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                    
+                    if (filter === 'live') {
+                        // 动态筛选应该只包含视频
+                        if (!isVideo) {
+                            issues.push(`项目 ${index + 1}: 静态文件出现在动态筛选中 - ${item.title}`);
+                        }
+                    } else if (filter !== 'all') {
+                        // 其他筛选不应该包含视频
+                        if (isVideo) {
+                            issues.push(`项目 ${index + 1}: 视频文件出现在 ${filter} 筛选中 - ${item.title}`);
+                        }
+                        // 分类应该匹配
+                        if (item.category !== filter) {
+                            issues.push(`项目 ${index + 1}: 分类不匹配 (期望: ${filter}, 实际: ${item.category}) - ${item.title}`);
+                        }
+                    }
+                });
+                
+                return issues;
+            }
+        }
+
+        function testFiltering() {
+            tester.testFiltering();
+        }
+
+        // 初始化测试器
+        const tester = new FilteringTester();
+    </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稳定版Labubu壁纸画廊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .gallery-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .gallery {
+            column-count: 4;
+            column-gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .media-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            break-inside: avoid;
+            position: relative;
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .media-item {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .media-item.error {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .media-info {
+            padding: 1rem;
+        }
+
+        .media-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .media-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .category-tag {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            background: #9b59b6;
+        }
+
+        .source-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .local-badge {
+            background: #2ecc71 !important;
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .retry-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .retry-btn:hover {
+            background: #ff5252;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .gallery { column-count: 3; }
+        }
+
+        @media (max-width: 768px) {
+            .gallery { column-count: 2; }
+            .header h1 { font-size: 2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .gallery { column-count: 1; }
+            .header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐰 稳定版Labubu壁纸画廊</h1>
+        <p>优化加载 - 混合本地和在线资源</p>
+        <div class="stats">
+            <div class="stat-item">📸 <span id="loaded-count">0</span> 张已加载</div>
+            <div class="stat-item">⚠️ <span id="error-count">0</span> 个错误</div>
+            <div class="stat-item">🔄 智能重试</div>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <div id="gallery" class="gallery"></div>
+    </div>
+
+    <script>
+        class RobustGallery {
+            constructor() {
+                this.loadedCount = 0;
+                this.errorCount = 0;
+                this.mediaData = [
+                    // 本地测试图片
+                    {
+                        url: "local_images/rainbow-labubu.jpg",
+                        title: "彩虹Labubu - 本地版",
+                        category: "本地",
+                        source: "local"
+                    },
+                    {
+                        url: "local_images/hero-labubu.jpg", 
+                        title: "英雄Labubu - 本地版",
+                        category: "本地",
+                        source: "local"
+                    },
+                    // 在线资源 - 简化版
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/cute-rainbow-labubu-wallpaper---heart-gesture-edition.jpg",
+                        title: "彩虹Labubu - 爱心手势",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/hero-labubu.jpg",
+                        title: "英雄主题Labubu",
+                        category: "奇幻", 
+                        source: "com"
+                    },
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-spring-garden-castle-wallpaper---cute-bunny-ear-doll-fantasy-scene-mobile-wallpaper.jpg",
+                        title: "春日花园城堡",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/Labubu-with-Swim-Ring,Labubu-Live-Wallpaper.jpg",
+                        title: "游泳圈Labubu",
+                        category: "夏日",
+                        source: "com"
+                    },
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/two-labubu-bunnies-breaking-through-the-wall-wallpaper.png",
+                        title: "双兔破墙",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/Labubu-In-Red-And-White-Swimsuit,Labubu-Phone-Wallpaper.jpg",
+                        title: "红白泳装",
+                        category: "夏日",
+                        source: "com"
+                    },
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-beach-sunsetlabubu-wallpaper-pc.png",
+                        title: "海滩日落",
+                        category: "风景",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/Labubu-Whispers-in-Moonlit-Garden,Labubu-iPhone-Wallpaper.png",
+                        title: "月光花园低语",
+                        category: "奇幻",
+                        source: "com"
+                    }
+                ];
+                this.init();
+            }
+
+            init() {
+                this.renderGallery();
+            }
+
+            renderGallery() {
+                const gallery = document.getElementById('gallery');
+                
+                this.mediaData.forEach((item, index) => {
+                    const card = this.createMediaCard(item, index);
+                    gallery.appendChild(card);
+                });
+            }
+
+            createMediaCard(item, index) {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                
+                card.innerHTML = `
+                    <div class="image-container" style="position: relative;">
+                        <div class="loading-indicator">加载中...</div>
+                        <img class="media-item" data-src="${item.url}" alt="${item.title}" style="display: none;">
+                    </div>
+                    <div class="media-info">
+                        <div class="media-title">${item.title}</div>
+                        <div class="media-meta">
+                            <span class="category-tag">${item.category}</span>
+                            <span class="source-badge ${item.source === 'local' ? 'local-badge' : ''}">${item.source.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+
+                // 延迟加载图片
+                setTimeout(() => {
+                    this.loadImage(card, item, index);
+                }, index * 200); // 错开加载时间
+
+                return card;
+            }
+
+            loadImage(card, item, index) {
+                const img = card.querySelector('.media-item');
+                const loadingIndicator = card.querySelector('.loading-indicator');
+                const container = card.querySelector('.image-container');
+                
+                img.onload = () => {
+                    loadingIndicator.style.display = 'none';
+                    img.style.display = 'block';
+                    this.loadedCount++;
+                    this.updateStats();
+                };
+
+                img.onerror = () => {
+                    this.handleImageError(container, item, index);
+                };
+
+                // 设置超时
+                setTimeout(() => {
+                    if (img.style.display === 'none' && !img.complete) {
+                        this.handleImageError(container, item, index);
+                    }
+                }, 10000); // 10秒超时
+
+                img.src = img.dataset.src;
+            }
+
+            handleImageError(container, item, index) {
+                this.errorCount++;
+                this.updateStats();
+                
+                container.innerHTML = `
+                    <div class="media-item error">
+                        <div>
+                            <div>❌ 加载失败</div>
+                            <div style="font-size: 0.8rem; margin-top: 0.5rem;">${item.title}</div>
+                            <button class="retry-btn" onclick="gallery.retryLoad(${index})">重试</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            retryLoad(index) {
+                const card = document.querySelectorAll('.media-card')[index];
+                const item = this.mediaData[index];
+                const container = card.querySelector('.image-container');
+                
+                container.innerHTML = `
+                    <div class="loading-indicator">重新加载中...</div>
+                    <img class="media-item" data-src="${item.url}" alt="${item.title}" style="display: none;">
+                `;
+                
+                this.errorCount--;
+                this.updateStats();
+                
+                setTimeout(() => {
+                    this.loadImage(card, item, index);
+                }, 500);
+            }
+
+            updateStats() {
+                document.getElementById('loaded-count').textContent = this.loadedCount;
+                document.getElementById('error-count').textContent = this.errorCount;
+            }
+        }
+
+        // 初始化画廊
+        const gallery = new RobustGallery();
+    </script>
+</body>
+</html>

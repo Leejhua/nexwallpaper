@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>容错版Labubu壁纸画廊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn.active {
+            background: #ff6b6b;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .gallery-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .gallery {
+            column-count: 4;
+            column-gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .media-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            break-inside: avoid;
+            position: relative;
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .image-container {
+            position: relative;
+            background: #f8f9fa;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-item {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .media-info {
+            padding: 1rem;
+        }
+
+        .media-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .media-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .category-tag {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            background: #9b59b6;
+        }
+
+        .source-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.3rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .status-loading {
+            background: rgba(255, 193, 7, 0.9);
+            color: white;
+        }
+
+        .status-success {
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+        }
+
+        .status-error {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
+
+        .retry-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .retry-btn:hover {
+            background: #ff5252;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .gallery { column-count: 3; }
+        }
+
+        @media (max-width: 768px) {
+            .gallery { column-count: 2; }
+            .header h1 { font-size: 2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .gallery { column-count: 1; }
+            .header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐰 容错版Labubu壁纸画廊</h1>
+        <p>智能加载 - 自动处理网络问题</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn active" onclick="gallery.showAll()">显示全部</button>
+        <button class="btn" onclick="gallery.showLoaded()">仅显示已加载</button>
+        <button class="btn" onclick="gallery.retryAll()">重试全部</button>
+        <button class="btn" onclick="gallery.showStats()">显示统计</button>
+    </div>
+
+    <div class="gallery-container">
+        <div id="gallery" class="gallery"></div>
+    </div>
+
+    <script>
+        class FallbackGallery {
+            constructor() {
+                this.mediaData = [
+                    // 精选稳定资源
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/cute-rainbow-labubu-wallpaper---heart-gesture-edition.jpg",
+                        fallback: "local_images/rainbow-labubu.jpg",
+                        title: "彩虹Labubu - 爱心手势",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/hero-labubu.jpg",
+                        fallback: "local_images/hero-labubu.jpg",
+                        title: "英雄主题Labubu",
+                        category: "奇幻",
+                        source: "com"
+                    },
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-spring-garden-castle-wallpaper---cute-bunny-ear-doll-fantasy-scene-mobile-wallpaper.jpg",
+                        title: "春日花园城堡",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/Labubu-with-Swim-Ring,Labubu-Live-Wallpaper.jpg",
+                        title: "游泳圈Labubu",
+                        category: "夏日",
+                        source: "com"
+                    },
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/two-labubu-bunnies-breaking-through-the-wall-wallpaper.png",
+                        title: "双兔破墙而出",
+                        category: "奇幻",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/Labubu-In-Red-And-White-Swimsuit,Labubu-Phone-Wallpaper.jpg",
+                        title: "红白泳装",
+                        category: "夏日",
+                        source: "com"
+                    },
+                    {
+                        url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-beach-sunsetlabubu-wallpaper-pc.png",
+                        title: "海滩日落美景",
+                        category: "风景",
+                        source: "xyz"
+                    },
+                    {
+                        url: "https://labubuwallpaper.com/Labubu-Whispers-in-Moonlit-Garden,Labubu-iPhone-Wallpaper.png",
+                        title: "月光花园低语",
+                        category: "奇幻",
+                        source: "com"
+                    }
+                ];
+                
+                this.loadedCount = 0;
+                this.errorCount = 0;
+                this.cards = [];
+                this.init();
+            }
+
+            init() {
+                this.renderGallery();
+            }
+
+            renderGallery() {
+                const gallery = document.getElementById('gallery');
+                gallery.innerHTML = '';
+                
+                this.mediaData.forEach((item, index) => {
+                    const card = this.createMediaCard(item, index);
+                    gallery.appendChild(card);
+                    this.cards.push(card);
+                });
+            }
+
+            createMediaCard(item, index) {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                card.dataset.index = index;
+                
+                card.innerHTML = `
+                    <div class="image-container">
+                        <div class="placeholder">
+                            <div class="loading-spinner"></div>
+                            <div>加载中...</div>
+                        </div>
+                        <div class="status-indicator status-loading">加载中</div>
+                    </div>
+                    <div class="media-info">
+                        <div class="media-title">${item.title}</div>
+                        <div class="media-meta">
+                            <span class="category-tag">${item.category}</span>
+                            <span class="source-badge">${item.source.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+
+                // 延迟加载
+                setTimeout(() => {
+                    this.loadImage(card, item, index);
+                }, index * 300);
+
+                return card;
+            }
+
+            loadImage(card, item, index) {
+                const container = card.querySelector('.image-container');
+                const statusIndicator = card.querySelector('.status-indicator');
+                
+                const img = new Image();
+                img.onload = () => {
+                    container.innerHTML = `<img class="media-item" src="${item.url}" alt="${item.title}">`;
+                    statusIndicator.className = 'status-indicator status-success';
+                    statusIndicator.textContent = '✓ 已加载';
+                    this.loadedCount++;
+                };
+
+                img.onerror = () => {
+                    this.handleImageError(card, item, index);
+                };
+
+                // 设置超时
+                const timeout = setTimeout(() => {
+                    if (!img.complete) {
+                        this.handleImageError(card, item, index);
+                    }
+                }, 8000);
+
+                img.onload = () => {
+                    clearTimeout(timeout);
+                    container.innerHTML = `<img class="media-item" src="${item.url}" alt="${item.title}">`;
+                    statusIndicator.className = 'status-indicator status-success';
+                    statusIndicator.textContent = '✓ 已加载';
+                    this.loadedCount++;
+                };
+
+                img.src = item.url;
+            }
+
+            handleImageError(card, item, index) {
+                const container = card.querySelector('.image-container');
+                const statusIndicator = card.querySelector('.status-indicator');
+                
+                // 尝试备用图片
+                if (item.fallback) {
+                    const fallbackImg = new Image();
+                    fallbackImg.onload = () => {
+                        container.innerHTML = `<img class="media-item" src="${item.fallback}" alt="${item.title}">`;
+                        statusIndicator.className = 'status-indicator status-success';
+                        statusIndicator.textContent = '✓ 备用';
+                        this.loadedCount++;
+                    };
+                    fallbackImg.onerror = () => {
+                        this.showErrorPlaceholder(container, statusIndicator, item, index);
+                    };
+                    fallbackImg.src = item.fallback;
+                } else {
+                    this.showErrorPlaceholder(container, statusIndicator, item, index);
+                }
+            }
+
+            showErrorPlaceholder(container, statusIndicator, item, index) {
+                container.innerHTML = `
+                    <div class="placeholder">
+                        <div class="placeholder-icon">🐰</div>
+                        <div>暂时无法加载</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">${item.title}</div>
+                        <button class="retry-btn" onclick="gallery.retryImage(${index})">重试</button>
+                    </div>
+                `;
+                statusIndicator.className = 'status-indicator status-error';
+                statusIndicator.textContent = '✗ 失败';
+                this.errorCount++;
+            }
+
+            retryImage(index) {
+                const card = this.cards[index];
+                const item = this.mediaData[index];
+                const container = card.querySelector('.image-container');
+                const statusIndicator = card.querySelector('.status-indicator');
+                
+                container.innerHTML = `
+                    <div class="placeholder">
+                        <div class="loading-spinner"></div>
+                        <div>重新加载中...</div>
+                    </div>
+                `;
+                statusIndicator.className = 'status-indicator status-loading';
+                statusIndicator.textContent = '加载中';
+                
+                if (this.errorCount > 0) this.errorCount--;
+                
+                setTimeout(() => {
+                    this.loadImage(card, item, index);
+                }, 500);
+            }
+
+            retryAll() {
+                this.loadedCount = 0;
+                this.errorCount = 0;
+                this.renderGallery();
+            }
+
+            showAll() {
+                this.cards.forEach(card => {
+                    card.style.display = 'block';
+                });
+            }
+
+            showLoaded() {
+                this.cards.forEach(card => {
+                    const status = card.querySelector('.status-indicator');
+                    if (status.classList.contains('status-success')) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            showStats() {
+                alert(`加载统计:\n✅ 成功: ${this.loadedCount}\n❌ 失败: ${this.errorCount}\n📊 总计: ${this.mediaData.length}`);
+            }
+        }
+
+        // 初始化画廊
+        const gallery = new FallbackGallery();
+    </script>
+</body>
+</html>
