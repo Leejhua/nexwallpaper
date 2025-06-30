@@ -220,22 +220,24 @@ const completeImageData = [
         source: "com",
         type: "原图"
     },
-    {
-        url: "https://labubuwallpaper.com/Labubu's-Vibrant-Abyss,Labubu-Wallpaper-PC.png",
-        title: "充满活力的深渊",
-        category: "desktop",
-        resolution: "PC",
-        source: "com",
-        type: "原图"
-    },
-    {
-        url: "https://labubuwallpaper.com/Labubu's-Starlit-Summit-Vigil,Labubu-Wallpaper-PC.png",
-        title: "星光山顶守夜",
-        category: "desktop",
-        resolution: "PC",
-        source: "com",
-        type: "原图"
-    },
+    // 移除失效的图片 - 充满活力的深渊
+    // {
+    //     url: "https://labubuwallpaper.com/Labubu's-Vibrant-Abyss,Labubu-Wallpaper-PC.png",
+    //     title: "充满活力的深渊",
+    //     category: "desktop",
+    //     resolution: "PC",
+    //     source: "com",
+    //     type: "原图"
+    // },
+    // 移除失效的图片 - 星光山顶守夜
+    // {
+    //     url: "https://labubuwallpaper.com/Labubu's-Starlit-Summit-Vigil,Labubu-Wallpaper-PC.png",
+    //     title: "星光山顶守夜",
+    //     category: "desktop",
+    //     resolution: "PC",
+    //     source: "com",
+    //     type: "原图"
+    // },
     {
         url: "https://labubuwallpaper.com/Labubu-Whispering-Cloud-Library,Labubu-Computer-Wallpaper.png",
         title: "云端图书馆低语",
@@ -252,14 +254,15 @@ const completeImageData = [
         source: "com",
         type: "原图"
     },
-    {
-        url: "https://labubuwallpaper.com/Labubu's-Desert-Bloom,Labubu-Desktop-Background.png",
-        title: "沙漠花开",
-        category: "desktop",
-        resolution: "桌面",
-        source: "com",
-        type: "原图"
-    },
+    // 移除失效的图片 - 沙漠花开
+    // {
+    //     url: "https://labubuwallpaper.com/Labubu's-Desert-Bloom,Labubu-Desktop-Background.png",
+    //     title: "沙漠花开",
+    //     category: "desktop",
+    //     resolution: "桌面",
+    //     source: "com",
+    //     type: "原图"
+    // },
     {
         url: "https://labubuwallpaper.com/Labubu-Whispering-Valley-Glow,Labubu-Desktop-Background.png",
         title: "低语山谷光辉",

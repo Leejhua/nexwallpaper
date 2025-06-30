@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桌面分类图片加载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .test-section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .image-test {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            gap: 1rem;
+        }
+        .image-preview {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+        .image-info {
+            flex: 1;
+        }
+        .image-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .image-url {
+            font-size: 0.8rem;
+            color: #666;
+            word-break: break-all;
+        }
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            min-width: 60px;
+            text-align: center;
+        }
+        .status-loading { background: #ffc107; color: white; }
+        .status-success { background: #28a745; color: white; }
+        .status-error { background: #dc3545; color: white; }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+        .btn:hover { background: #0056b3; }
+        .summary {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        .error-details {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖥️ 桌面分类图片加载测试</h1>
+        <p>检测"桌面"分类中哪些图片无法正常加载</p>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 测试摘要</h3>
+        <div id="summary" class="summary">
+            正在初始化测试...
+        </div>
+        <button class="btn" onclick="startTest()">开始测试</button>
+        <button class="btn" onclick="retryFailed()">重试失败项</button>
+        <button class="btn" onclick="testAllUrls()">测试所有URL</button>
+    </div>
+
+    <div class="test-section">
+        <h3>🖼️ 图片加载测试结果</h3>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>❌ 错误详情</h3>
+        <div id="error-details"></div>
+    </div>
+
+    <script src="complete_gallery_data.js"></script>
+    <script>
+        class DesktopImageTester {
+            constructor() {
+                this.allMedia = [...completeImageData, ...completeVideoData];
+                this.desktopImages = [];
+                this.testResults = [];
+                this.init();
+            }
+
+            init() {
+                // 筛选出桌面分类的图片
+                this.desktopImages = this.allMedia.filter(item => {
+                    const isImage = !item.url.includes('.mp4') && !item.url.includes('.mov');
+                    return isImage && item.category === 'desktop';
+                });
+
+                this.updateSummary();
+                this.renderTestItems();
+            }
+
+            updateSummary() {
+                const summaryDiv = document.getElementById('summary');
+                const total = this.desktopImages.length;
+                const tested = this.testResults.length;
+                const success = this.testResults.filter(r => r.status === 'success').length;
+                const failed = this.testResults.filter(r => r.status === 'error').length;
+
+                summaryDiv.innerHTML = `
+                    <strong>桌面分类图片统计:</strong><br>
+                    • 总数: ${total} 张图片<br>
+                    • 已测试: ${tested} 张<br>
+                    • 加载成功: ${success} 张<br>
+                    • 加载失败: ${failed} 张<br>
+                    • 成功率: ${tested > 0 ? Math.round((success / tested) * 100) : 0}%
+                `;
+            }
+
+            renderTestItems() {
+                const resultsDiv = document.getElementById('test-results');
+                resultsDiv.innerHTML = '';
+
+                this.desktopImages.forEach((item, index) => {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'image-test';
+                    testDiv.id = `test-${index}`;
+
+                    testDiv.innerHTML = `
+                        <img class="image-preview" id="img-${index}" style="display: none;">
+                        <div class="image-info">
+                            <div class="image-title">${item.title}</div>
+                            <div class="image-url">${item.url}</div>
+                        </div>
+                        <div class="status status-loading" id="status-${index}">待测试</div>
+                    `;
+
+                    resultsDiv.appendChild(testDiv);
+                });
+            }
+
+            async startTest() {
+                this.testResults = [];
+                const errorDetails = [];
+
+                for (let i = 0; i < this.desktopImages.length; i++) {
+                    const item = this.desktopImages[i];
+                    const result = await this.testImage(item, i);
+                    this.testResults.push(result);
+
+                    if (result.status === 'error') {
+                        errorDetails.push({
+                            title: item.title,
+                            url: item.url,
+                            error: result.error,
+                            source: item.source
+                        });
+                    }
+
+                    this.updateSummary();
+                }
+
+                this.showErrorDetails(errorDetails);
+            }
+
+            async testImage(item, index) {
+                const img = document.getElementById(`img-${index}`);
+                const status = document.getElementById(`status-${index}`);
+                
+                status.textContent = '测试中...';
+                status.className = 'status status-loading';
+
+                return new Promise((resolve) => {
+                    const testImg = new Image();
+                    const startTime = Date.now();
+
+                    testImg.onload = () => {
+                        const loadTime = Date.now() - startTime;
+                        img.src = item.url;
+                        img.style.display = 'block';
+                        status.textContent = `✓ ${loadTime}ms`;
+                        status.className = 'status status-success';
+                        
+                        resolve({
+                            index,
+                            status: 'success',
+                            loadTime,
+                            url: item.url
+                        });
+                    };
+
+                    testImg.onerror = (error) => {
+                        const loadTime = Date.now() - startTime;
+                        status.textContent = `✗ 失败`;
+                        status.className = 'status status-error';
+                        
+                        resolve({
+                            index,
+                            status: 'error',
+                            loadTime,
+                            url: item.url,
+                            error: error.type || 'Load failed'
+                        });
+                    };
+
+                    // 设置超时
+                    setTimeout(() => {
+                        if (!testImg.complete) {
+                            status.textContent = '✗ 超时';
+                            status.className = 'status status-error';
+                            
+                            resolve({
+                                index,
+                                status: 'error',
+                                loadTime: Date.now() - startTime,
+                                url: item.url,
+                                error: 'Timeout'
+                            });
+                        }
+                    }, 10000);
+
+                    testImg.src = item.url;
+                });
+            }
+
+            showErrorDetails(errorDetails) {
+                const errorDiv = document.getElementById('error-details');
+                
+                if (errorDetails.length === 0) {
+                    errorDiv.innerHTML = '<div style="color: green; font-weight: bold;">🎉 所有图片都加载成功！</div>';
+                    return;
+                }
+
+                let html = `<div class="error-details">发现 ${errorDetails.length} 个加载失败的图片:\n\n`;
+                
+                errorDetails.forEach((error, index) => {
+                    html += `${index + 1}. ${error.title}\n`;
+                    html += `   来源: ${error.source.toUpperCase()}\n`;
+                    html += `   URL: ${error.url}\n`;
+                    html += `   错误: ${error.error}\n\n`;
+                });
+
+                html += '</div>';
+                errorDiv.innerHTML = html;
+
+                // 分析错误模式
+                this.analyzeErrors(errorDetails);
+            }
+
+            analyzeErrors(errorDetails) {
+                const errorDiv = document.getElementById('error-details');
+                
+                // 按来源分组
+                const bySource = {};
+                errorDetails.forEach(error => {
+                    bySource[error.source] = (bySource[error.source] || 0) + 1;
+                });
+
+                // 检查URL模式
+                const urlPatterns = {};
+                errorDetails.forEach(error => {
+                    const domain = error.url.split('/')[2];
+                    urlPatterns[domain] = (urlPatterns[domain] || 0) + 1;
+                });
+
+                let analysisHtml = '<div class="error-details">错误分析:\n\n';
+                analysisHtml += '按来源统计:\n';
+                Object.entries(bySource).forEach(([source, count]) => {
+                    analysisHtml += `• ${source.toUpperCase()}: ${count} 个失败\n`;
+                });
+
+                analysisHtml += '\n按域名统计:\n';
+                Object.entries(urlPatterns).forEach(([domain, count]) => {
+                    analysisHtml += `• ${domain}: ${count} 个失败\n`;
+                });
+
+                analysisHtml += '\n可能的原因:\n';
+                analysisHtml += '• 网络连接问题\n';
+                analysisHtml += '• 图片URL已失效\n';
+                analysisHtml += '• 服务器限制访问\n';
+                analysisHtml += '• CORS策略阻止\n';
+                analysisHtml += '</div>';
+
+                errorDiv.innerHTML += analysisHtml;
+            }
+
+            async retryFailed() {
+                const failedResults = this.testResults.filter(r => r.status === 'error');
+                
+                for (const result of failedResults) {
+                    const item = this.desktopImages[result.index];
+                    const newResult = await this.testImage(item, result.index);
+                    
+                    // 更新结果
+                    const resultIndex = this.testResults.findIndex(r => r.index === result.index);
+                    this.testResults[resultIndex] = newResult;
+                }
+
+                this.updateSummary();
+            }
+
+            async testAllUrls() {
+                // 测试所有媒体文件的URL可访问性
+                console.log('开始测试所有URL...');
+                
+                const allUrls = this.allMedia.map(item => ({
+                    url: item.url,
+                    title: item.title,
+                    category: item.category,
+                    source: item.source
+                }));
+
+                let successCount = 0;
+                let failCount = 0;
+
+                for (const item of allUrls) {
+                    try {
+                        const response = await fetch(item.url, { method: 'HEAD', mode: 'no-cors' });
+                        successCount++;
+                    } catch (error) {
+                        failCount++;
+                        console.log(`Failed: ${item.title} - ${item.url}`);
+                    }
+                }
+
+                console.log(`URL测试完成: ${successCount} 成功, ${failCount} 失败`);
+            }
+        }
+
+        // 初始化测试器
+        const tester = new DesktopImageTester();
+
+        function startTest() {
+            tester.startTest();
+        }
+
+        function retryFailed() {
+            tester.retryFailed();
+        }
+
+        function testAllUrls() {
+            tester.testAllUrls();
+        }
+    </script>
+</body>
+</html>
