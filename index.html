@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐰 Labubu壁纸画廊 - 首页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .gallery-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .card-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .card-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .card-features li {
+            padding: 0.5rem 0;
+            color: #666;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .card-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .card-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .card-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .recommended {
+            border: 2px solid #ff6b6b;
+            position: relative;
+        }
+
+        .recommended::after {
+            content: '推荐';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .tools-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tools-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .tool-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tool-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐰 Labubu壁纸画廊</h1>
+            <p>精美的Labubu主题壁纸收藏，支持多种浏览模式</p>
+            <div class="stats">
+                <div class="stat-item">📸 46张精美图片</div>
+                <div class="stat-item">🎬 12个动态视频</div>
+                <div class="stat-item">🔄 自动更新维护</div>
+                <div class="stat-item">📱 完美响应式</div>
+            </div>
+        </div>
+
+        <div class="gallery-grid">
+            <div class="gallery-card recommended">
+                <div class="card-header">
+                    <div class="card-icon">🎬</div>
+                    <div>
+                        <div class="card-title">视频缩略图版</div>
+                        <div class="card-subtitle">最新推荐版本</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    最先进的画廊版本，支持视频缩略图自动生成，动态壁纸一目了然。采用HTML5 Canvas技术，提供最佳的预览体验。
+                </div>
+                <ul class="card-features">
+                    <li>自动生成视频缩略图</li>
+                    <li>智能分页加载</li>
+                    <li>完美响应式设计</li>
+                    <li>一键下载功能</li>
+                    <li>多维度筛选</li>
+                </ul>
+                <a href="video_thumbnail_gallery.html" class="card-button">立即体验</a>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-header">
+                    <div class="card-icon">📄</div>
+                    <div>
+                        <div class="card-title">分页版画廊</div>
+                        <div class="card-subtitle">性能优化版本</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    专为性能优化设计的分页版本，避免服务器压力，支持键盘导航。适合网络较慢或设备性能有限的用户。
+                </div>
+                <ul class="card-features">
+                    <li>智能分页加载</li>
+                    <li>键盘导航支持</li>
+                    <li>可调节页面大小</li>
+                    <li>错开加载策略</li>
+                    <li>服务器友好</li>
+                </ul>
+                <a href="paginated_gallery.html" class="card-button">浏览画廊</a>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-header">
+                    <div class="card-icon">🖼️</div>
+                    <div>
+                        <div class="card-title">完整版画廊</div>
+                        <div class="card-subtitle">经典完整版本</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    一次性加载所有壁纸的完整版本，适合高速网络环境。提供最流畅的浏览体验，无需翻页。
+                </div>
+                <ul class="card-features">
+                    <li>一次加载全部内容</li>
+                    <li>流畅的瀑布流布局</li>
+                    <li>双视图模式切换</li>
+                    <li>全屏预览模态框</li>
+                    <li>适合高速网络</li>
+                </ul>
+                <a href="ultimate_labubu_gallery.html" class="card-button">查看全部</a>
+            </div>
+
+            <div class="gallery-card">
+                <div class="card-header">
+                    <div class="card-icon">🎨</div>
+                    <div>
+                        <div class="card-title">自适应卡片版</div>
+                        <div class="card-subtitle">美观设计版本</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    注重视觉设计的自适应卡片版本，采用现代化的卡片布局，提供优雅的用户界面和流畅的交互体验。
+                </div>
+                <ul class="card-features">
+                    <li>现代化卡片设计</li>
+                    <li>自适应布局</li>
+                    <li>优雅的动画效果</li>
+                    <li>移动端优化</li>
+                    <li>视觉体验佳</li>
+                </ul>
+                <a href="adaptive_cards_gallery.html" class="card-button">体验设计</a>
+            </div>
+        </div>
+
+        <div class="tools-section">
+            <h2 class="tools-title">🛠️ 管理工具</h2>
+            <div class="tools-grid">
+                <a href="test_desktop_images.html" class="tool-link">
+                    🖥️ 桌面图片测试
+                </a>
+                <a href="test_filtering.html" class="tool-link">
+                    🔍 筛选逻辑测试
+                </a>
+                <a href="diagnostic.html" class="tool-link">
+                    🔧 系统诊断工具
+                </a>
+                <a href="url_check_report.json" class="tool-link">
+                    📊 URL检测报告
+                </a>
+                <a href="AUTO_UPDATE_GUIDE.md" class="tool-link">
+                    📖 自动更新指南
+                </a>
+                <a href="README.md" class="tool-link">
+                    📝 项目说明
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加一些交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为卡片添加悬停效果
+            const cards = document.querySelectorAll('.gallery-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // 统计信息动画
+            const stats = document.querySelectorAll('.stat-item');
+            stats.forEach((stat, index) => {
+                stat.style.opacity = '0';
+                stat.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    stat.style.transition = 'all 0.6s ease';
+                    stat.style.opacity = '1';
+                    stat.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

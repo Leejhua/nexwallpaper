@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HD Data Test</title>
+</head>
+<body>
+    <h1>HD Gallery Data Test</h1>
+    <div id="stats"></div>
+    <div id="sample"></div>
+
+    <script src="hd_gallery_data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const data = hdImageData || [];
+            const images = data.filter(item => item.type === 'image');
+            const videos = data.filter(item => item.type === 'video');
+            
+            document.getElementById('stats').innerHTML = `
+                <p>Total items: ${data.length}</p>
+                <p>Images: ${images.length}</p>
+                <p>Videos: ${videos.length}</p>
+            `;
+            
+            document.getElementById('sample').innerHTML = `
+                <h3>Sample items:</h3>
+                <pre>${JSON.stringify(data.slice(0, 3), null, 2)}</pre>
+            `;
+        });
+    </script>
+</body>
+</html>

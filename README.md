@@ -4,6 +4,14 @@
 
 ## 📊 项目概览
 
+### 🌟 高清版本 (最新)
+- **图片资源**: 386张真正高清壁纸
+- **视频资源**: 14个动态壁纸
+- **总计**: 400+精选作品
+- **画质**: 真正的4K高清，无压缩
+- **数据源**: labubuwallpaper.xyz 完整收录
+
+### 📱 经典版本
 - **图片资源**: 42张高质量壁纸
 - **视频资源**: 12个动态壁纸
 - **数据源**: 2个专业网站 (labubuwallpaper.xyz + labubuwallpaper.com)
@@ -14,7 +22,10 @@
 ### 启动画廊服务器
 
 ```bash
-# 使用启动脚本（推荐）
+# 启动高清画廊（推荐）
+./start_hd_gallery.sh
+
+# 启动经典画廊
 ./start_gallery.sh
 
 # 或手动启动
@@ -23,7 +34,12 @@ python3 -m http.server 8080
 
 ### 访问画廊
 
-- **🎬 视频缩略图版**: http://localhost:8080/video_thumbnail_gallery.html （最新推荐）
+#### 🌟 高清版本 (400+作品)
+- **🎨 侧边栏画廊**: http://localhost:8080/hd_sidebar_gallery.html （最新推荐）
+- **🎬 高清画廊**: http://localhost:8080/hd_video_thumbnail_gallery.html
+
+#### 📱 经典版本 (54作品)
+- **🎬 视频缩略图版**: http://localhost:8080/video_thumbnail_gallery.html
 - **🚀 分页版画廊**: http://localhost:8080/paginated_gallery.html
 - **完整画廊**: http://localhost:8080/ultimate_labubu_gallery.html
 - **自适应画廊**: http://localhost:8080/adaptive_cards_gallery.html
@@ -194,3 +210,26 @@ pip install -r requirements.txt
 **项目状态**: ✅ 完成并可用  
 
 🎉 **享受你的Labubu壁纸收藏之旅！**
+
+## 📚 项目文档
+
+### 📖 完整文档集合
+- **[项目技术文档](PROJECT_DOCUMENTATION.md)** - 详细的技术架构和实现说明
+- **[代码注释指南](CODE_COMMENTS_GUIDE.md)** - 代码注释规范和最佳实践
+- **[API参考文档](API_REFERENCE.md)** - 完整的API接口和方法说明
+- **[高清数据报告](hd_scraping_report.md)** - 400+高清数据的爬取分析报告
+
+### 🔍 代码注释版本
+- **[带注释的主画廊](hd_sidebar_gallery_commented.html)** - 包含详细注释的完整代码
+
+### 📊 技术亮点
+- **1500+行代码**: 包含详细注释的完整实现
+- **400+媒体文件**: 真正的4K高清壁纸收藏
+- **6大功能模块**: 数据管理、UI渲染、交互控制、响应式、媒体处理、错误处理
+- **完整文档体系**: 从使用指南到API参考的全方位文档
+
+### 🎯 文档特色
+- **中文注释**: 所有注释均使用中文，便于理解
+- **结构化文档**: 分层次的文档结构，便于查阅
+- **实用示例**: 丰富的代码示例和使用场景
+- **最佳实践**: 包含开发规范和优化建议

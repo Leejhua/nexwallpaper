@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐰 Labubu高清壁纸画廊 - 400+精选收藏</title>
+    <style>
+        /* ========================================
+           基础样式重置和全局设置
+        ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            margin: 0;
+            display: flex; /* 使用flex布局支持侧边栏 */
+        }
+
+        /* ========================================
+           侧边栏样式
+        ======================================== */
+        .sidebar {
+            width: 280px; /* 侧边栏固定宽度 */
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); /* 毛玻璃效果 */
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: hidden; /* 隐藏滚动条 */
+            z-index: 1000;
+            padding: 25px 20px;
+            transition: transform 0.3s ease; /* 收起展开动画 */
+        }
+
+        /* 侧边栏收起状态 */
+        .sidebar.collapsed {
+            transform: translateX(-280px); /* 完全隐藏 */
+        }
+
+        /* 侧边栏切换按钮 */
+        .sidebar-toggle {
+            position: fixed;
+            left: 240px; /* 默认位置在侧边栏右侧 */
+            top: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 1001; /* 确保在侧边栏之上 */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* 侧边栏收起时按钮样式 */
+        .sidebar.collapsed + .sidebar-toggle {
+            left: 20px; /* 移动到左上角 */
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* ========================================
+           主内容区域样式
+        ======================================== */
+        .main-content {
+            flex: 1;
+            margin-left: 280px; /* 为侧边栏留出空间 */
+            transition: margin-left 0.3s ease;
+        }
+
+        /* 侧边栏收起时主内容区占满屏幕 */
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        /* 顶部标题栏 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .title h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .title p {
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* ========================================
+           侧边栏内容样式
+        ======================================== */
+        .sidebar-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            height: 100%;
+        }
+
+        /* 侧边栏卡片样式 */
+        .sidebar-section {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .sidebar-section h3 {
+            margin: 0 0 20px 0;
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* ========================================
+           分类筛选按钮样式
+        ======================================== */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            color: #555;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            text-align: center;
+            font-size: 0.95rem;
+            border: 2px solid transparent;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* 激活状态的筛选按钮 */
+        .filter-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* ========================================
+           分页控制样式
+        ======================================== */
+        .pagination-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* 页面大小选择器 */
+        .page-size-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .page-size-selector label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .page-size-selector select {
+            padding: 12px 16px;
+            border-radius: 25px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            background: rgba(255,255,255,0.9);
+            font-weight: 600;
+            color: #555;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-size-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 分页导航按钮 */
+        .page-navigation {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .page-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            color: #555;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            font-size: 0.85rem;
+            flex: 1;
+            border: 2px solid transparent;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            background: rgba(200, 200, 200, 0.5);
+        }
+
+        /* 页面信息显示 */
+        .page-info {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            margin: 8px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        /* ========================================
+           画廊展示区域样式
+        ======================================== */
+        .gallery {
+            padding: 20px;
+        }
+
+        /* 瀑布流布局容器 */
+        .masonry-container {
+            column-count: 4; /* 默认4列 */
+            column-gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 画廊项目样式 */
+        .gallery-item {
+            break-inside: avoid; /* 防止瀑布流项目被分割 */
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
+        .gallery-item img, .gallery-item video {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img, .gallery-item:hover video {
+            transform: scale(1.05);
+        }
+
+        /* 项目信息区域 */
+        .item-info {
+            padding: 15px;
+            background: white;
+        }
+
+        .item-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 限制显示2行 */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* 标签样式 */
+        .tag {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* 不同分类的标签颜色 */
+        .tag.fantasy { background: linear-gradient(45deg, #667eea, #764ba2); }
+        .tag.desktop { background: linear-gradient(45deg, #f093fb, #f5576c); }
+        .tag.mobile { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+        .tag.seasonal { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+        .tag.live { background: linear-gradient(45deg, #fa709a, #fee140); }
+        .tag.k4 { background: linear-gradient(45deg, #a8edea, #fed6e3); color: #333; }
+
+        /* 视频指示器 */
+        .video-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 加载失败占位符 */
+        .loading-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-weight: bold;
+        }
+
+        /* ========================================
+           模态框样式
+        ======================================== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal img, .modal video {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal-info {
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        /* 关闭按钮 */
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .close:hover {
+            color: #ccc;
+        }
+
+        /* 下载按钮 */
+        .download-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        /* ========================================
+           响应式设计
+        ======================================== */
+        @media (max-width: 1200px) {
+            .masonry-container { column-count: 3; }
+            .sidebar { width: 260px; }
+            .main-content { margin-left: 260px; }
+            .sidebar-toggle { left: 220px; }
+            .sidebar.collapsed { transform: translateX(-260px); }
+            .sidebar.collapsed + .sidebar-toggle { left: 20px; }
+        }
+
+        @media (max-width: 768px) {
+            .masonry-container { column-count: 2; }
+            .title h1 { font-size: 1.8rem; }
+            .sidebar { 
+                width: 100%; 
+                transform: translateX(-100%);
+            }
+            .sidebar.show { 
+                transform: translateX(0); 
+            }
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+            }
+            .main-content { margin-left: 0; }
+            .main-content.expanded { margin-left: 0; }
+            .sidebar-toggle { 
+                left: 20px; 
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .masonry-container { column-count: 1; }
+            .gallery { padding: 15px; }
+            .header { padding: 10px 15px; }
+            .sidebar { padding: 20px 15px; }
+        }
+
+        /* ========================================
+           工具类样式
+        ======================================== */
+        .hidden {
+            display: none;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================
+         侧边栏导航区域
+    ======================================== -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <!-- 分类筛选卡片 -->
+            <div class="sidebar-section">
+                <h3>🎯 分类筛选</h3>
+                <div class="controls">
+                    <!-- 筛选按钮：data-filter属性用于JavaScript筛选逻辑 -->
+                    <button class="filter-btn active" data-filter="all">📂 全部作品</button>
+                    <button class="filter-btn" data-filter="fantasy">🌟 奇幻世界</button>
+                    <button class="filter-btn" data-filter="desktop">💻 桌面壁纸</button>
+                    <button class="filter-btn" data-filter="mobile">📱 手机壁纸</button>
+                    <button class="filter-btn" data-filter="seasonal">🌸 季节主题</button>
+                    <button class="filter-btn" data-filter="4k">🎬 4K超清</button>
+                    <button class="filter-btn" data-filter="live">🎥 动态壁纸</button>
+                </div>
+            </div>
+
+            <!-- 分页控制卡片 -->
+            <div class="sidebar-section">
+                <h3>📄 分页导航</h3>
+                <div class="pagination-controls">
+                    <!-- 页面大小选择器 -->
+                    <div class="page-size-selector">
+                        <label>每页显示数量</label>
+                        <select id="pageSizeSelect">
+                            <option value="24">24 个作品</option>
+                            <option value="36" selected>36 个作品</option>
+                            <option value="48">48 个作品</option>
+                            <option value="60">60 个作品</option>
+                        </select>
+                    </div>
+                    <!-- 当前页面信息显示 -->
+                    <div class="page-info">
+                        第 <span id="currentPage">1</span> 页 / 共 <span id="totalPages">1</span> 页
+                    </div>
+                    <!-- 分页导航按钮 -->
+                    <div class="page-navigation">
+                        <button class="page-btn" id="prevBtn">← 上一页</button>
+                        <button class="page-btn" id="nextBtn">下一页 →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 侧边栏切换按钮 -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="收起侧边栏">✕</button>
+
+    <!-- ========================================
+         主内容区域
+    ======================================== -->
+    <div class="main-content" id="mainContent">
+        <!-- 顶部标题栏 -->
+        <div class="header">
+            <div class="title">
+                <h1>🐰 Labubu高清壁纸画廊</h1>
+                <p>精选400+高清壁纸 · 真正的4K画质体验</p>
+            </div>
+        </div>
+
+        <!-- 画廊展示区域 -->
+        <div class="gallery">
+            <!-- 加载指示器 -->
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                正在加载高清壁纸...
+            </div>
+            <!-- 瀑布流画廊容器 -->
+            <div class="masonry-container" id="galleryContainer"></div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         模态框 - 用于全屏预览图片/视频
+    ======================================== -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <!-- 关闭按钮 -->
+            <span class="close">&times;</span>
+            <!-- 图片预览 -->
+            <img id="modalImage" src="" alt="">
+            <!-- 视频预览 -->
+            <video id="modalVideo" controls style="display: none;"></video>
+            <!-- 模态框信息区域 -->
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <div id="modalTags"></div>
+                <button class="download-btn" id="downloadBtn">下载高清原图</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入高清画廊数据文件 -->
+    <script src="hd_gallery_data.js"></script>
+    <script>
+        /**
+         * ========================================
+         * Labubu高清壁纸画廊主类
+         * ========================================
+         * 功能：
+         * - 管理400+高清壁纸和视频的展示
+         * - 提供分类筛选功能
+         * - 实现智能分页加载
+         * - 支持响应式布局
+         * - 视频缩略图生成
+         * - 模态框预览和下载
+         */
+        class HDLabubuGallery {
+            /**
+             * 构造函数 - 初始化画廊
+             */
+            constructor() {
+                // 从外部数据文件加载所有媒体项目
+                this.allItems = hdImageData || [];
+                // 当前筛选后的项目列表
+                this.filteredItems = [...this.allItems];
+                // 当前激活的筛选器
+                this.currentFilter = 'all';
+                // 当前页码
+                this.currentPage = 1;
+                // 每页显示的项目数量
+                this.pageSize = 36;
+                // 总页数
+                this.totalPages = 1;
+                
+                // 初始化画廊
+                this.init();
+            }
+
+            /**
+             * 初始化方法 - 设置事件监听器和初始状态
+             */
+            init() {
+                this.setupEventListeners();
+                this.filterItems('all');
+                this.hideLoading();
+            }
+
+            /**
+             * 设置所有事件监听器
+             */
+            setupEventListeners() {
+                // ========================================
+                // 侧边栏切换功能
+                // ========================================
+                const sidebarToggle = document.getElementById('sidebarToggle');
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+
+                sidebarToggle.addEventListener('click', () => {
+                    // 切换侧边栏显示/隐藏状态
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                    
+                    // 更新按钮图标和提示文字
+                    if (sidebar.classList.contains('collapsed')) {
+                        sidebarToggle.innerHTML = '☰';
+                        sidebarToggle.title = '展开侧边栏';
+                    } else {
+                        sidebarToggle.innerHTML = '✕';
+                        sidebarToggle.title = '收起侧边栏';
+                    }
+                });
+
+                // ========================================
+                // 分类筛选按钮事件
+                // ========================================
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const filter = e.target.dataset.filter;
+                        this.filterItems(filter);
+                    });
+                });
+
+                // ========================================
+                // 分页控制事件
+                // ========================================
+                
+                // 上一页按钮
+                document.getElementById('prevBtn').addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderGallery();
+                    }
+                });
+
+                // 下一页按钮
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                        this.renderGallery();
+                    }
+                });
+
+                // 页面大小选择器
+                document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+                    this.pageSize = parseInt(e.target.value);
+                    this.currentPage = 1; // 重置到第一页
+                    this.renderGallery();
+                });
+
+                // ========================================
+                // 模态框事件处理
+                // ========================================
+                const modal = document.getElementById('imageModal');
+                const closeBtn = document.querySelector('.close');
+                
+                // 关闭按钮点击事件
+                closeBtn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    this.pauseModalVideo();
+                });
+
+                // 点击模态框背景关闭
+                window.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                        this.pauseModalVideo();
+                    }
+                });
+
+                // ========================================
+                // 键盘导航支持
+                // ========================================
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        // ESC键关闭模态框
+                        modal.style.display = 'none';
+                        this.pauseModalVideo();
+                    } else if (e.key === 'ArrowLeft' && this.currentPage > 1) {
+                        // 左箭头键：上一页
+                        this.currentPage--;
+                        this.renderGallery();
+                    } else if (e.key === 'ArrowRight' && this.currentPage < this.totalPages) {
+                        // 右箭头键：下一页
+                        this.currentPage++;
+                        this.renderGallery();
+                    }
+                });
+
+                // ========================================
+                // 响应式处理
+                // ========================================
+                this.handleResponsive();
+                window.addEventListener('resize', () => this.handleResponsive());
+            }
+
+            /**
+             * 响应式布局处理
+             * 根据屏幕尺寸自动调整侧边栏状态
+             */
+            handleResponsive() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                const sidebarToggle = document.getElementById('sidebarToggle');
+                
+                if (window.innerWidth <= 768) {
+                    // 移动端：默认收起侧边栏
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('expanded');
+                    sidebarToggle.innerHTML = '☰';
+                    sidebarToggle.title = '展开侧边栏';
+                } else if (window.innerWidth > 768) {
+                    // 桌面端：默认展开侧边栏
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                    sidebarToggle.innerHTML = '✕';
+                    sidebarToggle.title = '收起侧边栏';
+                }
+            }
+
+            /**
+             * 筛选项目
+             * @param {string} filter - 筛选类型 ('all', 'fantasy', 'desktop', 等)
+             */
+            filterItems(filter) {
+                this.currentFilter = filter;
+                this.currentPage = 1; // 重置到第一页
+
+                // 更新筛选按钮的激活状态
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+
+                // 根据筛选条件过滤数据
+                if (filter === 'all') {
+                    // 显示所有项目
+                    this.filteredItems = [...this.allItems];
+                } else if (filter === 'live') {
+                    // 只显示视频文件
+                    this.filteredItems = this.allItems.filter(item => item.type === 'video');
+                } else if (filter === '4k') {
+                    // 显示4K分辨率的项目
+                    this.filteredItems = this.allItems.filter(item => 
+                        item.category === '4k' || item.resolution === '4K'
+                    );
+                } else {
+                    // 按分类筛选
+                    this.filteredItems = this.allItems.filter(item => 
+                        item.category === filter
+                    );
+                }
+
+                // 重新渲染画廊
+                this.renderGallery();
+            }
+
+            /**
+             * 渲染画廊内容
+             * 处理分页逻辑并生成HTML元素
+             */
+            renderGallery() {
+                const container = document.getElementById('galleryContainer');
+                
+                // ========================================
+                // 计算分页信息
+                // ========================================
+                this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize);
+                const startIndex = (this.currentPage - 1) * this.pageSize;
+                const endIndex = startIndex + this.pageSize;
+                const currentItems = this.filteredItems.slice(startIndex, endIndex);
+
+                // 更新分页信息显示
+                document.getElementById('currentPage').textContent = this.currentPage;
+                document.getElementById('totalPages').textContent = this.totalPages;
+                
+                // 更新分页按钮状态
+                document.getElementById('prevBtn').disabled = this.currentPage === 1;
+                document.getElementById('nextBtn').disabled = this.currentPage === this.totalPages;
+
+                // ========================================
+                // 渲染画廊项目
+                // ========================================
+                container.innerHTML = ''; // 清空现有内容
+
+                currentItems.forEach((item, index) => {
+                    const itemElement = this.createGalleryItem(item, startIndex + index);
+                    container.appendChild(itemElement);
+                });
+
+                // 平滑滚动到页面顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            /**
+             * 创建单个画廊项目元素
+             * @param {Object} item - 媒体项目数据
+             * @param {number} index - 项目索引
+             * @returns {HTMLElement} 画廊项目DOM元素
+             */
+            createGalleryItem(item, index) {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                
+                // 添加点击事件打开模态框
+                div.addEventListener('click', () => this.openModal(item));
+
+                const isVideo = item.type === 'video';
+                const mediaElement = isVideo ? 'video' : 'img';
+                const videoIndicator = isVideo ? '<div class="video-indicator">🎬 动态</div>' : '';
+
+                // 生成分类标签
+                const tags = this.generateTags(item);
+
+                // 构建HTML结构
+                div.innerHTML = `
+                    ${videoIndicator}
+                    <${mediaElement} 
+                        src="${item.url}" 
+                        alt="${item.title}"
+                        loading="lazy"
+                        ${isVideo ? 'preload="metadata" muted' : ''}
+                        onerror="this.parentElement.querySelector('.loading-placeholder').style.display='flex'; this.style.display='none';"
+                    ></${mediaElement}>
+                    <div class="loading-placeholder" style="display: none;">
+                        加载失败
+                    </div>
+                    <div class="item-info">
+                        <div class="item-title">${item.title}</div>
+                        <div class="item-tags">${tags}</div>
+                    </div>
+                `;
+
+                // 为视频生成缩略图
+                if (isVideo) {
+                    this.generateVideoThumbnail(div.querySelector('video'), div);
+                }
+
+                return div;
+            }
+
+            /**
+             * 生成项目标签HTML
+             * @param {Object} item - 媒体项目数据
+             * @returns {string} 标签HTML字符串
+             */
+            generateTags(item) {
+                const tags = [];
+                
+                // 分类标签
+                if (item.category) {
+                    const categoryMap = {
+                        'fantasy': '奇幻',
+                        'desktop': '桌面',
+                        'mobile': '手机',
+                        'seasonal': '季节',
+                        '4k': '4K',
+                        'live': '动态'
+                    };
+                    const categoryName = categoryMap[item.category] || item.category;
+                    tags.push(`<span class="tag ${item.category}">${categoryName}</span>`);
+                }
+
+                // 分辨率标签
+                if (item.resolution && item.resolution !== item.category) {
+                    tags.push(`<span class="tag k4">${item.resolution}</span>`);
+                }
+
+                return tags.join('');
+            }
+
+            /**
+             * 为视频生成缩略图
+             * 使用Canvas API从视频第1秒提取帧作为缩略图
+             * @param {HTMLVideoElement} video - 视频元素
+             * @param {HTMLElement} container - 容器元素
+             */
+            generateVideoThumbnail(video, container) {
+                video.addEventListener('loadeddata', () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 设置画布尺寸与视频相同
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    // 跳转到第1秒
+                    video.currentTime = 1;
+                    
+                    video.addEventListener('seeked', () => {
+                        // 将视频帧绘制到画布
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        // 创建缩略图img元素
+                        const img = document.createElement('img');
+                        img.src = canvas.toDataURL();
+                        img.alt = video.alt;
+                        img.loading = 'lazy';
+                        img.style.width = '100%';
+                        img.style.height = 'auto';
+                        img.style.display = 'block';
+                        
+                        // 替换视频元素为缩略图
+                        video.style.display = 'none';
+                        video.parentNode.insertBefore(img, video);
+                    }, { once: true });
+                });
+            }
+
+            /**
+             * 打开模态框预览
+             * @param {Object} item - 要预览的媒体项目
+             */
+            openModal(item) {
+                const modal = document.getElementById('imageModal');
+                const modalImage = document.getElementById('modalImage');
+                const modalVideo = document.getElementById('modalVideo');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalTags = document.getElementById('modalTags');
+                const downloadBtn = document.getElementById('downloadBtn');
+
+                // 设置模态框内容
+                modalTitle.textContent = item.title;
+                modalTags.innerHTML = this.generateTags(item);
+
+                if (item.type === 'video') {
+                    // 显示视频
+                    modalImage.style.display = 'none';
+                    modalVideo.style.display = 'block';
+                    modalVideo.src = item.url;
+                } else {
+                    // 显示图片
+                    modalVideo.style.display = 'none';
+                    modalImage.style.display = 'block';
+                    modalImage.src = item.url;
+                }
+
+                // 设置下载按钮
+                downloadBtn.onclick = () => this.downloadFile(item.url, item.title);
+
+                // 显示模态框
+                modal.style.display = 'block';
+            }
+
+            /**
+             * 暂停模态框中的视频播放
+             */
+            pauseModalVideo() {
+                const modalVideo = document.getElementById('modalVideo');
+                if (!modalVideo.paused) {
+                    modalVideo.pause();
+                }
+            }
+
+            /**
+             * 下载文件
+             * @param {string} url - 文件URL
+             * @param {string} filename - 文件名
+             */
+            downloadFile(url, filename) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename + '.' + url.split('.').pop();
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            /**
+             * 隐藏加载指示器
+             */
+            hideLoading() {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        /**
+         * ========================================
+         * 应用程序入口点
+         * ========================================
+         * 当DOM加载完成后初始化画廊
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            new HDLabubuGallery();
+        });
+    </script>
+</body>
+</html>
