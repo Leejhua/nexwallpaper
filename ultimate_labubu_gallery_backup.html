@@ -152,7 +152,7 @@
             gap: 0.5rem;
         }
 
-        .category-tag, .resolution-tag {
+        .category-tag {
             padding: 0.3rem 0.8rem;
             border-radius: 15px;
             font-size: 0.8rem;
@@ -167,11 +167,28 @@
         .category-live { background: #2ecc71; }
         .category-seasonal { background: #e67e22; }
 
-        .resolution-tag {
-            background: #6c757d;
+        .source-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
 
+        .source-xyz {
+            background: #ff6b6b;
+            color: white;
+        }
 
+        .source-com {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .resolution-info {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: bold;
+        }
 
         .video-overlay {
             position: absolute;
@@ -449,8 +466,9 @@
                         <div class="media-title">${item.title}</div>
                         <div class="media-meta">
                             <span class="category-tag category-${item.category}">${this.getCategoryName(item.category)}</span>
-                            <span class="resolution-tag">${item.resolution || '高清'}</span>
+                            <span class="source-badge source-${item.source}">${item.source.toUpperCase()}</span>
                         </div>
+                        <div class="resolution-info">${item.resolution || '高清'}</div>
                     </div>
                     <button class="download-btn" onclick="gallery.downloadMedia('${item.url}', '${item.title}')">⬇</button>
                 `;

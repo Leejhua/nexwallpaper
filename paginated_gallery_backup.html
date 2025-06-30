@@ -586,8 +586,9 @@
                             <div class="media-title">${item.title}</div>
                             <div class="media-meta">
                                 <span class="category-tag category-${item.category}">${this.getCategoryName(item.category)}</span>
-                                <span class="resolution-tag">${item.resolution || '高清'}</span>
+                                <span class="source-badge source-${item.source}">${item.source.toUpperCase()}</span>
                             </div>
+                            <div class="resolution-info">${item.resolution || '高清'}</div>
                         </div>
                         <button class="download-btn" onclick="gallery.downloadMedia('${item.url}', '${item.title}')">⬇</button>
                     `;
@@ -604,8 +605,9 @@
                             <div class="media-title">${item.title}</div>
                             <div class="media-meta">
                                 <span class="category-tag category-${item.category}">${this.getCategoryName(item.category)}</span>
-                                <span class="resolution-tag">${item.resolution || '高清'}</span>
+                                <span class="source-badge source-${item.source}">${item.source.toUpperCase()}</span>
                             </div>
+                            <div class="resolution-info">${item.resolution || '高清'}</div>
                         </div>
                         <button class="download-btn" onclick="gallery.downloadMedia('${item.url}', '${item.title}')">⬇</button>
                     `;
