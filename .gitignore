@@ -1,0 +1,51 @@
+# 系统文件和缓存
+.cache/
+.cursor-server/
+.landscape/
+.local/
+.motd_shown
+.npm/
+.ssh/
+.sudo_as_admin_successful
+.wget-hsts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 日志文件
+*.log
+server.log
+
+# 临时文件
+page_source.html
+*.tmp
+*.temp
+
+# 下载的资源文件（太大，不适合Git）
+labubu_downloads/
+labubu_wallpapers/
+wallpaper_downloads/
+wallpaper_downloads_v2/
+complete_labubu_collection/
+local_images/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 分析数据文件（太大）
+labubuwallpaper_com_analysis.json

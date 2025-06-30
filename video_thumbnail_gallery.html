@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频缩略图版Labubu壁纸画廊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+
+        .filter-btn, .view-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .filter-btn:hover, .view-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active, .view-btn.active {
+            background: #ff6b6b;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .page-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+        }
+
+        .page-size-selector select {
+            padding: 0.3rem 0.5rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: bold;
+        }
+
+        .gallery-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .gallery-masonry {
+            column-count: 4;
+            column-gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .media-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            break-inside: avoid;
+            position: relative;
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .media-item {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .video-thumbnail-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: auto;
+        }
+
+        .video-canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .play-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 1;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .media-info {
+            padding: 1rem;
+        }
+
+        .media-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .media-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .category-tag {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .category-fantasy { background: #9b59b6; }
+        .category-desktop { background: #3498db; }
+        .category-mobile { background: #e74c3c; }
+        .category-4k { background: #f39c12; }
+        .category-live { background: #2ecc71; }
+        .category-seasonal { background: #e67e22; }
+
+        .source-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .source-xyz {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .source-com {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .resolution-info {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .download-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .media-card:hover .download-btn {
+            opacity: 1;
+        }
+
+        .download-btn:hover {
+            background: #ff6b6b;
+            transform: scale(1.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .gallery-masonry {
+                column-count: 3;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .gallery-masonry {
+                column-count: 2;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats {
+                gap: 1rem;
+            }
+
+            .controls {
+                gap: 0.5rem;
+            }
+
+            .filter-btn, .view-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery-masonry {
+                column-count: 1;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 1.5rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal img, .modal video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #ff6b6b;
+        }
+
+        .thumbnail-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐰 视频缩略图版Labubu画廊</h1>
+        <p>动态壁纸预览 - 智能缩略图生成</p>
+        <div class="stats">
+            <div class="stat-item">📸 <span id="total-images">0</span> 张图片</div>
+            <div class="stat-item">🎬 <span id="total-videos">0</span> 个视频</div>
+            <div class="stat-item">📄 <span id="current-page-info">第1页</span></div>
+            <div class="stat-item">🖼️ 缩略图预览</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="fantasy">奇幻</button>
+            <button class="filter-btn" data-filter="desktop">桌面</button>
+            <button class="filter-btn" data-filter="mobile">手机</button>
+            <button class="filter-btn" data-filter="4k">4K高清</button>
+            <button class="filter-btn" data-filter="live">动态</button>
+            <button class="filter-btn" data-filter="seasonal">季节</button>
+        </div>
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="masonry">瀑布流</button>
+            <button class="view-btn" data-view="grid">网格</button>
+        </div>
+    </div>
+
+    <div class="pagination-controls">
+        <button class="page-btn" id="prev-btn" onclick="gallery.prevPage()">← 上一页</button>
+        <div class="page-info">
+            <span id="page-info">第 1 页，共 1 页</span>
+        </div>
+        <button class="page-btn" id="next-btn" onclick="gallery.nextPage()">下一页 →</button>
+        <div class="page-size-selector">
+            <span>每页显示:</span>
+            <select id="page-size" onchange="gallery.changePageSize(this.value)">
+                <option value="12">12项</option>
+                <option value="24" selected>24项</option>
+                <option value="36">36项</option>
+                <option value="48">48项</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            正在生成视频缩略图...
+        </div>
+        <div id="gallery" class="gallery-masonry"></div>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="modal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+
+    <script src="complete_gallery_data.js"></script>
+    <script>
+        class VideoThumbnailGallery {
+            constructor() {
+                this.currentFilter = 'all';
+                this.currentView = 'masonry';
+                this.currentPage = 1;
+                this.pageSize = 24;
+                this.allMedia = [...completeImageData, ...completeVideoData];
+                this.filteredMedia = [];
+                this.totalPages = 1;
+                this.init();
+            }
+
+            init() {
+                this.updateTotalStats();
+                this.applyFilter();
+                this.bindEvents();
+            }
+
+            updateTotalStats() {
+                document.getElementById('total-images').textContent = completeImageData.length;
+                document.getElementById('total-videos').textContent = completeVideoData.length;
+            }
+
+            applyFilter() {
+                if (this.currentFilter === 'all') {
+                    this.filteredMedia = [...this.allMedia];
+                } else {
+                    this.filteredMedia = this.allMedia.filter(item => item.category === this.currentFilter);
+                }
+                
+                this.totalPages = Math.ceil(this.filteredMedia.length / this.pageSize);
+                this.currentPage = 1;
+                this.updatePagination();
+                this.renderCurrentPage();
+            }
+
+            updatePagination() {
+                const pageInfo = document.getElementById('page-info');
+                const currentPageInfo = document.getElementById('current-page-info');
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+
+                pageInfo.textContent = `第 ${this.currentPage} 页，共 ${this.totalPages} 页`;
+                currentPageInfo.textContent = `第${this.currentPage}页`;
+
+                prevBtn.disabled = this.currentPage <= 1;
+                nextBtn.disabled = this.currentPage >= this.totalPages;
+            }
+
+            renderCurrentPage() {
+                this.showLoading();
+                
+                setTimeout(() => {
+                    const gallery = document.getElementById('gallery');
+                    gallery.innerHTML = '';
+                    
+                    const startIndex = (this.currentPage - 1) * this.pageSize;
+                    const endIndex = Math.min(startIndex + this.pageSize, this.filteredMedia.length);
+                    const pageItems = this.filteredMedia.slice(startIndex, endIndex);
+                    
+                    pageItems.forEach((item, index) => {
+                        setTimeout(() => {
+                            const card = this.createMediaCard(item, startIndex + index);
+                            gallery.appendChild(card);
+                        }, index * 100);
+                    });
+                    
+                    this.hideLoading();
+                }, 300);
+            }
+
+            createMediaCard(item, index) {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                
+                const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                
+                if (isVideo) {
+                    // 为视频创建缩略图容器
+                    card.innerHTML = `
+                        <div class="video-thumbnail-container">
+                            <video class="video-thumbnail" muted preload="metadata" style="display: none;">
+                                <source src="${item.url}#t=1" type="video/mp4">
+                            </video>
+                            <canvas class="video-canvas" style="display: none;"></canvas>
+                            <div class="thumbnail-loading">生成缩略图中...</div>
+                            <div class="video-overlay">🎬 动态</div>
+                            <div class="play-button">▶</div>
+                        </div>
+                        <div class="media-info">
+                            <div class="media-title">${item.title}</div>
+                            <div class="media-meta">
+                                <span class="category-tag category-${item.category}">${this.getCategoryName(item.category)}</span>
+                                <span class="source-badge source-${item.source}">${item.source.toUpperCase()}</span>
+                            </div>
+                            <div class="resolution-info">${item.resolution || '高清'}</div>
+                        </div>
+                        <button class="download-btn" onclick="gallery.downloadMedia('${item.url}', '${item.title}')">⬇</button>
+                    `;
+                    
+                    // 延迟生成缩略图
+                    setTimeout(() => {
+                        this.generateVideoThumbnail(card, item);
+                    }, index * 200);
+                } else {
+                    // 静态图片
+                    card.innerHTML = `
+                        <img class="media-item" src="${item.url}" alt="${item.title}" loading="lazy">
+                        <div class="media-info">
+                            <div class="media-title">${item.title}</div>
+                            <div class="media-meta">
+                                <span class="category-tag category-${item.category}">${this.getCategoryName(item.category)}</span>
+                                <span class="source-badge source-${item.source}">${item.source.toUpperCase()}</span>
+                            </div>
+                            <div class="resolution-info">${item.resolution || '高清'}</div>
+                        </div>
+                        <button class="download-btn" onclick="gallery.downloadMedia('${item.url}', '${item.title}')">⬇</button>
+                    `;
+                }
+
+                // 添加点击预览功能
+                const mediaEl = card.querySelector('.media-item, .video-canvas, .play-button');
+                if (mediaEl) {
+                    mediaEl.addEventListener('click', () => this.openModal(item));
+                }
+
+                return card;
+            }
+
+            generateVideoThumbnail(card, item) {
+                const video = card.querySelector('.video-thumbnail');
+                const canvas = card.querySelector('.video-canvas');
+                const loadingEl = card.querySelector('.thumbnail-loading');
+                const ctx = canvas.getContext('2d');
+                
+                video.addEventListener('loadeddata', () => {
+                    try {
+                        // 设置canvas尺寸
+                        canvas.width = video.videoWidth || 640;
+                        canvas.height = video.videoHeight || 360;
+                        
+                        // 绘制第一帧作为缩略图
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        // 显示canvas，隐藏加载提示
+                        canvas.style.display = 'block';
+                        loadingEl.style.display = 'none';
+                        
+                        console.log(`视频缩略图生成成功: ${item.title}`);
+                    } catch (error) {
+                        console.error('生成缩略图失败:', error);
+                        this.createVideoPlaceholder(canvas, item, loadingEl);
+                    }
+                });
+                
+                video.addEventListener('error', (e) => {
+                    console.error('视频加载失败:', e);
+                    this.createVideoPlaceholder(canvas, item, loadingEl);
+                });
+                
+                // 设置超时
+                setTimeout(() => {
+                    if (canvas.style.display === 'none') {
+                        console.log('视频加载超时，使用占位图');
+                        this.createVideoPlaceholder(canvas, item, loadingEl);
+                    }
+                }, 10000);
+                
+                // 开始加载视频
+                video.load();
+            }
+
+            createVideoPlaceholder(canvas, item, loadingEl) {
+                const ctx = canvas.getContext('2d');
+                canvas.width = 640;
+                canvas.height = 360;
+                
+                // 绘制渐变背景
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#ff6b6b');
+                gradient.addColorStop(1, '#4ecdc4');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制播放图标
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🎬', canvas.width / 2, canvas.height / 2 - 20);
+                
+                // 绘制标题
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText('动态壁纸', canvas.width / 2, canvas.height / 2 + 30);
+                
+                // 显示canvas，隐藏加载提示
+                canvas.style.display = 'block';
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+
+            getCategoryName(category) {
+                const names = {
+                    'fantasy': '奇幻',
+                    'desktop': '桌面',
+                    'mobile': '手机',
+                    '4k': '4K',
+                    'live': '动态',
+                    'seasonal': '季节'
+                };
+                return names[category] || category;
+            }
+
+            nextPage() {
+                if (this.currentPage < this.totalPages) {
+                    this.currentPage++;
+                    this.updatePagination();
+                    this.renderCurrentPage();
+                    this.scrollToTop();
+                }
+            }
+
+            prevPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.updatePagination();
+                    this.renderCurrentPage();
+                    this.scrollToTop();
+                }
+            }
+
+            changePageSize(newSize) {
+                this.pageSize = parseInt(newSize);
+                this.applyFilter();
+            }
+
+            scrollToTop() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+
+            filterBy(category) {
+                this.currentFilter = category;
+                this.applyFilter();
+                
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-filter="${category}"]`).classList.add('active');
+            }
+
+            switchView(view) {
+                this.currentView = view;
+                const gallery = document.getElementById('gallery');
+                
+                if (view === 'grid') {
+                    gallery.className = 'gallery-grid';
+                } else {
+                    gallery.className = 'gallery-masonry';
+                }
+                
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-view="${view}"]`).classList.add('active');
+            }
+
+            openModal(item) {
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+                
+                const isVideo = item.url.includes('.mp4') || item.url.includes('.mov');
+                
+                if (isVideo) {
+                    modalContent.innerHTML = `
+                        <video controls autoplay style="max-width: 100%; max-height: 80vh;">
+                            <source src="${item.url}" type="video/mp4">
+                        </video>
+                    `;
+                } else {
+                    modalContent.innerHTML = `<img src="${item.url}" alt="${item.title}" style="max-width: 100%; max-height: 80vh;">`;
+                }
+                
+                modal.style.display = 'block';
+            }
+
+            closeModal() {
+                document.getElementById('modal').style.display = 'none';
+            }
+
+            downloadMedia(url, title) {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${title}.${url.split('.').pop()}`;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            showLoading() {
+                document.getElementById('loading').style.display = 'block';
+            }
+
+            hideLoading() {
+                document.getElementById('loading').style.display = 'none';
+            }
+
+            bindEvents() {
+                // 筛选按钮
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.filterBy(e.target.dataset.filter);
+                    });
+                });
+
+                // 视图切换按钮
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchView(e.target.dataset.view);
+                    });
+                });
+
+                // 模态框关闭
+                document.querySelector('.close').addEventListener('click', () => {
+                    this.closeModal();
+                });
+
+                document.getElementById('modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal') {
+                        this.closeModal();
+                    }
+                });
+
+                // ESC键关闭模态框
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeModal();
+                    }
+                });
+
+                // 键盘导航
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft' && !e.ctrlKey && !e.metaKey) {
+                        this.prevPage();
+                    } else if (e.key === 'ArrowRight' && !e.ctrlKey && !e.metaKey) {
+                        this.nextPage();
+                    }
+                });
+            }
+        }
+
+        // 初始化画廊
+        const gallery = new VideoThumbnailGallery();
+    </script>
+</body>
+</html>

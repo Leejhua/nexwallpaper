@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labubu画廊诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .test-section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        .status-loading { background: #ffc107; color: white; }
+        .status-success { background: #28a745; color: white; }
+        .status-error { background: #dc3545; color: white; }
+        .test-image {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px;
+            margin-left: 1rem;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+        .btn:hover { background: #0056b3; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Labubu画廊诊断工具</h1>
+        <p>检测资源加载问题并提供解决方案</p>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 系统状态</h3>
+        <div class="test-item">
+            <span>本地服务器</span>
+            <span class="status status-loading" id="server-status">检测中...</span>
+        </div>
+        <div class="test-item">
+            <span>网络连接</span>
+            <span class="status status-loading" id="network-status">检测中...</span>
+        </div>
+        <div class="test-item">
+            <span>CORS策略</span>
+            <span class="status status-loading" id="cors-status">检测中...</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🖼️ 图片资源测试</h3>
+        <button class="btn" onclick="testAllImages()">测试所有图片</button>
+        <button class="btn" onclick="clearLog()">清空日志</button>
+        <div id="image-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📝 诊断日志</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const testUrls = [
+            {
+                name: "本地图片1",
+                url: "local_images/rainbow-labubu.jpg",
+                type: "local"
+            },
+            {
+                name: "本地图片2", 
+                url: "local_images/hero-labubu.jpg",
+                type: "local"
+            },
+            {
+                name: "XYZ网站图片1",
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/cute-rainbow-labubu-wallpaper---heart-gesture-edition.jpg",
+                type: "external"
+            },
+            {
+                name: "COM网站图片1",
+                url: "https://labubuwallpaper.com/hero-labubu.jpg",
+                type: "external"
+            },
+            {
+                name: "XYZ网站图片2",
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-spring-garden-castle-wallpaper---cute-bunny-ear-doll-fantasy-scene-mobile-wallpaper.jpg",
+                type: "external"
+            }
+        ];
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.className = `status status-${status}`;
+            element.textContent = text;
+        }
+
+        // 检测系统状态
+        function checkSystemStatus() {
+            log('开始系统状态检测...');
+            
+            // 检测服务器
+            fetch('/')
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus('server-status', 'success', '✓ 正常');
+                        log('✅ 本地服务器运行正常');
+                    } else {
+                        updateStatus('server-status', 'error', '✗ 异常');
+                        log('❌ 本地服务器响应异常');
+                    }
+                })
+                .catch(error => {
+                    updateStatus('server-status', 'error', '✗ 离线');
+                    log('❌ 无法连接到本地服务器: ' + error.message);
+                });
+
+            // 检测网络连接
+            fetch('https://www.google.com/favicon.ico', { mode: 'no-cors' })
+                .then(() => {
+                    updateStatus('network-status', 'success', '✓ 正常');
+                    log('✅ 网络连接正常');
+                })
+                .catch(error => {
+                    updateStatus('network-status', 'error', '✗ 异常');
+                    log('❌ 网络连接异常: ' + error.message);
+                });
+
+            // CORS检测
+            updateStatus('cors-status', 'success', '✓ 支持');
+            log('✅ 浏览器支持CORS');
+        }
+
+        function testImage(testItem, index) {
+            const container = document.getElementById('image-tests');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-item';
+            testDiv.innerHTML = `
+                <div>
+                    <strong>${testItem.name}</strong><br>
+                    <small>${testItem.url}</small>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="status status-loading">测试中...</span>
+                    <img class="test-image" style="display: none;">
+                </div>
+            `;
+            container.appendChild(testDiv);
+
+            const statusSpan = testDiv.querySelector('.status');
+            const img = testDiv.querySelector('.test-image');
+
+            log(`开始测试: ${testItem.name}`);
+
+            const startTime = Date.now();
+            
+            img.onload = function() {
+                const loadTime = Date.now() - startTime;
+                statusSpan.className = 'status status-success';
+                statusSpan.textContent = `✓ 成功 (${loadTime}ms)`;
+                img.style.display = 'block';
+                log(`✅ ${testItem.name} 加载成功 (${loadTime}ms)`);
+            };
+
+            img.onerror = function() {
+                const loadTime = Date.now() - startTime;
+                statusSpan.className = 'status status-error';
+                statusSpan.textContent = `✗ 失败 (${loadTime}ms)`;
+                log(`❌ ${testItem.name} 加载失败 (${loadTime}ms)`);
+                
+                // 提供解决建议
+                if (testItem.type === 'external') {
+                    log(`💡 建议: 外部资源可能被CORS策略阻止或网络不稳定`);
+                } else {
+                    log(`💡 建议: 检查本地文件是否存在`);
+                }
+            };
+
+            // 设置超时
+            setTimeout(() => {
+                if (!img.complete && img.naturalWidth === 0) {
+                    img.onerror();
+                }
+            }, 10000);
+
+            img.src = testItem.url;
+        }
+
+        function testAllImages() {
+            document.getElementById('image-tests').innerHTML = '';
+            log('开始批量图片测试...');
+            
+            testUrls.forEach((testItem, index) => {
+                setTimeout(() => {
+                    testImage(testItem, index);
+                }, index * 500);
+            });
+        }
+
+        // 页面加载时自动检测
+        window.onload = function() {
+            log('🚀 诊断工具启动');
+            checkSystemStatus();
+            
+            setTimeout(() => {
+                log('开始自动图片测试...');
+                testAllImages();
+            }, 2000);
+        };
+    </script>
+</body>
+</html>

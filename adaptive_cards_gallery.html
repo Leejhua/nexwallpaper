@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labubu自适应卡片画廊 - 无白边展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: clamp(2em, 5vw, 3em);
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: clamp(1em, 3vw, 1.3em);
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .quality-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: clamp(0.9em, 2.5vw, 1em);
+        }
+
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: clamp(0.8em, 2vw, 1em);
+        }
+
+        .filter-tab:hover,
+        .filter-tab.active {
+            background: rgba(255,255,255,0.2);
+            border-color: #ffd700;
+            color: #ffd700;
+            transform: translateY(-2px);
+        }
+
+        /* 瀑布流布局 - 自适应卡片大小 */
+        .gallery {
+            column-count: 1;
+            column-gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* 响应式列数调整 */
+        @media (min-width: 600px) {
+            .gallery {
+                column-count: 2;
+            }
+        }
+
+        @media (min-width: 900px) {
+            .gallery {
+                column-count: 3;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .gallery {
+                column-count: 4;
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .gallery {
+                column-count: 5;
+            }
+        }
+
+        /* 自适应卡片 - 完全贴合图片内容 */
+        .image-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 25px;
+            break-inside: avoid; /* 防止卡片被分割 */
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        /* 图片容器 - 无固定高度，完全自适应 */
+        .image-wrapper {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            /* 移除固定高度，让图片决定容器大小 */
+        }
+
+        /* 图片样式 - 保持原始比例，无白边 */
+        .image-card img {
+            width: 100%;
+            height: auto; /* 关键：让高度自适应 */
+            display: block;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+        }
+
+        .image-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .overlay-text {
+            color: white;
+            font-weight: bold;
+            font-size: clamp(0.9em, 2.5vw, 1.1em);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            font-size: clamp(1em, 2.5vw, 1.2em);
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .image-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: clamp(0.7em, 2vw, 0.85em);
+            font-weight: 500;
+        }
+
+        .meta-tag.resolution {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .meta-tag.category {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .image-url {
+            font-size: clamp(0.7em, 2vw, 0.85em);
+            color: #888;
+            word-break: break-all;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #667eea;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: clamp(0.8em, 2vw, 0.9em);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 模态框优化 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            cursor: pointer;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 95vw;
+            max-height: 95vh;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            color: white;
+            font-size: clamp(1.2em, 3vw, 1.5em);
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            padding: 0 20px;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #f1f1f1;
+            font-size: clamp(30px, 5vw, 50px);
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #ff6b6b;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: clamp(1em, 3vw, 1.2em);
+            margin: 50px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffd700;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .gallery {
+                column-count: 1;
+                column-gap: 15px;
+            }
+            
+            .image-card {
+                margin-bottom: 20px;
+            }
+            
+            .filter-tabs {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .filter-tab {
+                width: 80%;
+                text-align: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+
+        /* 图片加载失败样式 */
+        .image-error {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            color: #999;
+            flex-direction: column;
+            font-size: clamp(0.9em, 2.5vw, 1em);
+        }
+
+        .image-error-icon {
+            font-size: clamp(2em, 5vw, 3em);
+            margin-bottom: 10px;
+        }
+
+        /* 加载状态优化 */
+        .image-loading {
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .image-loading::after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐰 Labubu自适应卡片画廊</h1>
+            <p>瀑布流布局 - 卡片完全贴合图片，无白边展示</p>
+            <div class="quality-badge">✨ 自适应卡片 + 无白边 + 瀑布流 ✨</div>
+        </div>
+
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-filter="all">全部</div>
+            <div class="filter-tab" data-filter="4k">4K高清</div>
+            <div class="filter-tab" data-filter="desktop">桌面壁纸</div>
+            <div class="filter-tab" data-filter="mobile">手机壁纸</div>
+            <div class="filter-tab" data-filter="fantasy">奇幻场景</div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            正在加载自适应卡片...
+        </div>
+
+        <div class="gallery" id="imageGallery" style="display: none;">
+            <!-- 图片将通过JavaScript动态加载 -->
+        </div>
+    </div>
+
+    <!-- 图片放大模态框 -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="">
+            <div class="modal-title" id="modalTitle"></div>
+        </div>
+    </div>
+
+    <script>
+        // 高清原图URL列表
+        const imageData = [
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/cute-rainbow-labubu-wallpaper---heart-gesture-edition.jpg",
+                title: "彩虹Labubu - 爱心手势版",
+                category: "fantasy",
+                resolution: "高清",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-spring-garden-castle-wallpaper---cute-bunny-ear-doll-fantasy-scene-mobile-wallpaper.jpg",
+                title: "春日花园城堡 - 奇幻场景",
+                category: "fantasy",
+                resolution: "移动端",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/two-labubu-bunnies-breaking-through-the-wall-wallpaper.png",
+                title: "双Labubu破墙而出",
+                category: "fantasy",
+                resolution: "高清",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-beach-sunsetlabubu-wallpaper-pc.png",
+                title: "海滩日落景色",
+                category: "desktop",
+                resolution: "PC",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-desert-oasislabubu-wallpaper-pc.png",
+                title: "沙漠绿洲奇景",
+                category: "desktop",
+                resolution: "PC",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-starlit-forest-whisperlabubu-wallpaper-4k.png",
+                title: "星光森林低语",
+                category: "4k",
+                resolution: "4K",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-aurora-tide-keeperlabubu-wallpaper-4k.png",
+                title: "极光潮汐守护者",
+                category: "4k",
+                resolution: "4K",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-by-cherry-blossom-in-japanese-gardenlabubu-iphone-wallpaper.png",
+                title: "日式花园樱花盛开",
+                category: "mobile",
+                resolution: "iPhone",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-magical-gardenlabubu-desktop-wallpaper.png",
+                title: "魔法花园秘境",
+                category: "fantasy",
+                resolution: "桌面",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-enchanted-forestlabubu-desktop-wallpaper.png",
+                title: "魔法森林探险",
+                category: "fantasy",
+                resolution: "桌面",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-coastal-whisperlabubu-desktop-wallpaper.png",
+                title: "海岸低语时光",
+                category: "desktop",
+                resolution: "桌面",
+                type: "原图"
+            },
+            {
+                url: "https://res.labubuwallpaper.xyz/image/upload/f_auto,q_auto/labubu/labubu-in-moonlit-blossom-grovelabubu-wallpaper-4k.png",
+                title: "月光花丛漫步",
+                category: "4k",
+                resolution: "4K",
+                type: "原图"
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        // 加载图片画廊
+        function loadImageGallery() {
+            const gallery = document.getElementById('imageGallery');
+            const loading = document.getElementById('loading');
+            
+            gallery.innerHTML = '';
+            
+            const filteredImages = currentFilter === 'all' 
+                ? imageData 
+                : imageData.filter(item => item.category === currentFilter);
+            
+            filteredImages.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.setAttribute('data-category', item.category);
+                
+                card.innerHTML = `
+                    <div class="image-wrapper">
+                        <img src="${item.url}" alt="${item.title}" 
+                             onclick="openModal('${item.url}', '${item.title}')"
+                             onerror="handleImageError(this)"
+                             onload="handleImageLoad(this)"
+                             style="opacity: 0; transition: opacity 0.3s ease;">
+                        <div class="image-overlay">
+                            <div class="overlay-text">点击查看原图</div>
+                        </div>
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">${item.title}</div>
+                        <div class="image-meta">
+                            <span class="meta-tag resolution">${item.resolution}</span>
+                            <span class="meta-tag category">${item.type}</span>
+                        </div>
+                        <div class="image-url">${item.url}</div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="openModal('${item.url}', '${item.title}')">
+                                🔍 查看原图
+                            </button>
+                            <a href="${item.url}" target="_blank" class="btn btn-secondary">
+                                🔗 新窗口打开
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                gallery.appendChild(card);
+            });
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+                gallery.style.display = 'block';
+            }, 1000);
+        }
+
+        // 处理图片加载成功 - 淡入效果
+        function handleImageLoad(img) {
+            img.style.opacity = '1';
+        }
+
+        // 处理图片加载错误
+        function handleImageError(img) {
+            const wrapper = img.closest('.image-wrapper');
+            wrapper.innerHTML = `
+                <div class="image-error">
+                    <div class="image-error-icon">🖼️</div>
+                    <div>图片暂时无法加载</div>
+                    <div style="font-size: 0.9em; margin-top: 5px;">可能是网络问题</div>
+                </div>
+            `;
+        }
+
+        // 过滤功能
+        function setupFilters() {
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    currentFilter = tab.getAttribute('data-filter');
+                    
+                    document.getElementById('loading').style.display = 'block';
+                    document.getElementById('imageGallery').style.display = 'none';
+                    setTimeout(loadImageGallery, 500);
+                });
+            });
+        }
+
+        // 打开图片模态框
+        function openModal(imageUrl, title) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+            modalImg.alt = title;
+            modalTitle.textContent = title;
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadImageGallery();
+            setupFilters();
+            
+            document.querySelector('.close').onclick = closeModal;
+            
+            document.getElementById('imageModal').onclick = function(event) {
+                if (event.target === this) {
+                    closeModal();
+                }
+            };
+            
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
