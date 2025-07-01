@@ -1,41 +1,61 @@
 # 🐰 Labubu壁纸画廊项目
 
-一个完整的Labubu壁纸收藏和展示项目，整合了来自两个专业网站的所有资源，提供了美观的响应式画廊界面。
+一个现代化的Labubu壁纸收藏和展示项目，采用React + Aceternity UI构建，整合了400+高清壁纸资源，提供流畅的用户体验和美观的响应式界面。
 
 ## 📊 项目概览
 
-### 🌟 高清版本 (最新)
+### 🌟 React主要版本 (推荐)
+- **技术栈**: React 18 + Vite + Tailwind CSS + Framer Motion
+- **UI组件**: Aceternity UI现代化组件库
 - **图片资源**: 386张真正高清壁纸
 - **视频资源**: 14个动态壁纸
 - **总计**: 400+精选作品
 - **画质**: 真正的4K高清，无压缩
-- **数据源**: labubuwallpaper.xyz 完整收录
+- **特色**: 流畅动画、智能搜索、键盘快捷键
 
-### 📱 经典版本
-- **图片资源**: 42张高质量壁纸
-- **视频资源**: 12个动态壁纸
-- **数据源**: 2个专业网站 (labubuwallpaper.xyz + labubuwallpaper.com)
+### 🎨 原生HTML版本
+- **高清版本**: 386张高清壁纸 + 14个视频
+- **经典版本**: 42张高质量壁纸 + 12个视频
+- **数据源**: labubuwallpaper.xyz 完整收录
 - **分类覆盖**: 奇幻、桌面、手机、4K、动态、季节主题
 
 ## 🚀 快速开始
 
-### 启动画廊服务器
+### 启动主要版本 (React)
 
 ```bash
-# 启动高清画廊（推荐）
+# 启动React现代化画廊（主要推荐）
+./start_main_gallery.sh
+
+# 停止React画廊
+./stop_main_gallery.sh
+```
+
+### 启动原生HTML版本
+
+```bash
+# 启动高清画廊
 ./start_hd_gallery.sh
 
 # 启动经典画廊
 ./start_gallery.sh
 
-# 或手动启动
-python3 -m http.server 8080
+# 停止HTML画廊
+./stop_gallery.sh
 ```
 
 ### 访问画廊
 
-#### 🌟 高清版本 (400+作品)
-- **🎨 侧边栏画廊**: http://localhost:8080/hd_sidebar_gallery.html （最新推荐）
+#### 🌟 React主要版本 (推荐)
+- **🎭 React现代化画廊**: http://localhost:3000 （主要推荐）
+  - 流畅的Framer Motion动画
+  - Aceternity UI现代化组件
+  - 智能搜索和筛选功能
+  - 键盘快捷键支持
+  - 完美响应式设计
+
+#### 🎨 原生HTML版本 (400+作品)
+- **🎨 侧边栏画廊**: http://localhost:8080/hd_sidebar_gallery.html
 - **🎬 高清画廊**: http://localhost:8080/hd_video_thumbnail_gallery.html
 
 #### 📱 经典版本 (54作品)
@@ -43,12 +63,6 @@ python3 -m http.server 8080
 - **🚀 分页版画廊**: http://localhost:8080/paginated_gallery.html
 - **完整画廊**: http://localhost:8080/ultimate_labubu_gallery.html
 - **自适应画廊**: http://localhost:8080/adaptive_cards_gallery.html
-
-### 停止服务器
-
-```bash
-./stop_gallery.sh
-```
 
 ## ✨ 功能特色
 
