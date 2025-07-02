@@ -1,0 +1,65 @@
+name: 🚀 Deploy Hualang React Gallery
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    steps:
+    - name: 📥 Checkout代码
+      uses: actions/checkout@v3
+    
+    - name: 🔧 设置Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: 📦 安装依赖
+      run: npm ci
+    
+    - name: 🧪 运行测试
+      run: npm run test
+    
+    - name: 🔍 代码检查
+      run: npm run lint
+    
+    - name: 🔨 构建项目
+      run: npm run build
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout代码
+      uses: actions/checkout@v3
+    
+    - name: 🔧 设置Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 📦 安装依赖
+      run: npm ci
+    
+    - name: 🔨 构建项目
+      run: npm run build
+    
+    - name: 🚀 部署到GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
