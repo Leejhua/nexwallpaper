@@ -5,6 +5,7 @@ import { getHighResUrl } from '../utils/imageUtils';
 import LikeButton from './LikeButton';
 import LikeCounter from './LikeCounter';
 import ErrorBoundary from './ErrorBoundary';
+import ShareModal from './ShareModal';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 
 /**
@@ -15,6 +16,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
   const [imageError, setImageError] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [imageDimensions, setImageDimensions] = useState(null); // 添加图片尺寸状态
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false); // 分享模态框状态
 
   // 获取统计功能 - 添加错误处理
   let recordClick, getStats;
@@ -158,39 +160,10 @@ const Modal = memo(({ isOpen, item, onClose }) => {
     }
   }, [isDownloading, item]);
 
-  // 分享功能 - 分享到首页对应壁纸详情页
-  const handleShare = useCallback(async () => {
+  // 分享功能 - 打开分享模态框
+  const handleShare = useCallback(() => {
     if (!item) return;
-    
-    // 构建分享链接：首页 + 壁纸ID参数
-    const shareUrl = `${window.location.origin}?wallpaper=${item.id}`;
-    const shareTitle = `${item.title} - Labubu壁纸画廊`;
-    
-    console.log('分享链接:', shareUrl, '壁纸ID:', item.id); // 调试日志
-    
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: shareTitle,
-          text: `查看这张精美的${item.title}壁纸`,
-          url: shareUrl
-        });
-      } else {
-        // 复制分享链接到剪贴板
-        await navigator.clipboard.writeText(shareUrl);
-        // 可以添加一个提示，告诉用户链接已复制
-        alert(`分享链接已复制到剪贴板！\n${shareUrl}`);
-      }
-    } catch (error) {
-      // 分享功能不可用，尝试直接复制链接
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert(`分享链接已复制到剪贴板！\n${shareUrl}`);
-      } catch (clipboardError) {
-        // 如果剪贴板也不可用，显示链接让用户手动复制
-        prompt('请复制以下分享链接：', shareUrl);
-      }
-    }
+    setIsShareModalOpen(true);
   }, [item]);
 
   // 如果没有item，直接返回null
@@ -421,6 +394,13 @@ const Modal = memo(({ isOpen, item, onClose }) => {
           </motion.div>
         </motion.div>
       )}
+
+      {/* 分享模态框 */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        item={item}
+      />
     </AnimatePresence>
   );
 });
