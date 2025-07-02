@@ -30,7 +30,6 @@ export const useClickStats = () => {
         if (saved) {
           const parsed = JSON.parse(saved);
           setClickStats(parsed || {});
-          console.log('Loaded local stats:', Object.keys(parsed || {}).length, 'items');
         }
       } catch (error) {
         console.error('Failed to load local stats:', error);
@@ -43,7 +42,6 @@ export const useClickStats = () => {
   const saveLocalStats = useCallback((stats) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-      console.log('Saved local stats:', Object.keys(stats).length, 'items');
     } catch (error) {
       console.error('Failed to save local stats:', error);
     }
@@ -51,7 +49,6 @@ export const useClickStats = () => {
 
   // 记录点击操作
   const recordClick = useCallback(async (wallpaperId, action = 'view') => {
-    console.log('🎯 recordClick:', { wallpaperId, action, isOnline });
     
     // 立即更新本地状态
     setClickStats(prev => {
@@ -81,7 +78,6 @@ export const useClickStats = () => {
       }
 
       const newStats = { ...prev, [wallpaperId]: updated };
-      console.log('📊 Updated local stats:', updated);
       
       // 直接保存到本地存储
       try {
@@ -96,9 +92,7 @@ export const useClickStats = () => {
     // 如果在线，同步到服务器
     if (isOnline) {
       try {
-        console.log('🌐 Syncing to server...');
         const response = await statsAPI.recordAction(wallpaperId, action);
-        console.log('✅ Server sync success:', response);
         
         // 可选：用服务器数据更新本地状态
         if (response.success && response.data) {
@@ -122,12 +116,10 @@ export const useClickStats = () => {
     if (!wallpaperIds.length || !isOnline) return;
     
     try {
-      console.log('📥 Loading batch stats for:', wallpaperIds.length, 'items');
       setIsLoading(true);
       const response = await statsAPI.getBatchStats(wallpaperIds);
       
       if (response.success && response.data) {
-        console.log('📊 Received server stats:', Object.keys(response.data).length, 'items');
         
         setClickStats(prev => {
           const updated = { ...prev };
@@ -164,7 +156,6 @@ export const useClickStats = () => {
           });
           
           if (hasChanges) {
-            console.log('📊 Stats updated with server data');
             // 直接保存，不依赖外部函数
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -173,7 +164,6 @@ export const useClickStats = () => {
             }
             return updated;
           } else {
-            console.log('📊 No changes needed');
             return prev; // 返回原状态，避免不必要的重渲染
           }
         });
@@ -219,10 +209,8 @@ export const useClickStats = () => {
 
   // 切换喜欢状态
   const toggleLike = useCallback(async (wallpaperId) => {
-    console.log('💖 toggleLike called for:', wallpaperId);
     const currentlyLiked = isLiked(wallpaperId);
     const action = currentlyLiked ? 'unlike' : 'like';
-    console.log('💖 Current state:', currentlyLiked, '-> Action:', action);
     
     await recordClick(wallpaperId, action);
     return !currentlyLiked;

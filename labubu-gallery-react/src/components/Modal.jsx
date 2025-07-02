@@ -31,7 +31,6 @@ const Modal = memo(({ isOpen, item, onClose }) => {
   // 重置状态当item变化时
   useEffect(() => {
     if (item) {
-      console.log('Modal: Item changed, resetting states', item.id);
       setImageLoaded(false);
       setImageError(false);
       setIsDownloading(false);
@@ -42,7 +41,6 @@ const Modal = memo(({ isOpen, item, onClose }) => {
   // 清理状态当组件卸载时
   useEffect(() => {
     return () => {
-      console.log('Modal: Cleanup on unmount');
       setImageLoaded(false);
       setImageError(false);
       setIsDownloading(false);
@@ -160,21 +158,38 @@ const Modal = memo(({ isOpen, item, onClose }) => {
     }
   }, [isDownloading, item]);
 
-  // 分享功能 - 简化处理
+  // 分享功能 - 分享到首页对应壁纸详情页
   const handleShare = useCallback(async () => {
     if (!item) return;
+    
+    // 构建分享链接：首页 + 壁纸ID参数
+    const shareUrl = `${window.location.origin}?wallpaper=${item.id}`;
+    const shareTitle = `${item.title} - Labubu壁纸画廊`;
+    
+    console.log('分享链接:', shareUrl, '壁纸ID:', item.id); // 调试日志
     
     try {
       if (navigator.share) {
         await navigator.share({
-          title: item.title,
-          url: item.url
+          title: shareTitle,
+          text: `查看这张精美的${item.title}壁纸`,
+          url: shareUrl
         });
       } else {
-        await navigator.clipboard.writeText(item.url);
+        // 复制分享链接到剪贴板
+        await navigator.clipboard.writeText(shareUrl);
+        // 可以添加一个提示，告诉用户链接已复制
+        alert(`分享链接已复制到剪贴板！\n${shareUrl}`);
       }
     } catch (error) {
-      console.log('分享功能不可用');
+      // 分享功能不可用，尝试直接复制链接
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert(`分享链接已复制到剪贴板！\n${shareUrl}`);
+      } catch (clipboardError) {
+        // 如果剪贴板也不可用，显示链接让用户手动复制
+        prompt('请复制以下分享链接：', shareUrl);
+      }
     }
   }, [item]);
 
@@ -227,11 +242,9 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         muted
                         playsInline
                         onLoadedData={() => {
-                          console.log('Video loaded');
                           setImageLoaded(true);
                         }}
                         onError={() => {
-                          console.log('Video error');
                           setImageError(true);
                         }}
                       />
@@ -241,11 +254,9 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         src={getHighResUrl(item.url)}
                         alt={item.title}
                         onLoad={() => {
-                          console.log('Image loaded');
                           setImageLoaded(true);
                         }}
                         onError={() => {
-                          console.log('Image error');
                           setImageError(true);
                         }}
                       />

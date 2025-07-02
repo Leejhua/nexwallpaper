@@ -29,7 +29,6 @@ const GalleryItem = ({ item, onPreview, index }) => {
     
     // 记录下载统计
     recordClick(item.id, 'download');
-    console.log('Download clicked for:', item.title);
     
     try {
       // 使用高清原图进行下载
@@ -130,7 +129,6 @@ const GalleryItem = ({ item, onPreview, index }) => {
   const handleCardClick = useCallback((e) => {
     // 记录点击统计
     recordClick(item.id, 'view');
-    console.log('Card clicked, opening preview for:', item.title);
     onPreview(item);
   }, [item, onPreview, recordClick]);
 
@@ -144,7 +142,7 @@ const GalleryItem = ({ item, onPreview, index }) => {
         await videoRef.current.play();
         setIsPlaying(true);
       } catch (error) {
-        console.log('视频自动播放失败:', error);
+        // 视频自动播放失败，忽略错误
       }
     }
     

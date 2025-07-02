@@ -55,6 +55,29 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 处理分享链接 - 检查URL参数中的wallpaper ID
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const wallpaperIdStr = urlParams.get('wallpaper');
+    
+    if (wallpaperIdStr && items.length > 0) {
+      // 将字符串ID转换为数字进行匹配
+      const wallpaperId = parseInt(wallpaperIdStr, 10);
+      
+      // 查找对应的壁纸
+      const targetWallpaper = items.find(item => item.id === wallpaperId);
+      
+      if (targetWallpaper) {
+        // 自动打开对应壁纸的详情页
+        setTimeout(() => {
+          openModal(targetWallpaper);
+          // 清除URL参数，保持URL干净
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }, 1000); // 延迟1秒，确保页面完全加载
+      }
+    }
+  }, [items, openModal]); // 依赖items和openModal
+
   return (
     <ClickStatsProvider>
       <div className="min-h-screen custom-scrollbar">

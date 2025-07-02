@@ -38,11 +38,9 @@ const LikeButton = ({
     e.stopPropagation();
     
     try {
-      console.log('LikeButton clicked for wallpaper:', wallpaperId);
       setIsAnimating(true);
       if (toggleLike) {
         const newLikeState = await toggleLike(wallpaperId);
-        console.log('Toggle like result:', newLikeState);
       } else {
         console.error('toggleLike function not available');
       }

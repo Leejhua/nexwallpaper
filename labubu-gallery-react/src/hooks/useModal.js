@@ -10,7 +10,6 @@ export const useModal = () => {
 
   // 打开模态框
   const openModal = useCallback((item) => {
-    console.log('Opening modal with item:', item); // 添加调试日志
     setSelectedItem(item);
     setIsModalOpen(true);
     // 防止背景滚动
@@ -19,7 +18,6 @@ export const useModal = () => {
 
   // 关闭模态框
   const closeModal = useCallback(() => {
-    console.log('Closing modal'); // 添加调试日志
     setIsModalOpen(false);
     setSelectedItem(null);
     // 恢复背景滚动
@@ -28,7 +26,6 @@ export const useModal = () => {
 
   // 下载文件
   const downloadFile = useCallback((url, filename) => {
-    console.log('Downloading file:', url, filename); // 添加调试日志
     try {
       const link = document.createElement('a');
       link.href = url;

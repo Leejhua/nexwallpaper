@@ -28,6 +28,7 @@ const Gallery = ({
   useEffect(() => {
     loadBatchStatsRef.current = loadBatchStats;
   }, [loadBatchStats]);
+  const [isInitialized, setIsInitialized] = useState(false); // 初始化标记
   const [columns, setColumns] = useState([[], [], [], [], []]);
   const [columnCount, setColumnCount] = useState(4);
   const [isInitialLoading, setIsInitialLoading] = useState(true); // 初始加载状态
@@ -35,6 +36,7 @@ const Gallery = ({
   const observerRef = useRef();
   const loadTriggerRef = useRef();
   const containerRef = useRef();
+  const initTimeoutRef = useRef(); // 防抖定时器
   
   // 点击统计
   const { getStats, getPopularityScore, getLikeCount, getLikeRate } = useClickStatsContext();
@@ -63,7 +65,6 @@ const Gallery = ({
   const sortItems = useCallback((itemsToSort) => {
     if (sortMode === 'default') {
       // 默认模式使用随机排序，每次页面加载都不同
-      console.log('🎲 Applying random shuffle to default view, seed:', randomSeed);
       return shuffleArray(itemsToSort);
     }
     
@@ -162,80 +163,85 @@ const Gallery = ({
     ));
   };
 
-  // 当items或columnCount变化时，重新初始化 - 优化加载体验
+  // 当items或columnCount变化时，重新初始化 - 优化加载体验，避免双重刷新
   useEffect(() => {
-    console.log('Items changed, reinitializing...', { 
-      itemsLength: items.length, 
-      currentFilter,
-      columnCount,
-      sortMode 
-    });
+    // 清除之前的定时器，实现防抖
+    if (initTimeoutRef.current) {
+      clearTimeout(initTimeoutRef.current);
+    }
     
-    // 显示骨架屏，避免白屏
-    setShowSkeleton(true);
-    setIsInitialLoading(true);
+    // 如果是首次初始化，立即执行
+    const delay = isInitialized ? 100 : 0;
     
-    // 重置所有状态
-    setDisplayedItems([]);
-    setLoadedCount(0);
-    setHasMore(true);
-    setColumns(Array(5).fill().map(() => []));
-    setIsLoadingMore(false);
-    
-    // 模拟加载延迟，确保平滑过渡
-    const loadTimer = setTimeout(() => {
-      if (items.length > 0) {
-        // 应用排序
-        const sortedItems = sortItems(items);
-        const initialLoadSize = Math.min(INITIAL_LOAD_SIZE, sortedItems.length);
-        const initialItems = sortedItems.slice(0, initialLoadSize);
-        
-        // 分批渲染，避免一次性渲染造成卡顿
-        const batchSize = 10;
-        let currentBatch = 0;
-        const totalBatches = Math.ceil(initialItems.length / batchSize);
-        
-        const renderBatch = () => {
-          const startIndex = currentBatch * batchSize;
-          const endIndex = Math.min(startIndex + batchSize, initialItems.length);
-          const batchItems = initialItems.slice(0, endIndex);
+    initTimeoutRef.current = setTimeout(() => {
+      // 显示骨架屏，避免白屏
+      setShowSkeleton(true);
+      setIsInitialLoading(true);
+      
+      // 重置所有状态
+      setDisplayedItems([]);
+      setLoadedCount(0);
+      setHasMore(true);
+      setColumns(Array(5).fill().map(() => []));
+      setIsLoadingMore(false);
+      
+      // 模拟加载延迟，确保平滑过渡
+      const loadTimer = setTimeout(() => {
+        if (items.length > 0) {
+          // 应用排序
+          const sortedItems = sortItems(items);
+          const initialLoadSize = Math.min(INITIAL_LOAD_SIZE, sortedItems.length);
+          const initialItems = sortedItems.slice(0, initialLoadSize);
           
-          setDisplayedItems(batchItems);
-          setLoadedCount(endIndex);
+          // 分批渲染，避免一次性渲染造成卡顿
+          const batchSize = 10;
+          let currentBatch = 0;
+          const totalBatches = Math.ceil(initialItems.length / batchSize);
           
-          // 重新分配到列
-          const newColumns = redistributeAllItems(batchItems);
-          setColumns(newColumns);
-          
-          currentBatch++;
-          
-          if (currentBatch < totalBatches) {
-            // 继续下一批，间隔很短避免闪烁
-            setTimeout(renderBatch, 50);
-          } else {
-            // 完成初始加载
-            setHasMore(items.length > initialLoadSize);
-            setIsInitialLoading(false);
-            setShowSkeleton(false);
+          const renderBatch = () => {
+            const startIndex = currentBatch * batchSize;
+            const endIndex = Math.min(startIndex + batchSize, initialItems.length);
+            const batchItems = initialItems.slice(0, endIndex);
             
-            console.log('Initial load completed:', {
-              initialItemsCount: initialItems.length,
-              hasMore: items.length > initialLoadSize,
-              columnsDistribution: newColumns.map(col => col.length)
-            });
-          }
-        };
-        
-        renderBatch();
-      } else {
-        // 没有数据时也要隐藏骨架屏
-        setIsInitialLoading(false);
-        setShowSkeleton(false);
-      }
-    }, 200); // 200ms延迟，给用户平滑的加载感受
+            setDisplayedItems(batchItems);
+            setLoadedCount(endIndex);
+            
+            // 重新分配到列
+            const newColumns = redistributeAllItems(batchItems);
+            setColumns(newColumns);
+            
+            currentBatch++;
+            
+            if (currentBatch < totalBatches) {
+              // 继续下一批，间隔很短避免闪烁
+              setTimeout(renderBatch, 50);
+            } else {
+              // 完成初始加载
+              setHasMore(items.length > initialLoadSize);
+              setIsInitialLoading(false);
+              setShowSkeleton(false);
+              setIsInitialized(true); // 标记为已初始化
+            }
+          };
+          
+          renderBatch();
+        } else {
+          // 没有数据时也要隐藏骨架屏
+          setIsInitialLoading(false);
+          setShowSkeleton(false);
+          setIsInitialized(true);
+        }
+      }, isInitialized ? 100 : 200); // 首次加载稍长延迟，后续更快
+      
+      return () => clearTimeout(loadTimer);
+    }, delay);
     
-    return () => clearTimeout(loadTimer);
-  }, [items, columnCount, redistributeAllItems, currentFilter, sortItems]);
+    return () => {
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+    };
+  }, [items, columnCount, redistributeAllItems, currentFilter, sortMode, randomSeed]); // 明确依赖项，避免sortItems导致的循环
 
   // 加载统计数据 - 当显示的项目变化时，使用防抖避免频繁调用
   useEffect(() => {
@@ -244,7 +250,6 @@ const Gallery = ({
       
       // 防抖处理，避免频繁调用
       const timeoutId = setTimeout(() => {
-        console.log('Loading batch stats for:', wallpaperIds.length, 'items');
         if (loadBatchStatsRef.current) {
           loadBatchStatsRef.current(wallpaperIds).catch(error => {
             console.error('Failed to load batch stats:', error);
@@ -259,11 +264,9 @@ const Gallery = ({
   // 加载更多数据 - 优化版本，避免闪烁
   const loadMore = useCallback(() => {
     if (isLoadingMore || !hasMore || items.length === 0 || isInitialLoading) {
-      console.log('Load more blocked:', { isLoadingMore, hasMore, itemsLength: items.length, isInitialLoading });
       return;
     }
 
-    console.log('Loading more items...', { loadedCount, totalItems: items.length });
     setIsLoadingMore(true);
     
     // 平滑加载，避免突然出现大量内容
@@ -273,12 +276,6 @@ const Gallery = ({
       const nextItems = sortedItems.slice(loadedCount, loadedCount + LOAD_SIZE);
       const newDisplayedItems = [...displayedItems, ...nextItems];
       
-      console.log('Adding new items:', {
-        nextItemsCount: nextItems.length,
-        newTotalCount: newDisplayedItems.length,
-        remainingItems: items.length - (loadedCount + LOAD_SIZE)
-      });
-      
       setDisplayedItems(newDisplayedItems);
       setLoadedCount(prev => prev + LOAD_SIZE);
       setHasMore(loadedCount + LOAD_SIZE < items.length);
@@ -286,11 +283,6 @@ const Gallery = ({
       // 重新分配所有项目到列，确保均匀分布
       const newColumns = redistributeAllItems(newDisplayedItems);
       setColumns(newColumns);
-      
-      console.log('Load more completed:', {
-        columnsDistribution: newColumns.map(col => col.length),
-        hasMoreRemaining: loadedCount + LOAD_SIZE < items.length
-      });
       
       setIsLoadingMore(false);
     }, 100); // 100ms延迟，提供平滑的加载体验
@@ -301,7 +293,6 @@ const Gallery = ({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isInitialLoading) {
-          console.log('Intersection observer triggered load more');
           loadMore();
         }
       },
@@ -335,7 +326,6 @@ const Gallery = ({
       
       // 当滚动到距离底部400px时触发加载
       if (scrollTop + windowHeight >= documentHeight - 400) {
-        console.log('Scroll listener triggered load more');
         loadMore();
       }
     };
@@ -433,15 +423,6 @@ const Gallery = ({
           )}
         </div>
       </motion.div>
-
-      {/* 调试信息 (开发时可见) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-gray-400 bg-gray-100 p-2 rounded">
-          调试: 总项目{items.length} | 已显示{displayedItems.length} | 已加载{loadedCount} | 
-          列分布[{columns.map(col => col.length).join(', ')}] | 
-          筛选器:{currentFilter} | 还有更多:{hasMore ? '是' : '否'}
-        </div>
-      )}
 
       {/* 稳定瀑布流容器 */}
       <div 

@@ -11,6 +11,7 @@ export const useGallery = () => {
   const [loading, setLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false); // 过渡状态
   const [randomSeed, setRandomSeed] = useState(() => Math.random() * 1000000); // 随机种子
+  const [isInitialized, setIsInitialized] = useState(false); // 初始化标记
 
   // 筛选后的数据
   const filteredData = useMemo(() => {
@@ -40,6 +41,11 @@ export const useGallery = () => {
     return filtered;
   }, [currentFilter, searchTerm]);
 
+  // 初始化标记 - 避免首次加载时的双重刷新
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
+
   // 筛选变化时的平滑过渡 - 避免闪屏
   useEffect(() => {
     if (currentFilter !== 'all' || searchTerm.trim()) {
@@ -66,16 +72,16 @@ export const useGallery = () => {
     }
   }, [currentFilter, searchTerm]);
 
-  // 切换筛选器 - 优化体验
+  // 切换筛选器 - 优化体验，避免首次加载双重刷新
   const handleFilterChange = (filter) => {
     // 如果是相同筛选器，不做处理
     if (filter === currentFilter) return;
     
     setCurrentFilter(filter);
     
-    // 如果切换到"全部作品"，自动刷新随机种子
-    if (filter === 'all') {
-      console.log('🎲 Auto-refreshing random order for "all" category');
+    // 只有在已初始化且切换到"全部作品"时才刷新随机种子
+    // 避免首次加载时的双重刷新
+    if (filter === 'all' && isInitialized && currentFilter !== 'all') {
       setRandomSeed(Math.random() * 1000000);
     }
   };
@@ -90,13 +96,14 @@ export const useGallery = () => {
     setSearchTerm('');
   };
 
-  // 重置所有筛选
+  // 重置所有筛选 - 避免不必要的刷新
   const resetFilters = () => {
     setCurrentFilter('all');
     setSearchTerm('');
-    // 重置时也刷新随机种子
-    console.log('🎲 Auto-refreshing random order for reset filters');
-    setRandomSeed(Math.random() * 1000000);
+    // 只有在不是默认状态时才刷新随机种子
+    if (isInitialized && (currentFilter !== 'all' || searchTerm.trim())) {
+      setRandomSeed(Math.random() * 1000000);
+    }
   };
 
   return {

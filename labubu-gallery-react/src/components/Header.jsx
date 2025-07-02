@@ -68,32 +68,6 @@ const Header = ({ totalItems, filteredItems, currentFilter }) => {
             </div>
           )}
         </motion.div>
-
-        {/* 项目链接 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="flex items-center justify-center gap-4 pt-2"
-        >
-          <motion.a
-            href="https://gitcode.com/LEEJHSE/react_code"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Github className="w-4 h-4" />
-            <span className="text-sm">查看源码</span>
-          </motion.a>
-          
-          <div className="w-px h-4 bg-gray-300" />
-          
-          <div className="text-sm text-gray-500">
-            React + Aceternity UI
-          </div>
-        </motion.div>
       </div>
     </motion.header>
   );
