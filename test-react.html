@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React测试页面</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐰 Labubu壁纸画廊 - React测试</h1>
+        
+        <div class="status">
+            <h2>服务器状态检查</h2>
+            <p>如果下方显示内容，说明React应用正常运行</p>
+            <p>如果显示空白或错误，说明有问题需要修复</p>
+        </div>
+
+        <iframe src="http://localhost:3000" title="React应用"></iframe>
+        
+        <div class="status">
+            <h3>故障排除</h3>
+            <p>1. 检查控制台是否有JavaScript错误</p>
+            <p>2. 确认服务器在端口3000上运行</p>
+            <p>3. 检查网络连接</p>
+        </div>
+    </div>
+
+    <script>
+        // 检查服务器状态
+        fetch('http://localhost:3000')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ 服务器响应正常');
+                } else {
+                    console.log('❌ 服务器响应异常:', response.status);
+                }
+            })
+            .catch(error => {
+                console.log('❌ 无法连接到服务器:', error);
+            });
+    </script>
+</body>
+</html>
