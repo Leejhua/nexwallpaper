@@ -1,4 +1,5 @@
 import React from 'react';
+import { Heart, TrendingUp } from 'lucide-react';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 
 const PopularityBadge = ({ 
@@ -25,7 +26,8 @@ const PopularityBadge = ({
       case 'fire':
         return (
           <span className="flex items-center gap-1 text-xs">
-            🔥 {stats.totalClicks}
+            <TrendingUp size={12} className="text-orange-500" />
+            {stats.totalClicks}
           </span>
         );
       case 'number':
@@ -43,7 +45,8 @@ const PopularityBadge = ({
       case 'likes':
         return likeCount > 0 ? (
           <span className="flex items-center gap-1 text-xs">
-            ❤️ {likeCount}
+            <Heart size={12} className="text-red-500" />
+            {likeCount}
           </span>
         ) : null;
       default:

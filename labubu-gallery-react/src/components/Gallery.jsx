@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Sparkles } from 'lucide-react';
 import GalleryItem from './GalleryItem';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -370,7 +371,9 @@ const Gallery = ({
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center justify-center min-h-[400px] text-center"
       >
-        <div className="text-6xl mb-4">🔍</div>
+        <div className="text-gray-400 mb-4">
+          <Search size={64} />
+        </div>
         <h3 className="text-xl font-semibold text-gray-800 mb-2">
           {t('noResults')}
         </h3>
@@ -484,7 +487,7 @@ const Gallery = ({
           className="text-center py-8"
         >
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 rounded-full">
-            <span className="text-green-500">✨</span>
+            <Sparkles className="text-green-500" size={16} />
             <span className="font-medium">{t('allDisplayed')} {displayedItems.length} {t('wallpapers')}</span>
             <span className="text-blue-500">🎉</span>
           </div>

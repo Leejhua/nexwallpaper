@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { List, TrendingUp, Clock, Download, Heart, Star } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const SortControls = ({ onSortChange, currentSort = 'default' }) => {
@@ -6,12 +7,12 @@ const SortControls = ({ onSortChange, currentSort = 'default' }) => {
   const [activeSort, setActiveSort] = useState(currentSort);
 
   const sortOptions = [
-    { key: 'default', label: t('sortModes.default'), icon: '📋' },
-    { key: 'popularity', label: t('sortModes.popularity'), icon: '🔥' },
-    { key: 'recent', label: t('sortModes.recent'), icon: '🕒' },
-    { key: 'downloads', label: t('sortModes.downloads'), icon: '⬇️' },
-    { key: 'likes', label: t('sortModes.likes'), icon: '❤️' },
-    { key: 'likeRate', label: t('sortModes.likeRate'), icon: '💖' }
+    { key: 'default', label: t('sortModes.default'), icon: List },
+    { key: 'popularity', label: t('sortModes.popularity'), icon: TrendingUp },
+    { key: 'recent', label: t('sortModes.recent'), icon: Clock },
+    { key: 'downloads', label: t('sortModes.downloads'), icon: Download },
+    { key: 'likes', label: t('sortModes.likes'), icon: Heart },
+    { key: 'likeRate', label: t('sortModes.likeRate'), icon: Star }
   ];
 
   const handleSortChange = (sortKey) => {
@@ -38,7 +39,7 @@ const SortControls = ({ onSortChange, currentSort = 'default' }) => {
             }
           `}
         >
-          <span>{option.icon}</span>
+          <option.icon size={16} />
           <span>{option.label}</span>
         </button>
       ))}

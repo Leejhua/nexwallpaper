@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Download, Pause } from 'lucide-react';
+import { Play, Download, Pause, Video, Image } from 'lucide-react';
 import { getThumbnailUrl, getHighResUrl } from '../utils/imageUtils';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import PopularityBadge from './PopularityBadge';
@@ -277,7 +277,9 @@ const GalleryItem = ({ item, onPreview, index }) => {
             style={{ minHeight: '200px' }}
           >
             <div className="text-center text-gray-500">
-              <div className="text-4xl mb-2">{isVideo ? '🎬' : '🖼️'}</div>
+              <div className="text-gray-400 mb-2">
+                {isVideo ? <Video size={48} /> : <Image size={48} />}
+              </div>
               <div className="text-sm">{t('error')}</div>
             </div>
           </div>

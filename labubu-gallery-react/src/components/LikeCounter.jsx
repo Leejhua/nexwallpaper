@@ -1,4 +1,5 @@
 import React from 'react';
+import { Heart } from 'lucide-react';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 
 const LikeCounter = ({ 
@@ -36,7 +37,8 @@ const LikeCounter = ({
       case 'badge':
         return (
           <span className="flex items-center gap-1 text-xs">
-            ❤️ {likeCount}
+            <Heart size={12} className="text-red-500" />
+            {likeCount}
           </span>
         );
       

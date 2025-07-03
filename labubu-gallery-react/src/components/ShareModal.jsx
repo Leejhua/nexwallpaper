@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Copy, Check } from 'lucide-react';
+import { X, Share2, Copy, Check, Smartphone, Flame, Star, MessageCircle, Camera, Pin } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { generateShareMetadata, optimizeForPlatform } from '../utils/shareUtils';
 
@@ -230,7 +230,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     const universalOptions = [
       {
         name: t('shareOptions.more'),
-        icon: '📱',
+        icon: Smartphone,
         color: 'bg-purple-500 hover:bg-purple-600',
         action: nativeShare,
         description: t('shareOptions.more')
@@ -241,21 +241,21 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     const domesticOptions = [
       {
         name: '微博',
-        icon: '🔥',
+        icon: Flame,
         color: 'bg-red-500 hover:bg-red-600',
         action: shareToWeibo,
         description: t('shareOptions.weibo')
       },
       {
         name: 'QQ空间',
-        icon: '🌟',
+        icon: Star,
         color: 'bg-yellow-500 hover:bg-yellow-600',
         action: shareToQzone,
         description: t('shareOptions.qzone')
       },
       {
         name: '微信',
-        icon: '💚',
+        icon: MessageCircle,
         color: 'bg-green-500 hover:bg-green-600',
         action: shareToWechat,
         description: t('shareOptions.wechat')
@@ -280,14 +280,14 @@ const ShareModal = ({ isOpen, onClose, item }) => {
       },
       {
         name: 'Instagram',
-        icon: '📷',
+        icon: Camera,
         color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
         action: shareToInstagram,
         description: t('shareOptions.instagram')
       },
       {
         name: 'Pinterest',
-        icon: '📌',
+        icon: Pin,
         color: 'bg-red-600 hover:bg-red-700',
         action: shareToPinterest,
         description: t('shareOptions.pinterest')
@@ -428,7 +428,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
                     whileTap={{ scale: 0.98 }}
                     title={option.description}
                   >
-                    <span className="text-xl">{option.icon}</span>
+                    <option.icon size={20} className="text-white" />
                     <span className="font-medium text-xs text-center leading-tight">{option.name}</span>
                   </motion.button>
                 ))}
