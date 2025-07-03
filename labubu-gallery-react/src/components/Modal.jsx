@@ -222,13 +222,13 @@ const Modal = memo(({ isOpen, item, onClose }) => {
             className="relative max-w-6xl max-h-[95vh] w-full bg-white rounded-lg overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 关闭按钮 - 不遮住图片，图标居中 */}
+            {/* 关闭按钮 - 在详情页内部完整展示，不遮挡图片 */}
             <button
               onClick={onClose}
               className={`close-btn no-focus-outline absolute ${
                 isMobile 
-                  ? '-top-2 -right-2 z-50 w-8 h-8' 
-                  : '-top-3 -right-3 z-10 w-10 h-10'
+                  ? 'top-3 right-3 z-50 w-8 h-8' 
+                  : 'top-4 right-4 z-10 w-10 h-10'
               } text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-lg border border-gray-200 group flex items-center justify-center`}
               title={t('buttons.close')}
             >
@@ -242,8 +242,10 @@ const Modal = memo(({ isOpen, item, onClose }) => {
             </button>
             {/* Pixiv风格主要内容区域 - 移动端优化 */}
             <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} h-full max-h-[95vh]`}>
-              {/* 左侧图片区域 */}
-              <div className="flex-1 bg-gray-50 flex items-center justify-center p-6 relative">
+              {/* 左侧图片区域 - 为关闭按钮预留空间 */}
+              <div className={`flex-1 bg-gray-50 flex items-center justify-center relative ${
+                isMobile ? 'p-6 pt-12' : 'p-6 pt-16'
+              }`}>
                 {!imageError ? (
                   <>
                     {isVideo ? (
