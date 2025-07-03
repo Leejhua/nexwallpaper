@@ -6,7 +6,7 @@ import { galleryData } from '../data/galleryData';
  * 提供筛选、搜索等功能，优化加载体验，避免闪屏
  */
 export const useGallery = () => {
-  const [currentFilter, setCurrentFilter] = useState('all');
+  const [selectedFilters, setSelectedFilters] = useState(['all']); // 改为数组支持多选
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false); // 过渡状态
@@ -17,15 +17,17 @@ export const useGallery = () => {
   const filteredData = useMemo(() => {
     let filtered = galleryData;
 
-    // 按分类筛选
-    if (currentFilter !== 'all') {
-      if (currentFilter === 'live') {
-        // 动态壁纸筛选
-        filtered = filtered.filter(item => item.type === 'video');
-      } else {
-        // 其他分类筛选
-        filtered = filtered.filter(item => item.category === currentFilter);
-      }
+    // 按分类筛选 - 支持多选
+    if (!selectedFilters.includes('all') && selectedFilters.length > 0) {
+      filtered = filtered.filter(item => {
+        return selectedFilters.some(filter => {
+          if (filter === 'live') {
+            return item.type === 'video';
+          } else {
+            return item.category === filter;
+          }
+        });
+      });
     }
 
     // 按搜索词筛选
@@ -39,7 +41,7 @@ export const useGallery = () => {
     }
 
     return filtered;
-  }, [currentFilter, searchTerm]);
+  }, [selectedFilters, searchTerm]);
 
   // 初始化标记 - 避免首次加载时的双重刷新
   useEffect(() => {
@@ -48,7 +50,7 @@ export const useGallery = () => {
 
   // 筛选变化时的平滑过渡 - 避免闪屏
   useEffect(() => {
-    if (currentFilter !== 'all' || searchTerm.trim()) {
+    if (!selectedFilters.includes('all') || searchTerm.trim()) {
       setIsTransitioning(true);
       setLoading(true);
       
@@ -70,18 +72,35 @@ export const useGallery = () => {
       setLoading(false);
       setIsTransitioning(false);
     }
-  }, [currentFilter, searchTerm]);
+  }, [selectedFilters, searchTerm]);
 
-  // 切换筛选器 - 优化体验，避免首次加载双重刷新
+  // 切换筛选器 - 支持多选
   const handleFilterChange = (filter) => {
-    // 如果是相同筛选器，不做处理
-    if (filter === currentFilter) return;
-    
-    setCurrentFilter(filter);
+    setSelectedFilters(prevFilters => {
+      // 如果点击"全部"，清空其他选择
+      if (filter === 'all') {
+        return ['all'];
+      }
+      
+      // 如果当前包含"全部"，移除"全部"
+      let newFilters = prevFilters.filter(f => f !== 'all');
+      
+      // 切换选中状态
+      if (newFilters.includes(filter)) {
+        newFilters = newFilters.filter(f => f !== filter);
+        // 如果没有选择任何分类，回到"全部"
+        if (newFilters.length === 0) {
+          newFilters = ['all'];
+        }
+      } else {
+        newFilters = [...newFilters, filter];
+      }
+      
+      return newFilters;
+    });
     
     // 只有在已初始化且切换到"全部作品"时才刷新随机种子
-    // 避免首次加载时的双重刷新
-    if (filter === 'all' && isInitialized && currentFilter !== 'all') {
+    if (filter === 'all' && isInitialized && !selectedFilters.includes('all')) {
       setRandomSeed(Math.random() * 1000000);
     }
   };
@@ -98,10 +117,10 @@ export const useGallery = () => {
 
   // 重置所有筛选 - 避免不必要的刷新
   const resetFilters = () => {
-    setCurrentFilter('all');
+    setSelectedFilters(['all']);
     setSearchTerm('');
     // 只有在不是默认状态时才刷新随机种子
-    if (isInitialized && (currentFilter !== 'all' || searchTerm.trim())) {
+    if (isInitialized && (!selectedFilters.includes('all') || searchTerm.trim())) {
       setRandomSeed(Math.random() * 1000000);
     }
   };
@@ -115,7 +134,7 @@ export const useGallery = () => {
     // 状态
     loading,
     isTransitioning,
-    currentFilter,
+    selectedFilters,
     searchTerm,
     
     // 操作

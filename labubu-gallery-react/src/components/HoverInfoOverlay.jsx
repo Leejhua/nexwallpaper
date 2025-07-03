@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { Eye, Heart, Download } from 'lucide-react';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import LikeButton from './LikeButton';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const HoverInfoOverlay = ({ item, isVisible }) => {
+  const { t } = useLanguage();
   const { getStats } = useClickStatsContext();
   
   if (!isVisible) return null;
@@ -42,7 +44,7 @@ const HoverInfoOverlay = ({ item, isVisible }) => {
         {/* 标题区域 - 紧凑布局使用更小的间距和字体 */}
         <div className={compactLayout ? "mb-1" : "mb-3"}>
           <h3 className={`text-white font-medium ${compactLayout ? 'text-xs' : 'text-sm'} line-clamp-1 mb-1`}>
-            {item.title || '未命名壁纸'}
+            {item.title || t('untitledWallpaper')}
           </h3>
           {item.author && !compactLayout && (
             <p className="text-white/80 text-xs">

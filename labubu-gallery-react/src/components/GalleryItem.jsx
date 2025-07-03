@@ -5,11 +5,13 @@ import { getThumbnailUrl, getHighResUrl } from '../utils/imageUtils';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import PopularityBadge from './PopularityBadge';
 import HoverInfoOverlay from './HoverInfoOverlay';
+import { useLanguage } from '../contexts/LanguageContext';
 
 /**
  * 画廊项目组件 - 单个壁纸/视频卡片
  */
 const GalleryItem = ({ item, onPreview, index }) => {
+  const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -185,16 +187,9 @@ const GalleryItem = ({ item, onPreview, index }) => {
   };
 
   // 获取分类中文名
+  // 获取分类名称
   const getCategoryName = (category) => {
-    const names = {
-      fantasy: '奇幻',
-      desktop: '桌面',
-      mobile: '手机',
-      seasonal: '季节',
-      '4k': '4K',
-      live: '动态'
-    };
-    return names[category] || category;
+    return t(`categories.${category}`);
   };
 
   return (
@@ -250,7 +245,7 @@ const GalleryItem = ({ item, onPreview, index }) => {
                       className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
                     >
                       <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                      LIVE
+                      {t('live')}
                     </motion.div>
                   </div>
                 )}
@@ -260,7 +255,7 @@ const GalleryItem = ({ item, onPreview, index }) => {
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-gray-800 flex items-center gap-2">
                       <Play className="w-4 h-4" />
-                      悬停播放
+                      {t('hoverToPlay')}
                     </div>
                   </div>
                 )}
@@ -283,7 +278,7 @@ const GalleryItem = ({ item, onPreview, index }) => {
           >
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-2">{isVideo ? '🎬' : '🖼️'}</div>
-              <div className="text-sm">加载失败</div>
+              <div className="text-sm">{t('error')}</div>
             </div>
           </div>
         )}

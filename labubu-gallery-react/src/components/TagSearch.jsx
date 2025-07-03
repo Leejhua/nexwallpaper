@@ -29,15 +29,7 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
 
   // 标签分类
   const tagCategories = useMemo(() => {
-    const categories = {
-      '技术特征': ['4K超清', '高分辨率', 'PNG格式', 'JPEG格式', '透明支持', '无损', '细节丰富'],
-      '设备适配': ['电脑壁纸', '手机壁纸', '横屏', '竖屏', '宽屏比例', '移动设备'],
-      '自然环境': ['森林', '花园', '海滩', '星空', '天空', '海洋', '沙滩', '自然景观'],
-      '季节时间': ['春天', '春季', '冬天', '冬季', '夜晚', '日落', '黄昏', '季节主题'],
-      '情感氛围': ['可爱', '萌系', '治愈系', '浪漫', '温馨', '奇幻', '魔法', '神秘'],
-      '色彩风格': ['彩虹', '七彩', '色彩丰富', '红色调', '蓝色调', '绿色调', '暖光'],
-      '主题风格': ['圣诞节', '节日', '童话风格', '艺术性', '创意', '想象力']
-    };
+    const categories = t('tagCategories');
 
     const result = {};
     Object.entries(categories).forEach(([category, categoryTags]) => {
@@ -45,7 +37,7 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
     });
 
     return result;
-  }, [allTags]);
+  }, [allTags, t]);
 
   // 过滤标签（基于搜索词）
   const filteredTags = useMemo(() => {

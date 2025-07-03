@@ -7,11 +7,13 @@ import LikeCounter from './LikeCounter';
 import ErrorBoundary from './ErrorBoundary';
 import ShareModal from './ShareModal';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
+import { useLanguage } from '../contexts/LanguageContext';
 
 /**
  * 模态框组件 - 优化性能，防止卡死
  */
 const Modal = memo(({ isOpen, item, onClose }) => {
+  const { t, currentLanguage } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -172,18 +174,17 @@ const Modal = memo(({ isOpen, item, onClose }) => {
   const isVideo = item.type === 'video';
 
   // 获取分类中文名
+  // 获取分类名称
   const getCategoryName = (category) => {
-    const names = {
-      fantasy: '奇幻', desktop: '桌面', mobile: '手机',
-      seasonal: '季节', '4k': '4K', live: '动态'
-    };
-    return names[category] || category;
+    return t(`categories.${category}`);
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+          key="modal-backdrop"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -194,6 +195,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
         >
           {/* Pixiv风格模态框容器 */}
           <motion.div
+            key="modal-content"
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
@@ -214,8 +216,9 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         controls
                         muted
                         playsInline
-                        onLoadedData={() => {
+                        onLoadedData={(e) => {
                           setImageLoaded(true);
+                          getVideoDimensions(e.target);
                         }}
                         onError={() => {
                           setImageError(true);
@@ -226,8 +229,9 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
                         src={getHighResUrl(item.url)}
                         alt={item.title}
-                        onLoad={() => {
+                        onLoad={(e) => {
                           setImageLoaded(true);
+                          getImageDimensions(e.target);
                         }}
                         onError={() => {
                           setImageError(true);
@@ -239,7 +243,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                   <div className="w-full h-64 flex items-center justify-center bg-gray-100 rounded-lg">
                     <div className="text-center text-gray-500">
                       <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-500" />
-                      <div className="text-sm">加载失败</div>
+                      <div className="text-sm">{t('error')}</div>
                     </div>
                   </div>
                 )}
@@ -249,7 +253,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                     <div className="text-center">
                       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <div className="text-sm text-gray-600">加载中...</div>
+                      <div className="text-sm text-gray-600">{t('loading')}</div>
                     </div>
                   </div>
                 )}
@@ -263,7 +267,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                   <button
                     onClick={onClose}
                     className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors shadow-sm group"
-                    title="关闭 (ESC)"
+                    title={t('buttons.close')}
                   >
                     <X className="w-4 h-4" />
                     {/* 键盘快捷键提示 */}
@@ -278,11 +282,11 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                   
                   {/* Pixiv风格作品信息 */}
                   <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                    <span>{imageDimensions || item.resolution || '高清'}</span>
+                    <span>{imageDimensions || item.resolution || t('highQuality')}</span>
                     <span>•</span>
                     <span>{item.format?.toUpperCase() || 'JPG'}</span>
                     <span>•</span>
-                    <span>{isVideo ? '视频' : '图片'}</span>
+                    <span>{isVideo ? t('video') : t('image')}</span>
                   </div>
 
                   {/* Pixiv风格操作按钮 */}
@@ -297,12 +301,12 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                       {isDownloading ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-sm">保存中...</span>
+                          <span className="text-sm">{t('downloading')}</span>
                         </>
                       ) : (
                         <>
                           <Download className="w-4 h-4" />
-                          <span className="text-sm">保存</span>
+                          <span className="text-sm">{t('buttons.download')}</span>
                         </>
                       )}
                     </button>
@@ -326,7 +330,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
 
                 {/* 标签区域 - Pixiv风格 */}
                 <div className="p-6 border-b border-gray-100">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">标签</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">{t('tags')}</h3>
                   <div className="flex flex-wrap gap-2">
                     {/* 分类标签 */}
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors">
@@ -334,35 +338,49 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     </span>
                     
                     {/* 自定义标签 */}
-                    {item.tags && item.tags.slice(0, 6).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
+                    {item.tags && item.tags.slice(0, 6).filter(tag => tag && tag.trim()).map((tag, index) => {
+                      // 根据当前语言显示对应的标签文本
+                      let displayTag = tag;
+                      
+                      if (currentLanguage === 'zh') {
+                        // 中文环境：直接显示中文标签
+                        displayTag = tag;
+                      } else {
+                        // 英文或西班牙语环境：如果有翻译则显示翻译，否则显示原文
+                        const translation = t(`tagTranslations.${tag}`);
+                        displayTag = translation !== `tagTranslations.${tag}` ? translation : tag;
+                      }
+                      
+                      return (
+                        <span
+                          key={`tag-${tag}-${index}`}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                        >
+                          #{displayTag}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* 作品详情 - Pixiv风格 */}
                 <div className="p-6 flex-1">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">作品详情</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">{t('details')}</h3>
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex justify-between">
-                      <span>发布时间</span>
-                      <span>{new Date().toLocaleDateString('zh-CN')}</span>
+                      <span>{t('publishTime')}</span>
+                      <span>{new Date().toLocaleDateString(currentLanguage === 'zh' ? 'zh-CN' : currentLanguage === 'es' ? 'es-ES' : 'en-US')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>文件格式</span>
+                      <span>{t('fileFormat')}</span>
                       <span>{item.format?.toUpperCase() || 'JPG'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>分辨率</span>
-                      <span>{imageDimensions || item.resolution || '高分辨率'}</span>
+                      <span>{t('resolution')}</span>
+                      <span>{imageDimensions || item.resolution || t('highResolution')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>来源</span>
+                      <span>{t('source')}</span>
                       <span className="text-blue-600 hover:underline cursor-pointer">
                         {item.source === 'xyz' ? 'labubuwallpaper.xyz' : 'labubuwallpaper.com'}
                       </span>
@@ -386,7 +404,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         {getStats(item.id).actions?.download || 0}
                       </span>
                     </div>
-                    <span>ID: {item.id || Math.floor(Math.random() * 100000)}</span>
+                    <span>{t('id')}: {item.id || Math.floor(Math.random() * 100000)}</span>
                   </div>
                 </div>
               </div>
@@ -394,14 +412,15 @@ const Modal = memo(({ isOpen, item, onClose }) => {
           </motion.div>
         </motion.div>
       )}
-
-      {/* 分享模态框 */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        item={item}
-      />
     </AnimatePresence>
+    
+    {/* 分享模态框 */}
+    <ShareModal
+      isOpen={isShareModalOpen}
+      onClose={() => setIsShareModalOpen(false)}
+      item={item}
+    />
+    </>
   );
 });
 

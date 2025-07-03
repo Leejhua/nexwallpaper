@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LikeButton = ({ 
   wallpaperId, 
@@ -9,6 +10,7 @@ const LikeButton = ({
   showCount = true,
   className = '' 
 }) => {
+  const { t } = useLanguage();
   const [isAnimating, setIsAnimating] = useState(false);
   
   // 安全获取Context
@@ -20,7 +22,7 @@ const LikeButton = ({
     getLikeCount = context.getLikeCount;
   } catch (error) {
     console.error('LikeButton Context Error:', error);
-    return <div>Error loading like button</div>;
+    return <div>{t('errorLoadingLikeButton')}</div>;
   }
   
   // 安全获取状态

@@ -8,6 +8,7 @@ import SortControls from './components/SortControls';
 import { useGallery } from './hooks/useGallery';
 import { useModal } from './hooks/useModal';
 import { ClickStatsProvider } from './contexts/ClickStatsProvider';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { stats } from './data/galleryData.js'; // 添加.js扩展名
 import './styles/lazy-loading.css';
 
@@ -25,7 +26,7 @@ function App() {
     filteredItems,
     loading,
     isTransitioning,
-    currentFilter,
+    selectedFilters,
     searchTerm,
     handleFilterChange,
     handleSearch,
@@ -79,13 +80,14 @@ function App() {
   }, [items, openModal]); // 依赖items和openModal
 
   return (
-    <ClickStatsProvider>
-      <div className="min-h-screen custom-scrollbar">
+    <LanguageProvider>
+      <ClickStatsProvider>
+        <div className="min-h-screen custom-scrollbar">
       {/* Pixiv风格侧边栏 */}
       <Sidebar
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
-        currentFilter={currentFilter}
+        currentFilter={selectedFilters}
         onFilterChange={handleFilterChange}
         searchTerm={searchTerm}
         onSearchChange={handleSearch}
@@ -106,11 +108,13 @@ function App() {
             <div className="pixiv-header" style={{ 
               marginBottom: '24px'
             }}>
-              <Header
-                totalItems={stats.total}
-                filteredItems={filteredItems}
-                currentFilter={currentFilter}
-              />
+              <div className="flex justify-between items-center mb-4">
+                <Header
+                  totalItems={stats.total}
+                  filteredItems={filteredItems}
+                  currentFilter={selectedFilters}
+                />
+              </div>
               
               {/* 排序控制 */}
               <SortControls 
@@ -137,7 +141,7 @@ function App() {
                 items={items}
                 loading={loading}
                 onPreview={openModal}
-                currentFilter={currentFilter}
+                currentFilter={selectedFilters}
                 filteredItems={filteredItems}
                 sortMode={sortMode}
                 randomSeed={randomSeed}
@@ -304,7 +308,8 @@ function App() {
         }
       `}</style>
       </div>
-    </ClickStatsProvider>
+      </ClickStatsProvider>
+    </LanguageProvider>
   );
 }
 

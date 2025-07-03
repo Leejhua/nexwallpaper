@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GalleryItem from './GalleryItem';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
+import { useLanguage } from '../contexts/LanguageContext';
 
 /**
  * 优化版瀑布流画廊组件 - 懒加载首屏40条，避免闪屏白屏
@@ -15,6 +16,7 @@ const Gallery = ({
   sortMode = 'default',
   randomSeed = Math.random() * 1000000
 }) => {
+  const { t } = useLanguage();
   const [displayedItems, setDisplayedItems] = useState([]);
   const [loadedCount, setLoadedCount] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -347,7 +349,7 @@ const Gallery = ({
           <div className="text-gray-600">
             <span className="inline-flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              正在加载精美壁纸...
+              {t('loading')}
             </span>
           </div>
           <div className="text-sm text-gray-500">
@@ -373,7 +375,7 @@ const Gallery = ({
       >
         <div className="text-6xl mb-4">🔍</div>
         <h3 className="text-xl font-semibold text-gray-800 mb-2">
-          没有找到相关壁纸
+          {t('noResults')}
         </h3>
         <p className="text-gray-600 mb-6">
           尝试更换筛选条件或搜索关键词
@@ -400,22 +402,21 @@ const Gallery = ({
       >
         <div className="text-gray-600">
           显示 <span className="font-semibold text-blue-600">{displayedItems.length}</span> / 
-          <span className="font-semibold text-purple-600">{filteredItems}</span> 个结果
-          {currentFilter !== 'all' && (
-            <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-              {currentFilter === 'fantasy' && '奇幻世界'}
-              {currentFilter === 'desktop' && '桌面壁纸'}
-              {currentFilter === 'mobile' && '手机壁纸'}
-              {currentFilter === 'seasonal' && '季节主题'}
-              {currentFilter === '4k' && '4K超清'}
-              {currentFilter === 'live' && '动态壁纸'}
-            </span>
+          <span className="font-semibold text-purple-600">{filteredItems}</span> {t('results')}
+          {!currentFilter.includes('all') && currentFilter.length > 0 && (
+            <div className="flex flex-wrap gap-2 ml-2">
+              {currentFilter.map(filter => (
+                <span key={filter} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                  {t(`categories.${filter}`)}
+                </span>
+              ))}
+            </div>
           )}
         </div>
         
         {/* 懒加载状态指示 */}
         <div className="text-sm text-gray-500">
-          {isLoadingMore ? '⏳ 加载中...' : hasMore ? '📜 滚动加载更多' : '✅ 已加载全部'}
+          {isLoadingMore ? `⏳ ${t('loading')}` : hasMore ? `📜 ${t('loadMore')}` : `✅ ${t('allLoaded')}`}
           {!isInitialLoading && (
             <span className="ml-2 text-xs">
               (首屏{INITIAL_LOAD_SIZE}张，每次加载{LOAD_SIZE}张)
@@ -441,7 +442,7 @@ const Gallery = ({
                 const globalIndex = displayedItems.findIndex(displayedItem => displayedItem.id === item.id);
                 return (
                   <motion.div
-                    key={`${item.id}-${currentFilter}`} // 添加currentFilter确保重新渲染
+                    key={`${item.id}-${currentFilter.join('-')}`} // 添加currentFilter确保重新渲染
                     className="masonry-item"
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -518,7 +519,7 @@ const Gallery = ({
         >
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 rounded-full">
             <span className="text-green-500">✨</span>
-            <span className="font-medium">已展示全部 {displayedItems.length} 个精美壁纸</span>
+            <span className="font-medium">{t('allDisplayed')} {displayedItems.length} {t('wallpapers')}</span>
             <span className="text-blue-500">🎉</span>
           </div>
         </motion.div>

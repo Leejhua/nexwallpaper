@@ -1,29 +1,22 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Copy, Check } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { generateShareMetadata, optimizeForPlatform } from '../utils/shareUtils';
 
 /**
  * 分享模态框组件 - 支持多平台分享
  */
 const ShareModal = ({ isOpen, onClose, item }) => {
+  const { t, currentLanguage } = useLanguage();
   const [copied, setCopied] = useState(false);
+  const [showAllRegions, setShowAllRegions] = useState(false); // 新增状态
 
   // 构建分享数据
   const getShareData = useCallback(() => {
     if (!item) return null;
-
-    const shareUrl = `${window.location.origin}?wallpaper=${item.id}`;
-    const shareTitle = `${item.title} - Labubu壁纸画廊`;
-    const shareText = `发现了一张超美的Labubu壁纸：${item.title}`;
-    const hashtags = ['Labubu', '壁纸', '可爱', item.category];
-
-    return {
-      url: shareUrl,
-      title: shareTitle,
-      text: shareText,
-      hashtags: hashtags.join(',')
-    };
-  }, [item]);
+    return generateShareMetadata(item, t, currentLanguage);
+  }, [item, t, currentLanguage]);
 
   // 微博分享
   const shareToWeibo = useCallback(() => {
@@ -66,9 +59,102 @@ const ShareModal = ({ isOpen, onClose, item }) => {
       // 不关闭模态框，让用户知道链接已复制
     } catch (error) {
       // 降级处理
-      prompt('请复制以下链接分享到微信：', shareData.url);
+      prompt(t('copyLinkToWechat'), shareData.url);
       onClose();
     }
+  }, [getShareData, onClose]);
+
+  // Facebook分享
+  const shareToFacebook = useCallback(() => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    const facebookUrl = new URL('https://www.facebook.com/sharer/sharer.php');
+    facebookUrl.searchParams.set('u', shareData.url);
+    facebookUrl.searchParams.set('quote', shareData.text);
+    
+    window.open(facebookUrl.toString(), '_blank', 'width=600,height=400');
+    onClose();
+  }, [getShareData, onClose]);
+
+  // Pinterest分享
+  const shareToPinterest = useCallback(() => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    const pinterestUrl = new URL('https://pinterest.com/pin/create/button/');
+    pinterestUrl.searchParams.set('url', shareData.url);
+    pinterestUrl.searchParams.set('media', item.url);
+    pinterestUrl.searchParams.set('description', shareData.text);
+    
+    window.open(pinterestUrl.toString(), '_blank', 'width=600,height=400');
+    onClose();
+  }, [getShareData, item, onClose]);
+
+  // Reddit分享
+  const shareToReddit = useCallback(() => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    const redditUrl = new URL('https://reddit.com/submit');
+    redditUrl.searchParams.set('url', shareData.url);
+    redditUrl.searchParams.set('title', shareData.title);
+    
+    window.open(redditUrl.toString(), '_blank', 'width=600,height=400');
+    onClose();
+  }, [getShareData, onClose]);
+
+  // LinkedIn分享
+  const shareToLinkedIn = useCallback(() => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    const linkedinUrl = new URL('https://www.linkedin.com/sharing/share-offsite/');
+    linkedinUrl.searchParams.set('url', shareData.url);
+    
+    window.open(linkedinUrl.toString(), '_blank', 'width=600,height=400');
+    onClose();
+  }, [getShareData, onClose]);
+
+  // WhatsApp分享
+  const shareToWhatsApp = useCallback(() => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    const whatsappUrl = new URL('https://wa.me/');
+    whatsappUrl.searchParams.set('text', `${shareData.text} ${shareData.url}`);
+    
+    window.open(whatsappUrl.toString(), '_blank');
+    onClose();
+  }, [getShareData, onClose]);
+
+  // Instagram分享 (复制链接，因为Instagram不支持直接URL分享)
+  const shareToInstagram = useCallback(async () => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    try {
+      await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+      // 提示用户已复制，可以粘贴到Instagram
+      alert(t('instagramShareTip'));
+    } catch (error) {
+      prompt(t('copyLinkForInstagram'), `${shareData.text} ${shareData.url}`);
+    }
+  }, [getShareData, t]);
+
+  // Telegram分享
+  const shareToTelegram = useCallback(() => {
+    const shareData = getShareData();
+    if (!shareData) return;
+
+    const telegramUrl = new URL('https://t.me/share/url');
+    telegramUrl.searchParams.set('url', shareData.url);
+    telegramUrl.searchParams.set('text', shareData.text);
+    
+    window.open(telegramUrl.toString(), '_blank');
+    onClose();
   }, [getShareData, onClose]);
 
   // Twitter分享
@@ -76,10 +162,10 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     const shareData = getShareData();
     if (!shareData) return;
 
+    const optimized = optimizeForPlatform(shareData, 'twitter');
     const twitterUrl = new URL('https://twitter.com/intent/tweet');
-    twitterUrl.searchParams.set('text', shareData.text);
-    twitterUrl.searchParams.set('url', shareData.url);
-    twitterUrl.searchParams.set('hashtags', shareData.hashtags);
+    twitterUrl.searchParams.set('text', optimized.text);
+    twitterUrl.searchParams.set('hashtags', optimized.hashtags);
     
     window.open(twitterUrl.toString(), '_blank', 'width=600,height=400');
     onClose();
@@ -95,7 +181,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      prompt('请复制以下链接：', shareData.url);
+      prompt(t('copyLink'), shareData.url);
     }
   }, [getShareData]);
 
@@ -125,43 +211,122 @@ const ShareModal = ({ isOpen, onClose, item }) => {
 
   if (!item) return null;
 
-  const shareOptions = [
-    {
-      name: '微博',
-      icon: '🔥',
-      color: 'bg-red-500 hover:bg-red-600',
-      action: shareToWeibo,
-      description: '分享到新浪微博'
-    },
-    {
-      name: 'QQ空间',
-      icon: '🌟',
-      color: 'bg-yellow-500 hover:bg-yellow-600',
-      action: shareToQzone,
-      description: '分享到QQ空间'
-    },
-    {
-      name: '微信',
-      icon: '💬',
-      color: 'bg-green-500 hover:bg-green-600',
-      action: shareToWechat,
-      description: '复制链接分享到微信'
-    },
-    {
-      name: 'Twitter',
-      icon: '🐦',
-      color: 'bg-blue-500 hover:bg-blue-600',
-      action: shareToTwitter,
-      description: '分享到Twitter'
-    },
-    {
-      name: '更多',
-      icon: '📱',
-      color: 'bg-purple-500 hover:bg-purple-600',
-      action: nativeShare,
-      description: '使用系统分享'
+  // 根据当前语言动态生成分享选项
+  const getShareOptions = useCallback(() => {
+    // 通用选项（所有语言都显示）
+    const universalOptions = [
+      {
+        name: t('shareOptions.more'),
+        icon: '📱',
+        color: 'bg-purple-500 hover:bg-purple-600',
+        action: nativeShare,
+        description: t('shareOptions.more')
+      }
+    ];
+
+    // 国内社媒选项
+    const domesticOptions = [
+      {
+        name: '微博',
+        icon: '🔥',
+        color: 'bg-red-500 hover:bg-red-600',
+        action: shareToWeibo,
+        description: t('shareOptions.weibo')
+      },
+      {
+        name: 'QQ空间',
+        icon: '🌟',
+        color: 'bg-yellow-500 hover:bg-yellow-600',
+        action: shareToQzone,
+        description: t('shareOptions.qzone')
+      },
+      {
+        name: '微信',
+        icon: '💚',
+        color: 'bg-green-500 hover:bg-green-600',
+        action: shareToWechat,
+        description: t('shareOptions.wechat')
+      }
+    ];
+
+    // 国际社媒选项
+    const internationalOptions = [
+      {
+        name: 'Facebook',
+        icon: '📘',
+        color: 'bg-blue-600 hover:bg-blue-700',
+        action: shareToFacebook,
+        description: t('shareOptions.facebook')
+      },
+      {
+        name: 'Twitter/X',
+        icon: '🐦',
+        color: 'bg-black hover:bg-gray-800',
+        action: shareToTwitter,
+        description: t('shareOptions.twitter')
+      },
+      {
+        name: 'Instagram',
+        icon: '📷',
+        color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
+        action: shareToInstagram,
+        description: t('shareOptions.instagram')
+      },
+      {
+        name: 'Pinterest',
+        icon: '📌',
+        color: 'bg-red-600 hover:bg-red-700',
+        action: shareToPinterest,
+        description: t('shareOptions.pinterest')
+      },
+      {
+        name: 'Reddit',
+        icon: '🤖',
+        color: 'bg-orange-600 hover:bg-orange-700',
+        action: shareToReddit,
+        description: t('shareOptions.reddit')
+      },
+      {
+        name: 'LinkedIn',
+        icon: '💼',
+        color: 'bg-blue-700 hover:bg-blue-800',
+        action: shareToLinkedIn,
+        description: t('shareOptions.linkedin')
+      },
+      {
+        name: 'WhatsApp',
+        icon: '💬',
+        color: 'bg-green-600 hover:bg-green-700',
+        action: shareToWhatsApp,
+        description: t('shareOptions.whatsapp')
+      },
+      {
+        name: 'Telegram',
+        icon: '✈️',
+        color: 'bg-blue-500 hover:bg-blue-600',
+        action: shareToTelegram,
+        description: t('shareOptions.telegram')
+      }
+    ];
+
+    // 如果显示所有地区，返回所有选项
+    if (showAllRegions) {
+      return [
+        ...domesticOptions,
+        ...internationalOptions,
+        ...universalOptions
+      ];
     }
-  ];
+
+    // 根据语言返回对应地区的选项
+    if (currentLanguage === 'zh') {
+      return [...domesticOptions, ...universalOptions];
+    }
+
+    return [...internationalOptions, ...universalOptions];
+  }, [currentLanguage, showAllRegions, t, shareToWeibo, shareToQzone, shareToWechat, shareToFacebook, shareToTwitter, shareToInstagram, shareToPinterest, shareToReddit, shareToLinkedIn, shareToWhatsApp, shareToTelegram, nativeShare]);
+
+  const shareOptions = getShareOptions();
 
   return (
     <AnimatePresence>
@@ -213,17 +378,45 @@ const ShareModal = ({ isOpen, onClose, item }) => {
 
             {/* 分享选项 */}
             <div className="p-6">
-              <div className="grid grid-cols-2 gap-3">
+              {/* 地区提示和切换按钮 */}
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm text-gray-500">
+                  {showAllRegions 
+                    ? '🌐 ' + t('shareRegion.all')
+                    : currentLanguage === 'zh' 
+                      ? '🇨🇳 ' + t('shareRegion.domestic')
+                      : '🌍 ' + t('shareRegion.international')
+                  }
+                </p>
+                <button
+                  onClick={() => setShowAllRegions(!showAllRegions)}
+                  className="text-xs text-blue-500 hover:text-blue-600 transition-colors"
+                >
+                  {showAllRegions ? t('shareRegion.showRecommended') : t('shareRegion.showAll')}
+                </button>
+              </div>
+              
+              {/* 动态网格布局 */}
+              <div className={`grid gap-3 ${
+                shareOptions.length <= 4 
+                  ? 'grid-cols-2 sm:grid-cols-4' 
+                  : shareOptions.length <= 6
+                  ? 'grid-cols-3 sm:grid-cols-3'
+                  : shareOptions.length <= 8
+                  ? 'grid-cols-4 sm:grid-cols-4'
+                  : 'grid-cols-3 sm:grid-cols-4'
+              }`}>
                 {shareOptions.map((option) => (
                   <motion.button
                     key={option.name}
                     onClick={option.action}
-                    className={`${option.color} text-white p-4 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg`}
+                    className={`${option.color} text-white p-3 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    title={option.description}
                   >
-                    <span className="text-2xl">{option.icon}</span>
-                    <span className="font-medium text-sm">{option.name}</span>
+                    <span className="text-xl">{option.icon}</span>
+                    <span className="font-medium text-xs text-center leading-tight">{option.name}</span>
                   </motion.button>
                 ))}
               </div>

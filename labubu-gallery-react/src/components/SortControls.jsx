@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const SortControls = ({ onSortChange, currentSort = 'default' }) => {
+  const { t } = useLanguage();
   const [activeSort, setActiveSort] = useState(currentSort);
 
   const sortOptions = [
-    { key: 'default', label: '默认', icon: '📋' },
-    { key: 'popularity', label: '热度', icon: '🔥' },
-    { key: 'recent', label: '最新点击', icon: '🕒' },
-    { key: 'downloads', label: '下载量', icon: '⬇️' },
-    { key: 'likes', label: '最受喜欢', icon: '❤️' },
-    { key: 'likeRate', label: '喜欢率', icon: '💖' }
+    { key: 'default', label: t('sortModes.default'), icon: '📋' },
+    { key: 'popularity', label: t('sortModes.popularity'), icon: '🔥' },
+    { key: 'recent', label: t('sortModes.recent'), icon: '🕒' },
+    { key: 'downloads', label: t('sortModes.downloads'), icon: '⬇️' },
+    { key: 'likes', label: t('sortModes.likes'), icon: '❤️' },
+    { key: 'likeRate', label: t('sortModes.likeRate'), icon: '💖' }
   ];
 
   const handleSortChange = (sortKey) => {
@@ -20,7 +22,7 @@ const SortControls = ({ onSortChange, currentSort = 'default' }) => {
   return (
     <div className="flex flex-wrap gap-2 mb-6">
       <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center mr-2">
-        排序方式:
+        {t('sortBy')}:
       </span>
       {sortOptions.map((option) => (
         <button

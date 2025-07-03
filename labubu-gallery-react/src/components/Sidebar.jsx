@@ -2,6 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Menu, Filter, Search, RotateCcw } from 'lucide-react';
 import { categories } from '../data/galleryData';
+import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 
 /**
  * 侧边栏组件 - 筛选和搜索控制
@@ -18,6 +20,8 @@ const Sidebar = ({
   filteredItems,
   totalItems
 }) => {
+  const { t } = useLanguage();
+  
   return (
     <>
       {/* Pixiv风格侧边栏切换按钮 */}
@@ -74,7 +78,7 @@ const Sidebar = ({
               }}
             >
               {/* 顶部区域 */}
-              <div style={{ padding: '24px 24px 0 24px', flexShrink: 0 }}>
+              <div style={{ padding: '24px', flexShrink: 0 }}>
                 {/* Pixiv风格标题 */}
                 <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                   <h2 
@@ -92,7 +96,7 @@ const Sidebar = ({
                     🐰 Labubu Gallery
                   </h2>
                   <p style={{ fontSize: '14px', color: '#666666' }}>
-                    {filteredItems} / {totalItems} 作品
+                    {filteredItems} / {totalItems} {t('stats.items')}
                   </p>
                 </div>
 
@@ -106,13 +110,13 @@ const Sidebar = ({
                     marginBottom: '12px'
                   }}>
                     <Search className="w-4 h-4" />
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>搜索</span>
+                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{t('search')}</span>
                   </div>
                   
                   <div style={{ position: 'relative' }}>
                     <input
                       type="text"
-                      placeholder="搜索标题、标签..."
+                      placeholder={t('searchPlaceholder')}
                       value={searchTerm}
                       onChange={(e) => onSearchChange(e.target.value)}
                       className="pixiv-input"
@@ -146,57 +150,69 @@ const Sidebar = ({
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* 中间区域 - 分类列表居中 */}
-              <div style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center',
-                padding: '0 24px'
-              }}>
-                {/* 分类筛选 */}
+                {/* 语言选择器 */}
+                <div style={{ marginBottom: '24px' }}>
+                  <div className="flex items-center gap-2 text-gray-700 mb-2">
+                    <span className="text-lg">🌐</span>
+                    <span className="font-medium text-sm">{t('language')}</span>
+                  </div>
+                  <LanguageSelector />
+                </div>
+
+                {/* 分类筛选 - 多选 */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-gray-700">
                     <Filter className="w-4 h-4" />
-                    <span className="font-medium">分类筛选</span>
+                    <span className="font-medium">{t('categoryFilter')}</span>
+                    <span className="text-xs text-gray-500">({t('multiSelect')})</span>
                   </div>
                   
                   <div className="space-y-2">
-                    {categories.map((category) => (
-                      <motion.button
-                        key={category.key}
-                        onClick={() => onFilterChange(category.key)}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
-                          currentFilter === category.key
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                            : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg">{category.icon}</span>
-                          <span className="font-medium">{category.label}</span>
-                        </div>
-                        <span className={`text-sm px-2 py-1 rounded-full ${
-                          currentFilter === category.key
-                            ? 'bg-white/20 text-white'
-                            : 'bg-gray-200 text-gray-600'
-                        }`}>
-                          {category.count}
-                        </span>
-                      </motion.button>
-                    ))}
+                    {categories.map((category) => {
+                      const isSelected = currentFilter.includes(category.key);
+                      const isAllSelected = currentFilter.includes('all');
+                      
+                      return (
+                        <motion.button
+                          key={category.key}
+                          onClick={() => onFilterChange(category.key)}
+                          className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                            isSelected || (isAllSelected && category.key === 'all')
+                              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                              : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                          }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-lg">{category.icon}</span>
+                            <span className="font-medium">{t(`categories.${category.key}`)}</span>
+                          </div>
+                          <span className={`text-sm px-2 py-1 rounded-full ${
+                            isSelected || (isAllSelected && category.key === 'all')
+                              ? 'bg-white/20 text-white'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}>
+                            {category.count}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
+              </div>
+
+              {/* 中间区域 - 空白区域 */}
+              <div style={{ 
+                flex: 1
+              }}>
               </div>
 
               {/* 底部区域 */}
               <div style={{ padding: '0 24px 24px 24px', flexShrink: 0 }}>
                 {/* 重置按钮 */}
-                {(currentFilter !== 'all' || searchTerm) && (
+                {(!currentFilter.includes('all') || searchTerm) && (
                   <motion.button
                     onClick={onResetFilters}
                     className="w-full flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
@@ -204,25 +220,14 @@ const Sidebar = ({
                     whileTap={{ scale: 0.98 }}
                   >
                     <RotateCcw className="w-4 h-4" />
-                    <span className="font-medium">重置筛选</span>
+                    <span className="font-medium">{t('buttons.reset')}</span>
                   </motion.button>
                 )}
 
-                {/* 懒加载说明 */}
-                <div className="bg-blue-50 p-4 rounded-xl">
-                  <h4 className="font-medium text-blue-800 mb-2">💡 浏览提示</h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
-                    <li>• 向下滚动自动加载更多</li>
-                    <li>• 瀑布流布局优化展示</li>
-                    <li>• 视频悬停自动播放</li>
-                    <li>• 点击卡片查看详情</li>
-                  </ul>
-                </div>
-
                 {/* 版本信息 */}
                 <div className="text-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-                  <p>React版 v2.0</p>
-                  <p>懒加载 + 瀑布流</p>
+                  <p>{t('version')}</p>
+                  <p>{t('features')}</p>
                 </div>
               </div>
             </motion.div>
