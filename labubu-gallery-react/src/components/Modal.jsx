@@ -266,7 +266,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                   {/* 关闭按钮 - 移到标题区域内 */}
                   <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors shadow-sm group"
+                    className="close-btn no-focus-outline absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors shadow-sm group"
                     title={t('buttons.close')}
                   >
                     <X className="w-4 h-4" />
@@ -294,7 +294,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     <button
                       onClick={() => handleDownload(getHighResUrl(item.url), item.title)}
                       disabled={isDownloading}
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${
+                      className={`download-btn no-focus-outline flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${
                         isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
                       }`}
                     >
@@ -321,7 +321,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
 
                     <button
                       onClick={handleShare}
-                      className="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      className="share-btn no-focus-outline px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>

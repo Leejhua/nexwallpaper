@@ -29,6 +29,7 @@ const SortControls = ({ onSortChange, currentSort = 'default' }) => {
           key={option.key}
           onClick={() => handleSortChange(option.key)}
           className={`
+            sort-control-btn no-focus-outline
             flex items-center gap-1 px-3 py-1.5 rounded-full text-sm
             transition-all duration-200 border
             ${activeSort === option.key

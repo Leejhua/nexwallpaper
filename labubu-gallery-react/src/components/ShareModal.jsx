@@ -353,7 +353,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="close-btn no-focus-outline p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
@@ -390,7 +390,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
                 </p>
                 <button
                   onClick={() => setShowAllRegions(!showAllRegions)}
-                  className="text-xs text-blue-500 hover:text-blue-600 transition-colors"
+                  className="region-toggle-btn no-focus-outline text-xs text-blue-500 hover:text-blue-600 transition-colors"
                 >
                   {showAllRegions ? t('shareRegion.showRecommended') : t('shareRegion.showAll')}
                 </button>
@@ -410,7 +410,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
                   <motion.button
                     key={option.name}
                     onClick={option.action}
-                    className={`${option.color} text-white p-3 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg`}
+                    className={`share-option-btn no-focus-outline ${option.color} text-white p-3 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     title={option.description}
@@ -431,7 +431,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
                   </div>
                   <motion.button
                     onClick={copyLink}
-                    className={`px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${
+                    className={`copy-link-btn no-focus-outline px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${
                       copied
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

@@ -105,7 +105,7 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
           placeholder="搜索标签..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg no-focus-outline transition-all duration-200"
         />
       </div>
 
@@ -116,7 +116,7 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
             <span className="text-sm font-medium text-gray-700">已选标签:</span>
             <button
               onClick={clearAllTags}
-              className="text-xs text-red-500 hover:text-red-700"
+              className="clear-tags-btn no-focus-outline text-xs text-red-500 hover:text-red-700"
             >
               清除全部
             </button>

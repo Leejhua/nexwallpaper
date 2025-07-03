@@ -63,6 +63,7 @@ const LikeButton = ({
     <motion.button
       onClick={handleLikeClick}
       className={`
+        like-btn no-focus-outline
         flex items-center gap-2 px-3 py-2 rounded-md
         transition-all duration-200 border
         ${isLikedState 

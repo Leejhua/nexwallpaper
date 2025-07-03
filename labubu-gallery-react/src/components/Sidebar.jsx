@@ -27,7 +27,7 @@ const Sidebar = ({
       {/* Pixiv风格侧边栏切换按钮 */}
       <motion.button
         onClick={onToggle}
-        className={`fixed top-6 z-50 pixiv-btn-icon transition-all duration-300 focus:outline-none focus:ring-0 ${
+        className={`fixed top-6 z-50 pixiv-btn-icon transition-all duration-300 no-focus-outline ${
           isOpen ? 'left-[260px]' : 'left-6'
         }`}
         whileHover={{ scale: 1.05 }}
@@ -134,6 +134,7 @@ const Sidebar = ({
                     {searchTerm && (
                       <button
                         onClick={onClearSearch}
+                        className="search-clear-btn no-focus-outline"
                         style={{
                           position: 'absolute',
                           right: '8px',
@@ -177,7 +178,7 @@ const Sidebar = ({
                         <motion.button
                           key={category.key}
                           onClick={() => onFilterChange(category.key)}
-                          className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                          className={`category-filter-btn no-focus-outline w-full flex items-center justify-between p-3 rounded-xl transition-all ${
                             isSelected || (isAllSelected && category.key === 'all')
                               ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                               : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
@@ -215,7 +216,7 @@ const Sidebar = ({
                 {(!currentFilter.includes('all') || searchTerm) && (
                   <motion.button
                     onClick={onResetFilters}
-                    className="w-full flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
+                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >

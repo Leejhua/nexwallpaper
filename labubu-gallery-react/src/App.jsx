@@ -11,6 +11,7 @@ import { ClickStatsProvider } from './contexts/ClickStatsProvider';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { stats } from './data/galleryData.js'; // 添加.js扩展名
 import './styles/lazy-loading.css';
+import './styles/button-focus-fix.css';
 
 /**
  * 主应用组件 - 优化懒加载版本，避免闪屏白屏

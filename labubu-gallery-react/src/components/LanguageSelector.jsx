@@ -73,7 +73,7 @@ const LanguageSelector = () => {
             setIsOpen(true);
           }
         }}
-        className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-200"
+        className="language-selector-btn no-focus-outline w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-all duration-200"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         aria-label={t('selectLanguage')}
@@ -116,7 +116,7 @@ const LanguageSelector = () => {
                 key={code}
                 onClick={() => handleLanguageSelect(code)}
                 onKeyDown={(e) => handleKeyDown(e, code)}
-                className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
+                className={`language-option-btn no-focus-outline w-full flex items-center gap-3 px-3 py-2 text-left transition-colors duration-200 ${
                   currentLanguage === code 
                     ? 'bg-blue-100 text-blue-800 font-medium border-l-4 border-blue-500' 
                     : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
