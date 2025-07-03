@@ -37,7 +37,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    const qzoneUrl = new URL('https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey');
+    const qzoneUrl = new URL('https://connect.qq.com/widget/shareqq/index.html');
     qzoneUrl.searchParams.set('url', shareData.url);
     qzoneUrl.searchParams.set('title', shareData.title);
     qzoneUrl.searchParams.set('summary', shareData.text);
@@ -157,17 +157,30 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     onClose();
   }, [getShareData, onClose]);
 
-  // Twitter分享
+  // Twitter/X分享 - 使用通用分享方式
   const shareToTwitter = useCallback(() => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    const optimized = optimizeForPlatform(shareData, 'twitter');
-    const twitterUrl = new URL('https://twitter.com/intent/tweet');
-    twitterUrl.searchParams.set('text', optimized.text);
-    twitterUrl.searchParams.set('hashtags', optimized.hashtags);
+    // 尝试使用Web Share API，如果不支持则回退到URL方式
+    if (navigator.share) {
+      navigator.share({
+        title: shareData.title,
+        text: shareData.text,
+        url: shareData.url
+      }).catch(err => {
+        console.log('Web Share API failed, falling back to URL method');
+        // 回退到URL方式
+        const text = encodeURIComponent(`${shareData.text} ${shareData.url}`);
+        window.open(`https://x.com/intent/tweet?text=${text}`, '_blank', 'width=600,height=400');
+      });
+    } else {
+      // 直接使用URL方式
+      const optimized = optimizeForPlatform(shareData, 'twitter');
+      const text = encodeURIComponent(`${optimized.text} ${shareData.url}`);
+      window.open(`https://x.com/intent/tweet?text=${text}&hashtags=${optimized.hashtags}`, '_blank', 'width=600,height=400');
+    }
     
-    window.open(twitterUrl.toString(), '_blank', 'width=600,height=400');
     onClose();
   }, [getShareData, onClose]);
 
