@@ -406,12 +406,6 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                       <span>{t('resolution')}</span>
                       <span>{imageDimensions || item.resolution || t('highResolution')}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>{t('source')}</span>
-                      <span className="text-blue-600 hover:underline cursor-pointer">
-                        {item.source === 'xyz' ? 'labubuwallpaper.xyz' : 'labubuwallpaper.com'}
-                      </span>
-                    </div>
                   </div>
                 </div>
 

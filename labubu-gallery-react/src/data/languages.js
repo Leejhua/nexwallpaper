@@ -61,7 +61,6 @@ export const languages = {
       publishTime: '发布时间',
       fileFormat: '文件格式',
       resolution: '分辨率',
-      source: '来源',
       search: '搜索',
       tagCategories: {
         '技术特征': ['4K超清', '高分辨率', 'PNG格式', 'JPEG格式', '透明支持', '无损', '细节丰富'],
@@ -297,7 +296,6 @@ export const languages = {
       publishTime: 'Publish Time',
       fileFormat: 'File Format',
       resolution: 'Resolution',
-      source: 'Source',
       search: 'Search',
       tagCategories: {
         'Technical Features': ['4K HD', 'High Resolution', 'PNG Format', 'JPEG Format', 'Transparency Support', 'Lossless', 'Rich Details'],
@@ -533,7 +531,6 @@ export const languages = {
       publishTime: 'Tiempo de Publicación',
       fileFormat: 'Formato de Archivo',
       resolution: 'Resolución',
-      source: 'Fuente',
       search: 'Buscar',
       tagCategories: {
         'Características Técnicas': ['4K HD', 'Alta Resolución', 'Formato PNG', 'Formato JPEG', 'Soporte de Transparencia', 'Sin Pérdida', 'Detalles Ricos'],
