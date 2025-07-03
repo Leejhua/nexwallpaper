@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Heart, Share2, Maximize2, AlertCircle } from 'lucide-react';
-import { getHighResUrl } from '../utils/imageUtils';
+import { getHighResUrl, getThumbnailUrl } from '../utils/imageUtils';
 import LikeButton from './LikeButton';
 import LikeCounter from './LikeCounter';
 import ErrorBoundary from './ErrorBoundary';
@@ -10,15 +10,31 @@ import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import { useLanguage } from '../contexts/LanguageContext';
 
 /**
- * 模态框组件 - 优化性能，防止卡死
+ * 模态框组件 - 移动端优化版本
  */
 const Modal = memo(({ isOpen, item, onClose }) => {
   const { t, currentLanguage } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [imageDimensions, setImageDimensions] = useState(null); // 添加图片尺寸状态
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false); // 分享模态框状态
+  const [imageDimensions, setImageDimensions] = useState(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [useHighRes, setUseHighRes] = useState(false); // 控制是否加载高清图
+
+  // 检测移动端
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+      // 移动端默认不立即加载高清图
+      setUseHighRes(!mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // 获取统计功能 - 添加错误处理
   let recordClick, getStats;
@@ -39,8 +55,19 @@ const Modal = memo(({ isOpen, item, onClose }) => {
       setImageError(false);
       setIsDownloading(false);
       setImageDimensions(null);
+      // 移动端延迟加载高清图
+      if (isMobile) {
+        setUseHighRes(false);
+        // 延迟1秒后加载高清图，给用户时间看到缩略图
+        const timer = setTimeout(() => {
+          setUseHighRes(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        setUseHighRes(true);
+      }
     }
-  }, [item]);
+  }, [item, isMobile]);
 
   // 清理状态当组件卸载时
   useEffect(() => {
@@ -90,19 +117,26 @@ const Modal = memo(({ isOpen, item, onClose }) => {
     };
   }, [isOpen, onClose]);
 
-  // 下载功能 - 防止卡死
+  // 下载功能 - 移动端优化，添加超时处理
   const handleDownload = useCallback(async (url, title) => {
     if (isDownloading) return;
     
     setIsDownloading(true);
     try {
+      // 创建超时控制
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+      
       // 使用fetch获取图片数据，然后创建blob下载
       const response = await fetch(url, {
         mode: 'cors',
         headers: {
           'Accept': 'image/*'
-        }
+        },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -203,19 +237,20 @@ const Modal = memo(({ isOpen, item, onClose }) => {
             className="relative max-w-6xl max-h-[95vh] w-full bg-white rounded-lg overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Pixiv风格主要内容区域 */}
-            <div className="flex flex-col lg:flex-row h-full max-h-[95vh]">
+            {/* Pixiv风格主要内容区域 - 移动端优化 */}
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} h-full max-h-[95vh]`}>
               {/* 左侧图片区域 */}
-              <div className="flex-1 bg-gray-50 flex items-center justify-center p-6">
+              <div className="flex-1 bg-gray-50 flex items-center justify-center p-6 relative">
                 {!imageError ? (
                   <>
                     {isVideo ? (
                       <video
-                        className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
-                        src={getHighResUrl(item.url)}
+                        className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
+                        src={useHighRes ? getHighResUrl(item.url) : getThumbnailUrl(item.url)}
                         controls
                         muted
                         playsInline
+                        preload={isMobile ? "metadata" : "auto"}
                         onLoadedData={(e) => {
                           setImageLoaded(true);
                           getVideoDimensions(e.target);
@@ -225,18 +260,54 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         }}
                       />
                     ) : (
-                      <img
-                        className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
-                        src={getHighResUrl(item.url)}
-                        alt={item.title}
-                        onLoad={(e) => {
-                          setImageLoaded(true);
-                          getImageDimensions(e.target);
-                        }}
-                        onError={() => {
-                          setImageError(true);
-                        }}
-                      />
+                      <div className="relative">
+                        {/* 缩略图 - 快速加载 */}
+                        {!useHighRes && (
+                          <img
+                            className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
+                            src={getThumbnailUrl(item.url)}
+                            alt={item.title}
+                            onLoad={() => setImageLoaded(true)}
+                            onError={() => setImageError(true)}
+                          />
+                        )}
+                        
+                        {/* 高清图 - 延迟加载 */}
+                        {useHighRes && (
+                          <img
+                            className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg ${!imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                            src={getHighResUrl(item.url)}
+                            alt={item.title}
+                            onLoad={(e) => {
+                              setImageLoaded(true);
+                              getImageDimensions(e.target);
+                            }}
+                                onError={() => {
+                              setImageError(true);
+                            }}
+                          />
+                        )}
+                        
+                        {/* 加载指示器 */}
+                        {!imageLoaded && useHighRes && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                            <div className="flex flex-col items-center">
+                              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                              <div className="text-sm text-gray-500">{t('loading')}</div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* 高清加载按钮 - 移动端 */}
+                        {isMobile && !useHighRes && imageLoaded && (
+                          <button
+                            onClick={() => setUseHighRes(true)}
+                            className="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
+                          >
+                            查看高清
+                          </button>
+                        )}
+                      </div>
                     )}
                   </>
                 ) : (
@@ -259,14 +330,14 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                 )}
               </div>
 
-              {/* 右侧信息区域 - Pixiv风格 */}
-              <div className="w-full lg:w-80 bg-white border-l border-gray-200 flex flex-col">
+              {/* 右侧信息区域 - 移动端优化 */}
+              <div className={`w-full ${isMobile ? '' : 'lg:w-80'} bg-white ${isMobile ? '' : 'border-l border-gray-200'} flex flex-col ${isMobile ? 'max-h-[40vh] overflow-y-auto' : ''}`}>
                 {/* 作品标题区域 */}
                 <div className="relative p-4 sm:p-6 border-b border-gray-100">
                   {/* 关闭按钮 - 移到标题区域内 */}
                   <button
                     onClick={onClose}
-                    className="close-btn no-focus-outline absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors shadow-sm group"
+                    className="close-btn no-focus-outline absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors shadow-sm group z-10"
                     title={t('buttons.close')}
                   >
                     <X className="w-4 h-4" />
@@ -276,12 +347,12 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     </span>
                   </button>
 
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 leading-tight pr-12 sm:pr-14">
+                  <h1 className={`${isMobile ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 mb-3 leading-tight pr-12 sm:pr-14`}>
                     {item.title}
                   </h1>
                   
                   {/* Pixiv风格作品信息 */}
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                  <div className={`flex items-center gap-4 ${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-4 flex-wrap`}>
                     <span>{imageDimensions || item.resolution || t('highQuality')}</span>
                     <span>•</span>
                     <span>{item.format?.toUpperCase() || 'JPG'}</span>
@@ -289,24 +360,24 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     <span>{isVideo ? t('video') : t('image')}</span>
                   </div>
 
-                  {/* Pixiv风格操作按钮 */}
-                  <div className="flex gap-2">
+                  {/* Pixiv风格操作按钮 - 移动端优化 */}
+                  <div className={`flex gap-2 ${isMobile ? 'flex-wrap' : ''}`}>
                     <button
                       onClick={() => handleDownload(getHighResUrl(item.url), item.title)}
                       disabled={isDownloading}
-                      className={`download-btn no-focus-outline flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${
+                      className={`download-btn no-focus-outline flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${isMobile ? 'text-xs px-2 py-1.5' : ''} ${
                         isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
                       }`}
                     >
                       {isDownloading ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-sm">{t('downloading')}</span>
+                          <div className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
+                          <span className={`${isMobile ? 'text-xs' : 'text-sm'}`}>{t('downloading')}</span>
                         </>
                       ) : (
                         <>
-                          <Download className="w-4 h-4" />
-                          <span className="text-sm">{t('buttons.download')}</span>
+                          <Download className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
+                          <span className={`${isMobile ? 'text-xs' : 'text-sm'}`}>{t('buttons.download')}</span>
                         </>
                       )}
                     </button>
@@ -314,16 +385,16 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     <ErrorBoundary>
                       <LikeButton 
                         wallpaperId={item.id}
-                        size="small"
+                        size={isMobile ? "small" : "medium"}
                         showCount={false}
                       />
                     </ErrorBoundary>
 
                     <button
                       onClick={handleShare}
-                      className="share-btn no-focus-outline px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      className={`share-btn no-focus-outline px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors ${isMobile ? 'px-2 py-1.5' : ''}`}
                     >
-                      <Share2 className="w-4 h-4" />
+                      <Share2 className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
                     </button>
                   </div>
                 </div>
