@@ -222,20 +222,20 @@ const Modal = memo(({ isOpen, item, onClose }) => {
             className="relative max-w-6xl max-h-[95vh] w-full bg-white rounded-lg overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 关闭按钮 - 移动端放在整个详情页右上角 */}
+            {/* 关闭按钮 - 不遮住图片，图标居中 */}
             <button
               onClick={onClose}
               className={`close-btn no-focus-outline absolute ${
                 isMobile 
-                  ? 'top-2 right-2 z-50 p-1.5 w-8 h-8' 
-                  : 'top-4 right-4 z-10 p-2 w-10 h-10'
-              } text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-lg border border-gray-200 group`}
+                  ? '-top-2 -right-2 z-50 w-8 h-8' 
+                  : '-top-3 -right-3 z-10 w-10 h-10'
+              } text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-lg border border-gray-200 group flex items-center justify-center`}
               title={t('buttons.close')}
             >
-              <X className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
+              <X className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
               {/* 键盘快捷键提示 - 桌面端显示 */}
               {!isMobile && (
-                <span className="absolute -bottom-8 right-0 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                <span className="absolute -bottom-10 right-0 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                   ESC
                 </span>
               )}
