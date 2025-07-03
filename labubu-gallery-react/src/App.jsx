@@ -17,7 +17,13 @@ import './styles/button-focus-fix.css';
  * 主应用组件 - 优化懒加载版本，避免闪屏白屏
  */
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // 根据屏幕大小设置侧边栏初始状态
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // 如果是服务端渲染或者窗口对象不存在，默认为true
+    if (typeof window === 'undefined') return true;
+    // 桌面端默认展开，移动端默认收起
+    return window.innerWidth >= 1024;
+  });
   const [sortMode, setSortMode] = useState('default');
   
   // 画廊数据管理
@@ -48,10 +54,17 @@ function App() {
   // 响应式侧边栏控制
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
+      // 在移动端（小于1024px）时自动关闭侧边栏
+      if (window.innerWidth < 1024) {
         setSidebarOpen(false);
+      } else {
+        // 在桌面端（大于等于1024px）时保持侧边栏展开
+        setSidebarOpen(true);
       }
     };
+
+    // 初始化时根据屏幕大小设置侧边栏状态
+    handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
