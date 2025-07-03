@@ -20,15 +20,11 @@ const Modal = memo(({ isOpen, item, onClose }) => {
   const [imageDimensions, setImageDimensions] = useState(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [useHighRes, setUseHighRes] = useState(false); // 控制是否加载高清图
-
   // 检测移动端
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       setIsMobile(mobile);
-      // 移动端默认不立即加载高清图
-      setUseHighRes(!mobile);
     };
     
     checkMobile();
@@ -55,19 +51,8 @@ const Modal = memo(({ isOpen, item, onClose }) => {
       setImageError(false);
       setIsDownloading(false);
       setImageDimensions(null);
-      // 移动端延迟加载高清图
-      if (isMobile) {
-        setUseHighRes(false);
-        // 延迟1秒后加载高清图，给用户时间看到缩略图
-        const timer = setTimeout(() => {
-          setUseHighRes(true);
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else {
-        setUseHighRes(true);
-      }
     }
-  }, [item, isMobile]);
+  }, [item]);
 
   // 清理状态当组件卸载时
   useEffect(() => {
@@ -246,7 +231,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     {isVideo ? (
                       <video
                         className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
-                        src={useHighRes ? getHighResUrl(item.url) : getThumbnailUrl(item.url)}
+                        src={isMobile ? getThumbnailUrl(item.url) : getHighResUrl(item.url)}
                         controls
                         muted
                         playsInline
@@ -260,54 +245,18 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         }}
                       />
                     ) : (
-                      <div className="relative">
-                        {/* 缩略图 - 快速加载 */}
-                        {!useHighRes && (
-                          <img
-                            className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
-                            src={getThumbnailUrl(item.url)}
-                            alt={item.title}
-                            onLoad={() => setImageLoaded(true)}
-                            onError={() => setImageError(true)}
-                          />
-                        )}
-                        
-                        {/* 高清图 - 延迟加载 */}
-                        {useHighRes && (
-                          <img
-                            className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg ${!imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-                            src={getHighResUrl(item.url)}
-                            alt={item.title}
-                            onLoad={(e) => {
-                              setImageLoaded(true);
-                              getImageDimensions(e.target);
-                            }}
-                                onError={() => {
-                              setImageError(true);
-                            }}
-                          />
-                        )}
-                        
-                        {/* 加载指示器 */}
-                        {!imageLoaded && useHighRes && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-                            <div className="flex flex-col items-center">
-                              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-                              <div className="text-sm text-gray-500">{t('loading')}</div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* 高清加载按钮 - 移动端 */}
-                        {isMobile && !useHighRes && imageLoaded && (
-                          <button
-                            onClick={() => setUseHighRes(true)}
-                            className="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
-                          >
-                            查看高清
-                          </button>
-                        )}
-                      </div>
+                      <img
+                        className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
+                        src={isMobile ? getThumbnailUrl(item.url) : getHighResUrl(item.url)}
+                        alt={item.title}
+                        onLoad={(e) => {
+                          setImageLoaded(true);
+                          getImageDimensions(e.target);
+                        }}
+                        onError={() => {
+                          setImageError(true);
+                        }}
+                      />
                     )}
                   </>
                 ) : (
