@@ -11,41 +11,68 @@
  * @returns {Object} 分享元数据
  */
 export const generateShareMetadata = (item, t, currentLanguage) => {
-  if (!item) return null;
+  try {
+    if (!item) return null;
 
-  const baseUrl = window.location.origin;
-  const shareUrl = `${baseUrl}?wallpaper=${item.id}`;
-  
-  // 根据语言生成优化的标题和描述
-  let title, description, hashtags;
-  
-  switch (currentLanguage) {
-    case 'en':
-      title = `${item.title} - Beautiful Labubu Wallpaper Collection`;
-      description = `Download this stunning ${item.resolution || '4K'} Labubu wallpaper. Perfect for desktop and mobile devices. High quality, cute design, fantasy theme.`;
-      hashtags = ['Labubu', 'Wallpaper', 'Cute', 'Fantasy', 'HD', '4K', item.category];
-      break;
-    case 'es':
-      title = `${item.title} - Hermosa Colección de Fondos Labubu`;
-      description = `Descarga este impresionante fondo de Labubu en ${item.resolution || '4K'}. Perfecto para escritorio y dispositivos móviles. Alta calidad, diseño lindo, tema fantástico.`;
-      hashtags = ['Labubu', 'Fondo', 'Lindo', 'Fantasía', 'HD', '4K', item.category];
-      break;
-    default: // zh
-      title = `${item.title} - 精美Labubu壁纸收藏`;
-      description = `下载这张精美的${item.resolution || '4K'} Labubu壁纸。适合桌面和移动设备。高质量、可爱设计、奇幻主题。`;
-      hashtags = ['Labubu', '壁纸', '可爱', '奇幻', '高清', '4K', item.category];
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}?wallpaper=${item.id || 'unknown'}`;
+    
+    // 安全的翻译函数调用
+    const safeT = (key, fallback = key) => {
+      try {
+        return t ? t(key) : fallback;
+      } catch (error) {
+        console.warn('Translation error:', error);
+        return fallback;
+      }
+    };
+    
+    // 根据语言生成优化的标题和描述
+    let title, description, hashtags;
+    
+    switch (currentLanguage) {
+      case 'en':
+        title = `${item.title || 'Labubu Wallpaper'} - Beautiful Labubu Wallpaper Collection`;
+        description = `Download this stunning ${item.resolution || '4K'} Labubu wallpaper. Perfect for desktop and mobile devices. High quality, cute design, fantasy theme.`;
+        hashtags = ['Labubu', 'Wallpaper', 'Cute', 'Fantasy', 'HD', '4K', item.category];
+        break;
+      case 'es':
+        title = `${item.title || 'Fondo Labubu'} - Hermosa Colección de Fondos Labubu`;
+        description = `Descarga este impresionante fondo de Labubu en ${item.resolution || '4K'}. Perfecto para escritorio y dispositivos móviles. Alta calidad, diseño lindo, tema fantástico.`;
+        hashtags = ['Labubu', 'Fondo', 'Lindo', 'Fantasía', 'HD', '4K', item.category];
+        break;
+      default: // zh
+        title = `${item.title || 'Labubu壁纸'} - 精美Labubu壁纸收藏`;
+        description = `下载这张精美的${item.resolution || '4K'} Labubu壁纸。适合桌面和移动设备。高质量、可爱设计、奇幻主题。`;
+        hashtags = ['Labubu', '壁纸', '可爱', '奇幻', '高清', '4K', item.category];
+    }
+
+    return {
+      url: shareUrl,
+      title,
+      text: description, // 添加text字段作为description的别名
+      description,
+      image: item.url || '',
+      hashtags: hashtags.filter(Boolean),
+      type: 'website',
+      siteName: safeT('title', 'Labubu Gallery'),
+      imageAlt: title
+    };
+  } catch (error) {
+    console.error('generateShareMetadata error:', error);
+    // 返回基础的分享数据
+    return {
+      url: window.location.href,
+      title: item?.title || 'Labubu Wallpaper',
+      text: item?.description || 'Beautiful Labubu wallpaper',
+      description: item?.description || 'Beautiful Labubu wallpaper',
+      image: item?.url || '',
+      hashtags: ['Labubu'],
+      type: 'website',
+      siteName: 'Labubu Gallery',
+      imageAlt: item?.title || 'Labubu Wallpaper'
+    };
   }
-
-  return {
-    url: shareUrl,
-    title,
-    description,
-    image: item.url,
-    hashtags: hashtags.filter(Boolean),
-    type: 'website',
-    siteName: t('title'),
-    imageAlt: title
-  };
 };
 
 /**
@@ -55,49 +82,65 @@ export const generateShareMetadata = (item, t, currentLanguage) => {
  * @returns {Object} 平台优化的分享数据
  */
 export const optimizeForPlatform = (metadata, platform) => {
-  if (!metadata) return null;
+  try {
+    if (!metadata) return null;
 
-  const base = { ...metadata };
+    const base = { ...metadata };
 
-  switch (platform) {
-    case 'twitter':
-      // Twitter限制280字符
-      return {
-        ...base,
-        text: `${base.description.substring(0, 200)}... ${base.url}`,
-        hashtags: base.hashtags.slice(0, 5).join(' ')
-      };
+    switch (platform) {
+      case 'twitter':
+        // Twitter限制280字符
+        return {
+          ...base,
+          text: `${(base.description || base.text || '').substring(0, 200)}... ${base.url}`,
+          hashtags: (base.hashtags || []).slice(0, 5).join(' ')
+        };
 
-    case 'facebook':
-      return {
-        ...base,
-        quote: base.description
-      };
+      case 'facebook':
+        return {
+          ...base,
+          quote: base.description || base.text || ''
+        };
 
-    case 'pinterest':
-      return {
-        ...base,
-        description: `${base.title} - ${base.description}`
-      };
+      case 'pinterest':
+        return {
+          ...base,
+          description: `${base.title || ''} - ${base.description || base.text || ''}`
+        };
 
-    case 'linkedin':
-      return {
-        ...base,
-        summary: base.description
-      };
+      case 'linkedin':
+        return {
+          ...base,
+          summary: base.description || base.text || ''
+        };
 
-    case 'reddit':
-      return {
-        ...base,
-        title: `${base.title} [${base.hashtags.slice(0, 3).join(', ')}]`
-      };
+      case 'reddit':
+        return {
+          ...base,
+          title: `${base.title || ''} [${(base.hashtags || []).slice(0, 3).join(', ')}]`
+        };
 
-    case 'whatsapp':
-    case 'telegram':
-      return {
-        ...base,
-        text: `${base.title}\n\n${base.description}\n\n${base.url}`
-      };
+      case 'whatsapp':
+      case 'telegram':
+        return {
+          ...base,
+          text: `${base.title || ''}\n\n${base.description || base.text || ''}\n\n${base.url || ''}`
+        };
+
+      default:
+        return base;
+    }
+  } catch (error) {
+    console.error('optimizeForPlatform error:', error);
+    // 返回原始数据
+    return metadata || {
+      title: 'Labubu Wallpaper',
+      text: 'Beautiful Labubu wallpaper',
+      url: window.location.href,
+      hashtags: []
+    };
+  }
+};
 
     default:
       return base;
