@@ -352,9 +352,6 @@ const Gallery = ({
               {t('loading')}
             </span>
           </div>
-          <div className="text-sm text-gray-500">
-            ⏳ 首屏加载40张高清壁纸
-          </div>
         </motion.div>
 
         {/* 骨架屏 */}
@@ -394,37 +391,6 @@ const Gallery = ({
 
   return (
     <div className="space-y-6">
-      {/* 结果统计 */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <div className="text-gray-600">
-          显示 <span className="font-semibold text-blue-600">{displayedItems.length}</span> / 
-          <span className="font-semibold text-purple-600">{filteredItems}</span> {t('results')}
-          {!currentFilter.includes('all') && currentFilter.length > 0 && (
-            <div className="flex flex-wrap gap-2 ml-2">
-              {currentFilter.map(filter => (
-                <span key={filter} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                  {t(`categories.${filter}`)}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* 懒加载状态指示 */}
-        <div className="text-sm text-gray-500">
-          {isLoadingMore ? `⏳ ${t('loading')}` : hasMore ? `📜 ${t('loadMore')}` : `✅ ${t('allLoaded')}`}
-          {!isInitialLoading && (
-            <span className="ml-2 text-xs">
-              (首屏{INITIAL_LOAD_SIZE}张，每次加载{LOAD_SIZE}张)
-            </span>
-          )}
-        </div>
-      </motion.div>
-
       {/* 稳定瀑布流容器 */}
       <div 
         ref={containerRef}

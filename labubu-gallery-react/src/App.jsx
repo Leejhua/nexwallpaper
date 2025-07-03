@@ -125,11 +125,7 @@ function App() {
             }}>
               {/* Header组件 - 保持居中 */}
               <div className="w-full flex justify-center mb-6">
-                <Header
-                  totalItems={stats.total}
-                  filteredItems={filteredItems}
-                  currentFilter={selectedFilters}
-                />
+                <Header />
               </div>
               
               {/* 排序控制 - 居中显示 */}

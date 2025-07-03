@@ -5,7 +5,6 @@ export const languages = {
     flag: '🇨🇳',
     translations: {
       title: 'Labubu壁纸画廊',
-      subtitle: '精选400+高清壁纸 · 真正的4K画质体验 · React版本',
       searchPlaceholder: '搜索标题、标签...',
       categories: {
         all: '全部作品',
@@ -43,11 +42,6 @@ export const languages = {
         close: '关闭',
         reset: '重置筛选',
         refresh: '刷新'
-      },
-      stats: {
-        total: '总作品',
-        showing: '当前显示',
-        items: '项'
       },
       loading: '加载中...',
       loadMore: '滚动加载更多',
@@ -247,7 +241,6 @@ export const languages = {
     flag: '🇺🇸',
     translations: {
       title: 'Labubu Wallpaper Gallery',
-      subtitle: 'Curated 400+ HD Wallpapers · True 4K Quality Experience · React Version',
       searchPlaceholder: 'Search titles, tags...',
       categories: {
         all: 'All Works',
@@ -285,11 +278,6 @@ export const languages = {
         close: 'Close',
         reset: 'Reset Filters',
         refresh: 'Refresh'
-      },
-      stats: {
-        total: 'Total Works',
-        showing: 'Currently Showing',
-        items: 'items'
       },
       loading: 'Loading...',
       loadMore: 'Scroll to load more',
@@ -489,7 +477,6 @@ export const languages = {
     flag: '🇪🇸',
     translations: {
       title: 'Galería de Fondos Labubu',
-      subtitle: 'Colección de 400+ Fondos HD · Experiencia de Calidad 4K Real · Versión React',
       searchPlaceholder: 'Buscar títulos, etiquetas...',
       categories: {
         all: 'Todas las Obras',
@@ -527,11 +514,6 @@ export const languages = {
         close: 'Cerrar',
         reset: 'Restablecer Filtros',
         refresh: 'Actualizar'
-      },
-      stats: {
-        total: 'Total de Obras',
-        showing: 'Mostrando Actualmente',
-        items: 'elementos'
       },
       loading: 'Cargando...',
       loadMore: 'Desplázate para cargar más',
