@@ -222,6 +222,24 @@ const Modal = memo(({ isOpen, item, onClose }) => {
             className="relative max-w-6xl max-h-[95vh] w-full bg-white rounded-lg overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* 关闭按钮 - 移动端放在整个详情页右上角 */}
+            <button
+              onClick={onClose}
+              className={`close-btn no-focus-outline absolute ${
+                isMobile 
+                  ? 'top-2 right-2 z-50 p-1.5 w-8 h-8' 
+                  : 'top-4 right-4 z-10 p-2 w-10 h-10'
+              } text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-lg border border-gray-200 group`}
+              title={t('buttons.close')}
+            >
+              <X className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
+              {/* 键盘快捷键提示 - 桌面端显示 */}
+              {!isMobile && (
+                <span className="absolute -bottom-8 right-0 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  ESC
+                </span>
+              )}
+            </button>
             {/* Pixiv风格主要内容区域 - 移动端优化 */}
             <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} h-full max-h-[95vh]`}>
               {/* 左侧图片区域 */}
@@ -283,20 +301,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
               <div className={`w-full ${isMobile ? '' : 'lg:w-80'} bg-white ${isMobile ? '' : 'border-l border-gray-200'} flex flex-col ${isMobile ? 'max-h-[40vh] overflow-y-auto' : ''}`}>
                 {/* 作品标题区域 */}
                 <div className="relative p-4 sm:p-6 border-b border-gray-100">
-                  {/* 关闭按钮 - 移到标题区域内 */}
-                  <button
-                    onClick={onClose}
-                    className="close-btn no-focus-outline absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors shadow-sm group z-10"
-                    title={t('buttons.close')}
-                  >
-                    <X className="w-4 h-4" />
-                    {/* 键盘快捷键提示 */}
-                    <span className="absolute -bottom-8 right-0 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      ESC
-                    </span>
-                  </button>
-
-                  <h1 className={`${isMobile ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 mb-3 leading-tight pr-12 sm:pr-14`}>
+                  <h1 className={`${isMobile ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 mb-3 leading-tight ${isMobile ? 'pr-8' : 'pr-4'}`}>
                     {item.title}
                   </h1>
                   
