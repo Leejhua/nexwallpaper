@@ -20,7 +20,7 @@ const SortControls = ({ onSortChange, currentSort = 'default' }) => {
   };
 
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className="flex flex-wrap gap-2 mb-6 justify-center items-center">
       <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center mr-2">
         {t('sortBy')}:
       </span>

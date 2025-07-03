@@ -13,9 +13,9 @@ const Header = ({ totalItems, filteredItems, currentFilter }) => {
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 mb-8"
+      className="w-full mb-8"
     >
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-4 px-6">
         {/* 主标题 */}
         <motion.div
           initial={{ scale: 0.9 }}

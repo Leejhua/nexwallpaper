@@ -106,10 +106,12 @@ function App() {
         <div className="pixiv-container flex justify-center min-h-screen" style={{ padding: '0 16px' }}>
           <div style={{ maxWidth: '1200px', width: '100%' }}>
             {/* Pixiv风格头部 */}
-            <div className="pixiv-header" style={{ 
-              marginBottom: '24px'
+            <div className="pixiv-header w-full" style={{ 
+              marginBottom: '24px',
+              paddingTop: '24px'
             }}>
-              <div className="flex justify-between items-center mb-4">
+              {/* Header组件 - 保持居中 */}
+              <div className="w-full flex justify-center mb-6">
                 <Header
                   totalItems={stats.total}
                   filteredItems={filteredItems}
@@ -117,11 +119,13 @@ function App() {
                 />
               </div>
               
-              {/* 排序控制 */}
-              <SortControls 
-                onSortChange={setSortMode}
-                currentSort={sortMode}
-              />
+              {/* 排序控制 - 居中显示 */}
+              <div className="w-full flex justify-center">
+                <SortControls 
+                  onSortChange={setSortMode}
+                  currentSort={sortMode}
+                />
+              </div>
             </div>
 
             {/* Pixiv风格画廊内容 - 添加过渡效果 */}

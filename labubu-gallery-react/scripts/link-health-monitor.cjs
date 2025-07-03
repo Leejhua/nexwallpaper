@@ -71,9 +71,18 @@ class LinkHealthMonitor {
   extractLinks(filePath) {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
-      const urlRegex = /https?:\/\/[^\s"']+/g;
+      const urlRegex = /https?:\/\/[^\s"'`]+/g;
       const matches = content.match(urlRegex) || [];
-      return [...new Set(matches)];
+      
+      // 过滤掉包含模板字符串变量的URL
+      const validUrls = matches.filter(url => {
+        return !url.includes('${') && 
+               !url.includes('`') && 
+               !url.includes('undefined') &&
+               url.length < 500; // 过滤异常长的URL
+      });
+      
+      return [...new Set(validUrls)];
     } catch (error) {
       console.error(`Error reading ${filePath}:`, error.message);
       return [];
