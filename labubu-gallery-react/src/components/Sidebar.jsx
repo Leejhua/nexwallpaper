@@ -1,9 +1,23 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Menu, Filter, Search, RotateCcw } from 'lucide-react';
+import { 
+  X, Menu, Filter, Search, RotateCcw, Rabbit,
+  FolderOpen, Sparkles, Monitor, Smartphone, Flower2, Video, Play
+} from 'lucide-react';
 import { categories } from '../data/galleryData';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from './LanguageSelector';
+
+// 图标映射
+const iconMap = {
+  FolderOpen,
+  Sparkles,
+  Monitor,
+  Smartphone,
+  Flower2,
+  Video,
+  Play
+};
 
 /**
  * 侧边栏组件 - 筛选和搜索控制
@@ -93,7 +107,10 @@ const Sidebar = ({
                       WebkitTextFillColor: 'transparent'
                     }}
                   >
-                    🐰 Labubu Gallery
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Rabbit size={20} style={{ color: '#0096fa' }} />
+                      <span>Labubu Gallery</span>
+                    </div>
                   </h2>
                   <p style={{ fontSize: '14px', color: '#666666' }}>
                     {filteredItems} / {totalItems} {t('stats.items')}
@@ -187,7 +204,7 @@ const Sidebar = ({
                           whileTap={{ scale: 0.98 }}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-lg">{category.icon}</span>
+                            {React.createElement(iconMap[category.icon], { size: 18 })}
                             <span className="font-medium">{t(`categories.${category.key}`)}</span>
                           </div>
                           <span className={`text-sm px-2 py-1 rounded-full ${

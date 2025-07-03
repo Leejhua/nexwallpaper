@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Rabbit } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 /**
@@ -21,8 +22,9 @@ const Header = () => {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-2">
-            🐰 {t('title')}
+          <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-2 flex items-center gap-3">
+            <Rabbit size={48} className="text-blue-500" />
+            {t('title')}
           </h1>
         </motion.div>
       </div>

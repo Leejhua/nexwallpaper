@@ -8564,13 +8564,13 @@ export const galleryData = [
 
 // 分类配置
 export const categories = [
-  { key: 'all', label: '全部作品', icon: '📂', count: 400 },
-  { key: 'fantasy', label: '奇幻世界', icon: '🌟', count: 135 },
-  { key: 'desktop', label: '桌面壁纸', icon: '💻', count: 73 },
-  { key: 'mobile', label: '手机壁纸', icon: '📱', count: 34 },
-  { key: 'seasonal', label: '季节主题', icon: '🌸', count: 116 },
-  { key: '4k', label: '4K超清', icon: '🎬', count: 27 },
-  { key: 'live', label: '动态壁纸', icon: '🎥', count: 14 }
+  { key: 'all', label: '全部作品', icon: 'FolderOpen', count: 400 },
+  { key: 'fantasy', label: '奇幻世界', icon: 'Sparkles', count: 135 },
+  { key: 'desktop', label: '桌面壁纸', icon: 'Monitor', count: 73 },
+  { key: 'mobile', label: '手机壁纸', icon: 'Smartphone', count: 34 },
+  { key: 'seasonal', label: '季节主题', icon: 'Flower2', count: 116 },
+  { key: '4k', label: '4K超清', icon: 'Video', count: 27 },
+  { key: 'live', label: '动态壁纸', icon: 'Play', count: 14 }
 ];
 
 // 分页配置
