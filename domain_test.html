@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Labubu Gallery - 域名访问测试</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.1); 
+            padding: 30px; 
+            border-radius: 15px; 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .success { 
+            background: rgba(40, 167, 69, 0.2); 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+        .info { 
+            background: rgba(23, 162, 184, 0.2); 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+            border: 1px solid rgba(23, 162, 184, 0.3);
+        }
+        .button { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            background: rgba(255,255,255,0.2); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 25px; 
+            margin: 10px; 
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .button:hover { 
+            background: rgba(255,255,255,0.3); 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .domain-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .domain-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .emoji { font-size: 1.5em; margin-right: 10px; }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 2em; }
+            .domain-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐰 Labubu Gallery 域名访问成功！</h1>
+        
+        <div class="success">
+            <h3><span class="emoji">🎉</span>恭喜！域名访问配置成功！</h3>
+            <p>你现在可以使用友好的域名访问Labubu壁纸画廊了！</p>
+        </div>
+        
+        <div class="info">
+            <h3><span class="emoji">📊</span>当前访问信息</h3>
+            <p><strong>访问域名:</strong> <span id="currentDomain"></span></p>
+            <p><strong>服务器IP:</strong> 172.27.2.191</p>
+            <p><strong>访问时间:</strong> <span id="currentTime"></span></p>
+            <p><strong>用户代理:</strong> <span id="userAgent"></span></p>
+        </div>
+        
+        <div class="info">
+            <h3><span class="emoji">🌐</span>可用域名列表</h3>
+            <div class="domain-list">
+                <div class="domain-item">
+                    <strong>labubu.local</strong><br>
+                    <a href="http://labubu.local:3000" class="button">访问画廊</a>
+                    <a href="http://labubu.local:8080/network_test.html" class="button">网络测试</a>
+                </div>
+                <div class="domain-item">
+                    <strong>labubu-gallery.local</strong><br>
+                    <a href="http://labubu-gallery.local:3000" class="button">访问画廊</a>
+                    <a href="http://labubu-gallery.local:8080/network_test.html" class="button">网络测试</a>
+                </div>
+                <div class="domain-item">
+                    <strong>wallpaper.local</strong><br>
+                    <a href="http://wallpaper.local:3000" class="button">访问画廊</a>
+                    <a href="http://wallpaper.local:8080/network_test.html" class="button">网络测试</a>
+                </div>
+                <div class="domain-item">
+                    <strong>gallery.local</strong><br>
+                    <a href="http://gallery.local:3000" class="button">访问画廊</a>
+                    <a href="http://gallery.local:8080/network_test.html" class="button">网络测试</a>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="http://labubu.local:3000" class="button" style="font-size: 1.2em; padding: 15px 30px;">
+                <span class="emoji">🚀</span>进入Labubu壁纸画廊
+            </a>
+        </div>
+        
+        <div class="info">
+            <h3><span class="emoji">📱</span>手机访问配置</h3>
+            <p>要在手机上使用域名访问，请按以下步骤配置：</p>
+            <ol>
+                <li>打开手机WiFi设置</li>
+                <li>点击已连接的WiFi网络</li>
+                <li>找到"DNS"或"域名服务器"设置</li>
+                <li>将DNS设置为：<strong>172.27.2.191</strong></li>
+                <li>保存并重新连接WiFi</li>
+                <li>在浏览器访问：<strong>http://labubu.local:3000</strong></li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('currentDomain').textContent = window.location.hostname + ':' + window.location.port;
+        document.getElementById('currentTime').textContent = new Date().toLocaleString();
+        document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 100) + '...';
+    </script>
+</body>
+</html>
