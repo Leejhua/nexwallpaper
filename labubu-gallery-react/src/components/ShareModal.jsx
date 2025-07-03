@@ -18,51 +18,104 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     return generateShareMetadata(item, t, currentLanguage);
   }, [item, t, currentLanguage]);
 
-  // 微博分享
+  // 检测是否为移动设备
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // 尝试打开app，失败则回退到网页版
+  const tryOpenApp = useCallback((appUrl, webUrl, windowOptions = 'width=600,height=400') => {
+    if (isMobile) {
+      // 移动端尝试打开app
+      const startTime = Date.now();
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = appUrl;
+      document.body.appendChild(iframe);
+      
+      // 设置超时，如果app没有打开则打开网页版
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        const endTime = Date.now();
+        // 如果时间差小于2秒，说明可能没有安装app，打开网页版
+        if (endTime - startTime < 2000) {
+          window.open(webUrl, '_blank');
+        }
+      }, 1500);
+    } else {
+      // 桌面端直接打开网页版
+      window.open(webUrl, '_blank', windowOptions);
+    }
+  }, [isMobile]);
+
+  // 微博分享 - 支持app拉起
   const shareToWeibo = useCallback(() => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    const weiboUrl = new URL('https://service.weibo.com/share/share.php');
-    weiboUrl.searchParams.set('url', shareData.url);
-    weiboUrl.searchParams.set('title', `${shareData.text} ${shareData.url}`);
-    weiboUrl.searchParams.set('pic', item.url); // 分享图片
+    const weiboWebUrl = new URL('https://service.weibo.com/share/share.php');
+    weiboWebUrl.searchParams.set('url', shareData.url);
+    weiboWebUrl.searchParams.set('title', `${shareData.text}`);
+    weiboWebUrl.searchParams.set('pic', item.url);
     
-    window.open(weiboUrl.toString(), '_blank', 'width=600,height=400');
+    // 微博app深度链接
+    const weiboAppUrl = `sinaweibo://compose?content=${encodeURIComponent(shareData.text + ' ' + shareData.url)}&image=${encodeURIComponent(item.url)}`;
+    
+    tryOpenApp(weiboAppUrl, weiboWebUrl.toString());
     onClose();
-  }, [getShareData, item, onClose]);
+  }, [getShareData, item, onClose, tryOpenApp]);
 
-  // QQ空间分享
+  // QQ空间分享 - 支持app拉起
   const shareToQzone = useCallback(() => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    const qzoneUrl = new URL('https://connect.qq.com/widget/shareqq/index.html');
-    qzoneUrl.searchParams.set('url', shareData.url);
-    qzoneUrl.searchParams.set('title', shareData.title);
-    qzoneUrl.searchParams.set('summary', shareData.text);
-    qzoneUrl.searchParams.set('pics', item.url);
+    const qzoneWebUrl = new URL('https://connect.qq.com/widget/shareqq/index.html');
+    qzoneWebUrl.searchParams.set('url', shareData.url);
+    qzoneWebUrl.searchParams.set('title', shareData.title);
+    qzoneWebUrl.searchParams.set('summary', shareData.text);
+    qzoneWebUrl.searchParams.set('pics', item.url);
     
-    window.open(qzoneUrl.toString(), '_blank', 'width=600,height=400');
+    // QQ空间app深度链接
+    const qzoneAppUrl = `mqqapi://share/to_qzone?src_type=web&version=1&file_type=news&req_type=1&image_url=${encodeURIComponent(item.url)}&title=${encodeURIComponent(shareData.title)}&description=${encodeURIComponent(shareData.text)}&url=${encodeURIComponent(shareData.url)}`;
+    
+    tryOpenApp(qzoneAppUrl, qzoneWebUrl.toString());
     onClose();
-  }, [getShareData, item, onClose]);
+  }, [getShareData, item, onClose, tryOpenApp]);
 
-  // 微信分享 (复制链接)
+  // 微信分享 - 移动端优化
   const shareToWechat = useCallback(async () => {
     const shareData = getShareData();
     if (!shareData) return;
 
     try {
-      await navigator.clipboard.writeText(shareData.url);
+      // 尝试使用Web Share API (移动端支持更好)
+      if (navigator.share && isMobile) {
+        await navigator.share({
+          title: shareData.title,
+          text: shareData.text,
+          url: shareData.url
+        });
+        onClose();
+        return;
+      }
+      
+      // 复制链接到剪贴板
+      await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      // 不关闭模态框，让用户知道链接已复制
+      setTimeout(() => setCopied(false), 3000);
+      
+      // 移动端提示用户可以粘贴到微信
+      if (isMobile) {
+        alert(t('wechatShareTip') || '链接已复制，请粘贴到微信分享');
+      }
     } catch (error) {
       // 降级处理
-      prompt(t('copyLinkToWechat'), shareData.url);
+      const textToCopy = `${shareData.text} ${shareData.url}`;
+      if (window.prompt) {
+        prompt(t('copyLinkToWechat') || '复制链接到微信', textToCopy);
+      }
       onClose();
     }
-  }, [getShareData, onClose]);
+  }, [getShareData, onClose, isMobile, t]);
 
   // Facebook分享
   const shareToFacebook = useCallback(() => {
@@ -116,73 +169,143 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     onClose();
   }, [getShareData, onClose]);
 
-  // WhatsApp分享
+  // WhatsApp分享 - 支持app拉起
   const shareToWhatsApp = useCallback(() => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    const whatsappUrl = new URL('https://wa.me/');
-    whatsappUrl.searchParams.set('text', `${shareData.text} ${shareData.url}`);
+    const message = `${shareData.text} ${shareData.url}`;
     
-    window.open(whatsappUrl.toString(), '_blank');
+    if (isMobile) {
+      // 移动端尝试打开WhatsApp app
+      const whatsappAppUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
+      const whatsappWebUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      
+      tryOpenApp(whatsappAppUrl, whatsappWebUrl);
+    } else {
+      // 桌面端使用WhatsApp Web
+      const whatsappWebUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      window.open(whatsappWebUrl, '_blank');
+    }
+    
     onClose();
-  }, [getShareData, onClose]);
+  }, [getShareData, onClose, isMobile, tryOpenApp]);
 
-  // Instagram分享 (复制链接，因为Instagram不支持直接URL分享)
+  // Instagram分享 - 移动端优化
   const shareToInstagram = useCallback(async () => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    try {
-      await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-      // 提示用户已复制，可以粘贴到Instagram
-      alert(t('instagramShareTip'));
-    } catch (error) {
-      prompt(t('copyLinkForInstagram'), `${shareData.text} ${shareData.url}`);
-    }
-  }, [getShareData, t]);
+    const shareContent = `${shareData.text} ${shareData.url}`;
 
-  // Telegram分享
+    if (isMobile) {
+      try {
+        // 尝试使用Web Share API
+        if (navigator.share) {
+          await navigator.share({
+            title: shareData.title,
+            text: shareContent,
+            url: shareData.url
+          });
+          onClose();
+          return;
+        }
+      } catch (error) {
+        console.log('Web Share API failed for Instagram');
+      }
+      
+      // 移动端尝试打开Instagram app
+      const instagramAppUrl = `instagram://share?text=${encodeURIComponent(shareContent)}`;
+      
+      // 创建隐藏链接尝试打开app
+      const link = document.createElement('a');
+      link.href = instagramAppUrl;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // 同时复制内容到剪贴板
+      try {
+        await navigator.clipboard.writeText(shareContent);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+        alert(t('instagramShareTip') || '内容已复制，请粘贴到Instagram分享');
+      } catch (clipboardError) {
+        prompt(t('copyLinkForInstagram') || '复制内容到Instagram', shareContent);
+      }
+    } else {
+      // 桌面端复制链接
+      try {
+        await navigator.clipboard.writeText(shareContent);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+        alert(t('instagramShareTip') || '内容已复制，请在Instagram中粘贴分享');
+      } catch (error) {
+        prompt(t('copyLinkForInstagram') || '复制内容到Instagram', shareContent);
+      }
+    }
+    
+    onClose();
+  }, [getShareData, t, isMobile, onClose]);
+
+  // Telegram分享 - 支持app拉起
   const shareToTelegram = useCallback(() => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    const telegramUrl = new URL('https://t.me/share/url');
-    telegramUrl.searchParams.set('url', shareData.url);
-    telegramUrl.searchParams.set('text', shareData.text);
+    const message = `${shareData.text} ${shareData.url}`;
     
-    window.open(telegramUrl.toString(), '_blank');
+    if (isMobile) {
+      // 移动端尝试打开Telegram app
+      const telegramAppUrl = `tg://msg?text=${encodeURIComponent(message)}`;
+      const telegramWebUrl = `https://t.me/share/url?url=${encodeURIComponent(shareData.url)}&text=${encodeURIComponent(shareData.text)}`;
+      
+      tryOpenApp(telegramAppUrl, telegramWebUrl);
+    } else {
+      // 桌面端使用Telegram Web
+      const telegramWebUrl = `https://t.me/share/url?url=${encodeURIComponent(shareData.url)}&text=${encodeURIComponent(shareData.text)}`;
+      window.open(telegramWebUrl, '_blank');
+    }
+    
     onClose();
-  }, [getShareData, onClose]);
+  }, [getShareData, onClose, isMobile, tryOpenApp]);
 
-  // Twitter/X分享 - 使用通用分享方式
+  // Twitter/X分享 - 支持app拉起
   const shareToTwitter = useCallback(() => {
     const shareData = getShareData();
     if (!shareData) return;
 
-    // 尝试使用Web Share API，如果不支持则回退到URL方式
-    if (navigator.share) {
-      navigator.share({
-        title: shareData.title,
-        text: shareData.text,
-        url: shareData.url
-      }).catch(err => {
-        console.log('Web Share API failed, falling back to URL method');
-        // 回退到URL方式
-        const text = encodeURIComponent(`${shareData.text} ${shareData.url}`);
-        window.open(`https://x.com/intent/tweet?text=${text}`, '_blank', 'width=600,height=400');
-      });
+    // 优化分享内容
+    const optimized = optimizeForPlatform(shareData, 'twitter');
+    const tweetText = `${optimized.text} ${shareData.url}`;
+    
+    if (isMobile) {
+      // 移动端尝试打开Twitter app
+      const twitterAppUrl = `twitter://post?message=${encodeURIComponent(tweetText)}`;
+      const twitterWebUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&hashtags=${optimized.hashtags}`;
+      
+      tryOpenApp(twitterAppUrl, twitterWebUrl);
     } else {
-      // 直接使用URL方式
-      const optimized = optimizeForPlatform(shareData, 'twitter');
-      const text = encodeURIComponent(`${optimized.text} ${shareData.url}`);
-      window.open(`https://x.com/intent/tweet?text=${text}&hashtags=${optimized.hashtags}`, '_blank', 'width=600,height=400');
+      // 桌面端使用Web Share API或网页版
+      if (navigator.share) {
+        navigator.share({
+          title: shareData.title,
+          text: shareData.text,
+          url: shareData.url
+        }).catch(() => {
+          // 回退到网页版
+          const twitterWebUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&hashtags=${optimized.hashtags}`;
+          window.open(twitterWebUrl, '_blank', 'width=600,height=400');
+        });
+      } else {
+        const twitterWebUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&hashtags=${optimized.hashtags}`;
+        window.open(twitterWebUrl, '_blank', 'width=600,height=400');
+      }
     }
     
     onClose();
-  }, [getShareData, onClose]);
+  }, [getShareData, onClose, isMobile, tryOpenApp]);
 
   // 复制链接
   const copyLink = useCallback(async () => {

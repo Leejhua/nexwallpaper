@@ -231,7 +231,9 @@ export const languages = {
         showRecommended: '显示推荐'
       },
       instagramShareTip: '链接已复制！请打开Instagram应用并粘贴到你的动态中',
-      copyLinkForInstagram: '请复制以下内容到Instagram：'
+      copyLinkForInstagram: '请复制以下内容到Instagram：',
+      wechatShareTip: '链接已复制，请粘贴到微信分享',
+      copyLinkToWechat: '复制链接到微信'
     }
   },
   en: {
@@ -466,7 +468,9 @@ export const languages = {
         showRecommended: 'Show Recommended'
       },
       instagramShareTip: 'Link copied! Please open Instagram app and paste it to your story',
-      copyLinkForInstagram: 'Please copy the following content to Instagram:'
+      copyLinkForInstagram: 'Please copy the following content to Instagram:',
+      wechatShareTip: 'Link copied, please paste to WeChat to share',
+      copyLinkToWechat: 'Copy link to WeChat'
     }
   },
   es: {
@@ -701,7 +705,9 @@ export const languages = {
         showRecommended: 'Mostrar Recomendadas'
       },
       instagramShareTip: '¡Enlace copiado! Por favor abre la app de Instagram y pégalo en tu historia',
-      copyLinkForInstagram: 'Por favor copia el siguiente contenido a Instagram:'
+      copyLinkForInstagram: 'Por favor copia el siguiente contenido a Instagram:',
+      wechatShareTip: 'Enlace copiado, por favor pégalo en WeChat para compartir',
+      copyLinkToWechat: 'Copiar enlace a WeChat'
     }
   }
 };
