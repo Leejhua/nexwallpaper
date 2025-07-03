@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Copy, Check, Smartphone, Flame, Star, MessageCircle, Camera, Pin } from 'lucide-react';
+import { 
+  X, Share2, Copy, Check, Smartphone, Flame, Star, MessageCircle, Camera, Pin,
+  Facebook, Twitter, Instagram, Linkedin, Send, Globe, Hash, Users
+} from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { generateShareMetadata, optimizeForPlatform } from '../utils/shareUtils';
 
@@ -18,11 +21,21 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     // 不让错误导致白屏，静默处理
   }, []);
 
+  // 安全的翻译函数
+  const safeT = useCallback((key, fallback = key) => {
+    try {
+      return t ? t(key) : fallback;
+    } catch (error) {
+      handleError(error, 'safeT');
+      return fallback;
+    }
+  }, [t, handleError]);
+
   // 构建分享数据
   const getShareData = useCallback(() => {
     try {
       if (!item) return null;
-      return generateShareMetadata(item, t, currentLanguage);
+      return generateShareMetadata(item, safeT, currentLanguage);
     } catch (error) {
       handleError(error, 'getShareData');
       return {
@@ -31,7 +44,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
         url: window.location.href
       };
     }
-  }, [item, t, currentLanguage, handleError]);
+  }, [item, safeT, currentLanguage, handleError]);
 
   // 检测是否为移动设备
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -145,13 +158,13 @@ const ShareModal = ({ isOpen, onClose, item }) => {
         
         // 移动端提示用户可以粘贴到微信
         if (isMobile) {
-          alert(t('wechatShareTip') || '链接已复制，请粘贴到微信分享');
+          alert(safeT('wechatShareTip', '链接已复制，请粘贴到微信分享'));
         }
       } catch (error) {
         // 降级处理
         const textToCopy = `${shareData.text} ${shareData.url}`;
         if (window.prompt) {
-          prompt(t('copyLinkToWechat') || '复制链接到微信', textToCopy);
+          prompt(safeT('copyLinkToWechat', '复制链接到微信'), textToCopy);
         }
         onClose();
       }
@@ -300,9 +313,9 @@ const ShareModal = ({ isOpen, onClose, item }) => {
           await navigator.clipboard.writeText(shareContent);
           setCopied(true);
           setTimeout(() => setCopied(false), 3000);
-          alert(t('instagramShareTip') || '内容已复制，请粘贴到Instagram分享');
+          alert(safeT('instagramShareTip', '内容已复制，请粘贴到Instagram分享'));
         } catch (clipboardError) {
-          prompt(t('copyLinkForInstagram') || '复制内容到Instagram', shareContent);
+          prompt(safeT('copyLinkForInstagram', '复制内容到Instagram'), shareContent);
         }
       } else {
         // 桌面端复制链接
@@ -310,9 +323,9 @@ const ShareModal = ({ isOpen, onClose, item }) => {
           await navigator.clipboard.writeText(shareContent);
           setCopied(true);
           setTimeout(() => setCopied(false), 3000);
-          alert(t('instagramShareTip') || '内容已复制，请在Instagram中粘贴分享');
+          alert(safeT('instagramShareTip', '内容已复制，请在Instagram中粘贴分享'));
         } catch (error) {
-          prompt(t('copyLinkForInstagram') || '复制内容到Instagram', shareContent);
+          prompt(safeT('copyLinkForInstagram', '复制内容到Instagram'), shareContent);
         }
       }
       
@@ -402,12 +415,12 @@ const ShareModal = ({ isOpen, onClose, item }) => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (error) {
-        prompt(t('copyLink') || '复制链接', shareData.url);
+        prompt(safeT('copyLink', '复制链接'), shareData.url);
       }
     } catch (error) {
       handleError(error, 'copyLink');
     }
-  }, [getShareData, t, handleError]);
+  }, [getShareData, safeT, handleError]);
 
   // 原生分享
   const nativeShare = useCallback(async () => {
@@ -445,11 +458,11 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     // 通用选项（所有语言都显示）
     const universalOptions = [
       {
-        name: t('shareOptions.more'),
+        name: safeT('shareOptions.more', 'More'),
         icon: Smartphone,
         color: 'bg-purple-500 hover:bg-purple-600',
         action: nativeShare,
-        description: t('shareOptions.more')
+        description: safeT('shareOptions.more', 'Use system share')
       }
     ];
 
@@ -460,21 +473,21 @@ const ShareModal = ({ isOpen, onClose, item }) => {
         icon: Flame,
         color: 'bg-red-500 hover:bg-red-600',
         action: shareToWeibo,
-        description: t('shareOptions.weibo')
+        description: safeT('shareOptions.weibo', '分享到微博')
       },
       {
         name: 'QQ空间',
         icon: Star,
         color: 'bg-yellow-500 hover:bg-yellow-600',
         action: shareToQzone,
-        description: t('shareOptions.qzone')
+        description: safeT('shareOptions.qzone', '分享到QQ空间')
       },
       {
         name: '微信',
         icon: MessageCircle,
         color: 'bg-green-500 hover:bg-green-600',
         action: shareToWechat,
-        description: t('shareOptions.wechat')
+        description: safeT('shareOptions.wechat', '分享到微信')
       }
     ];
 
@@ -482,59 +495,59 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     const internationalOptions = [
       {
         name: 'Facebook',
-        icon: '📘',
+        icon: Facebook,
         color: 'bg-blue-600 hover:bg-blue-700',
         action: shareToFacebook,
-        description: t('shareOptions.facebook')
+        description: safeT('shareOptions.facebook', 'Share to Facebook')
       },
       {
         name: 'Twitter/X',
-        icon: '🐦',
+        icon: Twitter,
         color: 'bg-black hover:bg-gray-800',
         action: shareToTwitter,
-        description: t('shareOptions.twitter')
+        description: safeT('shareOptions.twitter', 'Share to Twitter/X')
       },
       {
         name: 'Instagram',
         icon: Camera,
         color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
         action: shareToInstagram,
-        description: t('shareOptions.instagram')
+        description: safeT('shareOptions.instagram', 'Copy link to share on Instagram')
       },
       {
         name: 'Pinterest',
         icon: Pin,
         color: 'bg-red-600 hover:bg-red-700',
         action: shareToPinterest,
-        description: t('shareOptions.pinterest')
+        description: safeT('shareOptions.pinterest', 'Share to Pinterest')
       },
       {
         name: 'Reddit',
-        icon: '🤖',
+        icon: Hash,
         color: 'bg-orange-600 hover:bg-orange-700',
         action: shareToReddit,
-        description: t('shareOptions.reddit')
+        description: safeT('shareOptions.reddit', 'Share to Reddit')
       },
       {
         name: 'LinkedIn',
-        icon: '💼',
+        icon: Linkedin,
         color: 'bg-blue-700 hover:bg-blue-800',
         action: shareToLinkedIn,
-        description: t('shareOptions.linkedin')
+        description: safeT('shareOptions.linkedin', 'Share to LinkedIn')
       },
       {
         name: 'WhatsApp',
-        icon: '💬',
+        icon: MessageCircle,
         color: 'bg-green-600 hover:bg-green-700',
         action: shareToWhatsApp,
-        description: t('shareOptions.whatsapp')
+        description: safeT('shareOptions.whatsapp', 'Share to WhatsApp')
       },
       {
         name: 'Telegram',
-        icon: '✈️',
+        icon: Send,
         color: 'bg-blue-500 hover:bg-blue-600',
         action: shareToTelegram,
-        description: t('shareOptions.telegram')
+        description: safeT('shareOptions.telegram', 'Share to Telegram')
       }
     ];
 
@@ -553,12 +566,30 @@ const ShareModal = ({ isOpen, onClose, item }) => {
     }
 
     return [...internationalOptions, ...universalOptions];
-  }, [currentLanguage, showAllRegions, t, shareToWeibo, shareToQzone, shareToWechat, shareToFacebook, shareToTwitter, shareToInstagram, shareToPinterest, shareToReddit, shareToLinkedIn, shareToWhatsApp, shareToTelegram, nativeShare, handleError]);
+  }, [currentLanguage, showAllRegions, safeT, shareToWeibo, shareToQzone, shareToWechat, shareToFacebook, shareToTwitter, shareToInstagram, shareToPinterest, shareToReddit, shareToLinkedIn, shareToWhatsApp, shareToTelegram, nativeShare, handleError]);
 
   const shareOptions = getShareOptions();
 
   // 安全渲染检查
   if (!isOpen || !item) {
+    return null;
+  }
+
+  // 最终安全检查
+  try {
+    // 确保所有必要的数据都存在
+    if (!shareOptions || shareOptions.length === 0) {
+      console.warn('ShareModal: No share options available');
+      return null;
+    }
+
+    // 确保翻译函数可用
+    if (!safeT) {
+      console.warn('ShareModal: Translation function not available');
+      return null;
+    }
+  } catch (error) {
+    handleError(error, 'final-safety-check');
     return null;
   }
 
@@ -581,7 +612,12 @@ const ShareModal = ({ isOpen, onClose, item }) => {
           whileTap={{ scale: 0.98 }}
           title={option.description}
         >
-          <option.icon size={20} className="text-white" />
+          {/* 安全的图标渲染 */}
+          {typeof option.icon === 'string' ? (
+            <span className="text-xl">{option.icon}</span>
+          ) : (
+            <option.icon size={20} className="text-white" />
+          )}
           <span className="font-medium text-xs text-center leading-tight">{option.name}</span>
         </motion.button>
       );

@@ -6,6 +6,7 @@ import LikeButton from './LikeButton';
 import LikeCounter from './LikeCounter';
 import ErrorBoundary from './ErrorBoundary';
 import ShareModal from './ShareModal';
+import ShareModalErrorBoundary from './ShareModalErrorBoundary';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -436,11 +437,13 @@ const Modal = memo(({ isOpen, item, onClose }) => {
     </AnimatePresence>
     
     {/* 分享模态框 */}
-    <ShareModal
-      isOpen={isShareModalOpen}
-      onClose={() => setIsShareModalOpen(false)}
-      item={item}
-    />
+    <ShareModalErrorBoundary onClose={() => setIsShareModalOpen(false)}>
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        item={item}
+      />
+    </ShareModalErrorBoundary>
     </>
   );
 });
