@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-07-03T07:32:50.040Z",
+  "summary": {
+    "total": 408,
+    "ok": 408,
+    "failed": 0,
+    "successRate": 100
+  },
+  "failedLinks": [],
+  "domainStats": {
+    "res.labubuwallpaper.xyz": {
+      "total": 400,
+      "ok": 400,
+      "failed": 0
+    },
+    "service.weibo.com": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "connect.qq.com": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "www.facebook.com": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "pinterest.com": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "reddit.com": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "www.linkedin.com": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "wa.me": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    },
+    "t.me": {
+      "total": 1,
+      "ok": 1,
+      "failed": 0
+    }
+  }
+}

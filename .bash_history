@@ -10,3 +10,13 @@ q
 q
 q
 q
+git push
+git branch
+git branch --verbose
+git push
+q
+q logout
+q login
+q
+q
+q

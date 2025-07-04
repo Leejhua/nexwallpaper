@@ -142,86 +142,57 @@ export const optimizeForPlatform = (metadata, platform) => {
   }
 };
 
-    default:
-      return base;
-  }
-};
-
 /**
- * 生成Open Graph和Twitter Card元标签
- * @param {Object} metadata - 元数据
- * @returns {string} HTML meta标签字符串
+ * 检测用户设备类型
+ * @returns {Object} 设备信息
  */
-export const generateMetaTags = (metadata) => {
-  if (!metadata) return '';
-
-  return `
-    <!-- Open Graph -->
-    <meta property="og:type" content="${metadata.type}" />
-    <meta property="og:title" content="${metadata.title}" />
-    <meta property="og:description" content="${metadata.description}" />
-    <meta property="og:image" content="${metadata.image}" />
-    <meta property="og:url" content="${metadata.url}" />
-    <meta property="og:site_name" content="${metadata.siteName}" />
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${metadata.title}" />
-    <meta name="twitter:description" content="${metadata.description}" />
-    <meta name="twitter:image" content="${metadata.image}" />
-    <meta name="twitter:image:alt" content="${metadata.imageAlt}" />
-    
-    <!-- General -->
-    <meta name="description" content="${metadata.description}" />
-    <meta name="keywords" content="${metadata.hashtags.join(', ')}" />
-  `.trim();
-};
-
-/**
- * 检测用户地区和语言，推荐最佳分享方式
- * @param {string} currentLanguage - 当前语言
- * @returns {Object} 推荐的分享平台配置
- */
-export const getRecommendedPlatforms = (currentLanguage) => {
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isMobile = /mobile|android|iphone|ipad/.test(userAgent);
-  const isIOS = /iphone|ipad/.test(userAgent);
-  const isAndroid = /android/.test(userAgent);
-
-  // 中文环境 - 推荐国内平台
-  if (currentLanguage === 'zh') {
-    let domestic = ['weibo', 'qzone', 'wechat'];
-    
-    if (isMobile) {
-      // 移动端优先微信和QQ
-      domestic = ['wechat', 'weibo', 'qzone'];
-    }
-    
-    return {
-      region: 'domestic',
-      platforms: domestic,
-      primary: domestic.slice(0, 3)
-    };
-  }
-
-  // 英文/西班牙语环境 - 推荐国际平台
-  let international = ['facebook', 'twitter', 'pinterest'];
-
-  if (isMobile) {
-    international.unshift('whatsapp');
-    if (isIOS) {
-      international.push('instagram');
-    }
-    if (isAndroid) {
-      international.push('telegram');
-    }
-  } else {
-    international.push('linkedin', 'reddit');
-  }
-
+export const detectDevice = () => {
+  const userAgent = navigator.userAgent;
   return {
-    region: 'international',
-    platforms: international,
-    primary: international.slice(0, 6)
+    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent),
+    isIOS: /iPhone|iPad|iPod/i.test(userAgent),
+    isAndroid: /Android/i.test(userAgent),
+    isDesktop: !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
   };
+};
+
+/**
+ * 生成分享链接
+ * @param {string} platform - 平台名称
+ * @param {Object} data - 分享数据
+ * @returns {string} 分享链接
+ */
+export const generateShareUrl = (platform, data) => {
+  try {
+    const { url, title, text, image } = data;
+    
+    switch (platform) {
+      case 'facebook':
+        return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+      
+      case 'twitter':
+        return `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      
+      case 'pinterest':
+        return `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(image)}&description=${encodeURIComponent(text)}`;
+      
+      case 'linkedin':
+        return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      
+      case 'reddit':
+        return `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
+      
+      case 'whatsapp':
+        return `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
+      
+      case 'telegram':
+        return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      
+      default:
+        return url;
+    }
+  } catch (error) {
+    console.error('generateShareUrl error:', error);
+    return data?.url || window.location.href;
+  }
 };
