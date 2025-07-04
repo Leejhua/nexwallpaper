@@ -117,6 +117,7 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
             <button
               onClick={clearAllTags}
               className="clear-tags-btn no-focus-outline text-xs text-red-500 hover:text-red-700"
+              style={{ height: '24px', padding: '0 8px' }} // 24px = 8 * 3
             >
               清除全部
             </button>
@@ -133,7 +134,8 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
                 {tag}
                 <button
                   onClick={() => removeTag(tag)}
-                  className="hover:bg-blue-200 rounded-full p-0.5"
+                  className="hover:bg-blue-200 rounded-full"
+                  style={{ width: '16px', height: '16px', padding: '2px' }} // 16px = 8 * 2
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -146,7 +148,8 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
       {/* 展开/收起按钮 */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full mb-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+        className="w-full mb-4 text-sm text-blue-600 hover:text-blue-800 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+        style={{ height: '40px' }} // 40px = 8 * 5
       >
         {isExpanded ? '收起标签分类' : '展开标签分类'}
       </button>
@@ -171,11 +174,12 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
                           key={tag}
                           onClick={() => addTag(tag)}
                           disabled={selectedTags.includes(tag)}
-                          className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                          className={`rounded-full text-xs transition-colors ${
                             selectedTags.includes(tag)
                               ? 'bg-blue-100 text-blue-800 cursor-not-allowed'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
+                          style={{ height: '24px', padding: '0 12px' }} // 24px = 8 * 3
                         >
                           {tag} ({count})
                         </button>
@@ -201,11 +205,12 @@ const TagSearch = ({ items, onFilteredItemsChange, className = '' }) => {
                     key={tag}
                     onClick={() => addTag(tag)}
                     disabled={selectedTags.includes(tag)}
-                    className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                    className={`rounded-full text-xs transition-colors ${
                       selectedTags.includes(tag)
                         ? 'bg-blue-100 text-blue-800 cursor-not-allowed'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
+                    style={{ height: '24px', padding: '0 12px' }} // 24px = 8 * 3
                   >
                     {tag} ({count})
                   </button>

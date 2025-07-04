@@ -607,7 +607,8 @@ const ShareModal = ({ isOpen, onClose, item }) => {
               onClose();
             }
           }}
-          className={`share-option-btn no-focus-outline ${option.color} text-white p-3 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg`}
+          className={`share-option-btn no-focus-outline ${option.color} text-white rounded-xl flex flex-col items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg`}
+          style={{ height: '80px', padding: '12px' }} // 80px = 8 * 10
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           title={option.description}
@@ -652,7 +653,8 @@ const ShareModal = ({ isOpen, onClose, item }) => {
               </div>
               <button
                 onClick={onClose}
-                className="close-btn no-focus-outline p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="close-btn no-focus-outline hover:bg-gray-100 rounded-full transition-colors"
+                style={{ width: '40px', height: '40px', padding: '8px' }} // 40px = 8 * 5
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
@@ -690,6 +692,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
                 <button
                   onClick={() => setShowAllRegions(!showAllRegions)}
                   className="region-toggle-btn no-focus-outline text-xs text-blue-500 hover:text-blue-600 transition-colors"
+                  style={{ height: '24px', padding: '0 8px' }} // 24px = 8 * 3
                 >
                   {showAllRegions ? t('shareRegion.showRecommended') : t('shareRegion.showAll')}
                 </button>
@@ -718,11 +721,12 @@ const ShareModal = ({ isOpen, onClose, item }) => {
                   </div>
                   <motion.button
                     onClick={copyLink}
-                    className={`copy-link-btn no-focus-outline px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${
+                    className={`copy-link-btn no-focus-outline rounded-lg font-medium text-sm transition-all duration-200 ${
                       copied
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
+                    style={{ height: '48px', padding: '0 16px' }} // 48px = 8 * 6
                     whileTap={{ scale: 0.95 }}
                   >
                     {copied ? (

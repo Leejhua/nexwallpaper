@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Menu, Filter, Search, RotateCcw, Rabbit,
+  X, Menu, Filter, Search, RotateCcw, Rabbit, Globe,
   FolderOpen, Sparkles, Monitor, Smartphone, Flower2, Video, Play
 } from 'lucide-react';
 import { categories } from '../data/galleryData';
@@ -48,7 +48,7 @@ const Sidebar = ({
         whileTap={{ scale: 0.95 }}
         style={{
           width: '40px',
-          height: '40px',
+          height: '40px', // 40px = 8 * 5
           borderRadius: '8px',
           background: 'white',
           border: '1px solid #e0e0e0',
@@ -139,6 +139,7 @@ const Sidebar = ({
                       className="pixiv-input"
                       style={{
                         width: '100%',
+                        height: '40px', // 40px = 8 * 5
                         padding: '8px 12px',
                         border: '1px solid #e0e0e0',
                         borderRadius: '8px',
@@ -172,7 +173,7 @@ const Sidebar = ({
                 {/* 语言选择器 */}
                 <div style={{ marginBottom: '24px' }}>
                   <div className="flex items-center gap-2 text-gray-700 mb-2">
-                    <span className="text-lg">🌐</span>
+                    <Globe className="w-4 h-4" />
                     <span className="font-medium text-sm">{t('language')}</span>
                   </div>
                   <LanguageSelector />
@@ -195,11 +196,12 @@ const Sidebar = ({
                         <motion.button
                           key={category.key}
                           onClick={() => onFilterChange(category.key)}
-                          className={`category-filter-btn no-focus-outline w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                          className={`category-filter-btn no-focus-outline w-full flex items-center justify-between rounded-xl transition-all ${
                             isSelected || (isAllSelected && category.key === 'all')
                               ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                               : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
                           }`}
+                          style={{ height: '48px', padding: '0 12px' }} // 48px = 8 * 6
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -233,7 +235,8 @@ const Sidebar = ({
                 {(!currentFilter.includes('all') || searchTerm) && (
                   <motion.button
                     onClick={onResetFilters}
-                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
+                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
+                    style={{ height: '48px' }} // 48px = 8 * 6
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >

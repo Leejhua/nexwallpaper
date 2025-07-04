@@ -31,13 +31,14 @@ const SortControls = ({ onSortChange, currentSort = 'default' }) => {
           onClick={() => handleSortChange(option.key)}
           className={`
             sort-control-btn no-focus-outline
-            flex items-center gap-1 px-3 py-1.5 rounded-full text-sm
+            flex items-center gap-1 rounded-full text-sm
             transition-all duration-200 border
             ${activeSort === option.key
               ? 'bg-blue-500 text-white border-blue-500 shadow-lg'
               : 'bg-white/80 text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-gray-800/80 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
             }
           `}
+          style={{ height: '32px', padding: '0 12px' }} // 32px = 8 * 4
         >
           <option.icon size={16} />
           <span>{option.label}</span>

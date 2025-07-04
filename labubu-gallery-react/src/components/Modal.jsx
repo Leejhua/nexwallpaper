@@ -228,9 +228,13 @@ const Modal = memo(({ isOpen, item, onClose }) => {
               onClick={onClose}
               className={`close-btn no-focus-outline absolute ${
                 isMobile 
-                  ? 'top-3 right-3 z-50 w-8 h-8' 
-                  : 'top-4 right-4 z-10 w-10 h-10'
+                  ? 'top-3 right-3 z-50' 
+                  : 'top-4 right-4 z-10'
               } text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-lg border border-gray-200 group flex items-center justify-center`}
+              style={{ 
+                width: isMobile ? '32px' : '40px',  // 32px = 8*4, 40px = 8*5
+                height: isMobile ? '32px' : '40px'
+              }}
               title={t('buttons.close')}
             >
               <X className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
@@ -322,9 +326,14 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                     <button
                       onClick={() => handleDownload(getHighResUrl(item.url), item.title)}
                       disabled={isDownloading}
-                      className={`download-btn no-focus-outline flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${isMobile ? 'text-xs px-2 py-1.5' : ''} ${
+                      className={`download-btn no-focus-outline flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${
                         isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
                       }`}
+                      style={{ 
+                        height: isMobile ? '32px' : '40px', // 32px = 8*4, 40px = 8*5
+                        padding: isMobile ? '0 8px' : '0 12px',
+                        fontSize: isMobile ? '12px' : '14px'
+                      }}
                     >
                       {isDownloading ? (
                         <>
@@ -344,12 +353,17 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                         wallpaperId={item.id}
                         size={isMobile ? "small" : "medium"}
                         showCount={false}
+                        square={true} // 设置为正方形
                       />
                     </ErrorBoundary>
 
                     <button
                       onClick={handleShare}
-                      className={`share-btn no-focus-outline px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors ${isMobile ? 'px-2 py-1.5' : ''}`}
+                      className="share-btn no-focus-outline border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      style={{ 
+                        height: isMobile ? '32px' : '40px', // 32px = 8*4, 40px = 8*5
+                        padding: isMobile ? '0 8px' : '0 12px'
+                      }}
                     >
                       <Share2 className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
                     </button>

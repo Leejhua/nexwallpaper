@@ -15,11 +15,12 @@
     "test:e2e": "node tests/e2e-test.js"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "clsx": "^2.0.0",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0",
+    "motion": "^12.23.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
@@ -35,7 +36,13 @@
     "tailwindcss": "^3.3.5",
     "vite": "^4.5.0"
   },
-  "keywords": ["react", "wallpaper", "gallery", "labubu", "aceternity"],
+  "keywords": [
+    "react",
+    "wallpaper",
+    "gallery",
+    "labubu",
+    "aceternity"
+  ],
   "author": "LEEJHSE",
   "license": "MIT"
 }

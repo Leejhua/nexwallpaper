@@ -4,6 +4,7 @@ import { Search, Sparkles } from 'lucide-react';
 import GalleryItem from './GalleryItem';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import { useLanguage } from '../contexts/LanguageContext';
+import { BlurFade } from './ui/BlurFade';
 
 /**
  * 优化版瀑布流画廊组件 - 懒加载首屏40条，避免闪屏白屏
@@ -106,9 +107,9 @@ const Gallery = ({
     });
   }, [sortMode, getStats, getPopularityScore, shuffleArray]);
 
-  // 首屏加载40条，后续每次加载20条
+  // 首屏加载40条，后续每次加载60条 - 激进优化滚动体验
   const INITIAL_LOAD_SIZE = 40; // 首屏显示40条
-  const LOAD_SIZE = 20; // 后续每次加载20条
+  const LOAD_SIZE = 60; // 后续每次加载60条，彻底消除空白时间
 
   // 响应式列数计算 - 为横屏图片优化
   useEffect(() => {
@@ -288,7 +289,7 @@ const Gallery = ({
       setColumns(newColumns);
       
       setIsLoadingMore(false);
-    }, 100); // 100ms延迟，提供平滑的加载体验
+    }, 30); // 30ms延迟，最快响应速度
   }, [items, loadedCount, displayedItems, isLoadingMore, hasMore, isInitialLoading, redistributeAllItems, sortItems]);
 
   // 无限滚动观察器 - 优化触发时机
@@ -301,7 +302,7 @@ const Gallery = ({
       },
       { 
         threshold: 0.1, 
-        rootMargin: '300px' // 提前300px开始加载，平衡性能和体验
+        rootMargin: '1200px' // 提前1200px开始加载，激进预加载策略
       }
     );
 
@@ -327,8 +328,8 @@ const Gallery = ({
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
       
-      // 当滚动到距离底部400px时触发加载
-      if (scrollTop + windowHeight >= documentHeight - 400) {
+      // 当滚动到距离底部1200px时触发加载，激进预加载
+      if (scrollTop + windowHeight >= documentHeight - 1200) {
         loadMore();
       }
     };
@@ -382,7 +383,8 @@ const Gallery = ({
         </p>
         <motion.button
           onClick={() => window.location.reload()}
-          className="reload-btn no-focus-outline px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+          className="reload-btn no-focus-outline bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+          style={{ height: '48px', padding: '0 24px' }} // 48px = 8 * 6
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -410,25 +412,21 @@ const Gallery = ({
               {columns[columnIndex]?.map((item, itemIndex) => {
                 const globalIndex = displayedItems.findIndex(displayedItem => displayedItem.id === item.id);
                 return (
-                  <motion.div
-                    key={`${item.id}-${currentFilter.join('-')}`} // 添加currentFilter确保重新渲染
+                  <BlurFade
+                    key={`${item.id}-${currentFilter.join('-')}`}
                     className="masonry-item"
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                    transition={{ 
-                      duration: 0.4,
-                      delay: globalIndex * 0.02,
-                      ease: "easeOut"
-                    }}
-                    layout={false}
+                    delay={globalIndex * 0.02}
+                    duration={0.4}
+                    direction="down"
+                    inView={true}
+                    blur="6px"
                   >
                     <GalleryItem
                       item={item}
                       onPreview={onPreview}
                       index={globalIndex}
                     />
-                  </motion.div>
+                  </BlurFade>
                 );
               })}
             </AnimatePresence>
@@ -461,7 +459,8 @@ const Gallery = ({
             ) : (
               <motion.button
                 onClick={loadMore}
-                className="load-more-btn no-focus-outline px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                className="load-more-btn no-focus-outline bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                style={{ height: '48px', padding: '0 24px' }} // 48px = 8 * 6
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}

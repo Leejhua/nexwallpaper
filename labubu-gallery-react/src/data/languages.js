@@ -41,7 +41,9 @@ export const languages = {
         fullscreen: '全屏',
         close: '关闭',
         reset: '重置筛选',
-        refresh: '刷新'
+        refresh: '刷新',
+        like: '喜欢',
+        unlike: '取消喜欢'
       },
       loading: '加载中...',
       loadMore: '滚动加载更多',
@@ -278,7 +280,9 @@ export const languages = {
         fullscreen: 'Fullscreen',
         close: 'Close',
         reset: 'Reset Filters',
-        refresh: 'Refresh'
+        refresh: 'Refresh',
+        like: 'Like',
+        unlike: 'Unlike'
       },
       loading: 'Loading...',
       loadMore: 'Scroll to load more',
@@ -515,7 +519,9 @@ export const languages = {
         fullscreen: 'Pantalla Completa',
         close: 'Cerrar',
         reset: 'Restablecer Filtros',
-        refresh: 'Actualizar'
+        refresh: 'Actualizar',
+        like: 'Me Gusta',
+        unlike: 'No Me Gusta'
       },
       loading: 'Cargando...',
       loadMore: 'Desplázate para cargar más',

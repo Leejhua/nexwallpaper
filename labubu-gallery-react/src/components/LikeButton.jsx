@@ -8,6 +8,7 @@ const LikeButton = ({
   wallpaperId, 
   size = 'medium',
   showCount = true,
+  square = false, // 新增正方形属性
   className = '' 
 }) => {
   const { t } = useLanguage();
@@ -62,9 +63,10 @@ const LikeButton = ({
   return (
     <motion.button
       onClick={handleLikeClick}
+      title={square ? (isLikedState ? t('buttons.unlike') : t('buttons.like')) : undefined} // 正方形时添加title
       className={`
         like-btn no-focus-outline
-        flex items-center gap-2 px-3 py-2 rounded-md
+        flex items-center ${square ? 'justify-center' : 'gap-2'} ${square ? 'rounded-md' : 'rounded-md'}
         transition-all duration-200 border
         ${isLikedState 
           ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
@@ -72,10 +74,16 @@ const LikeButton = ({
         }
         ${className}
       `}
+      style={{ 
+        height: size === 'small' ? '32px' : '40px', // 32px = 8*4, 40px = 8*5
+        width: square ? (size === 'small' ? '32px' : '40px') : 'auto', // 正方形时设置宽度
+        padding: square ? '0' : (size === 'small' ? '0 8px' : '0 12px')
+      }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}
       transition={{ duration: 0.3 }}
+    >
     >
       <motion.div
         animate={isAnimating ? { 
@@ -89,7 +97,7 @@ const LikeButton = ({
         />
       </motion.div>
       
-      {showCount && likeCount > 0 && (
+      {showCount && !square && likeCount > 0 && (
         <motion.span
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
