@@ -55,9 +55,9 @@ const LikeButton = ({
   }, [wallpaperId, toggleLike]);
 
   const sizeClasses = {
-    small: 'w-4 h-4 text-sm',
-    medium: 'w-8 h-8 text-base',
-    large: 'w-10 h-10 text-lg'
+    small: 'w-3 h-3', // 移动端尺寸，与分享按钮一致
+    medium: 'w-4 h-4', // 桌面端尺寸，与分享按钮一致
+    large: 'w-5 h-5'
   };
 
   return (
@@ -66,7 +66,7 @@ const LikeButton = ({
       title={square ? (isLikedState ? t('buttons.unlike') : t('buttons.like')) : undefined} // 正方形时添加title
       className={`
         like-btn no-focus-outline
-        flex items-center ${square ? 'justify-center' : 'gap-2'} ${square ? 'rounded-md' : 'rounded-md'}
+        flex items-center ${square ? 'justify-center' : 'gap-2'} rounded-md
         transition-all duration-200 border
         ${isLikedState 
           ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
@@ -84,11 +84,11 @@ const LikeButton = ({
       animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}
       transition={{ duration: 0.3 }}
     >
-    >
       <motion.div
+        className="flex items-center justify-center" // 确保图标居中
         animate={isAnimating ? { 
-          scale: [1, 1.3, 1],
-          rotate: [0, 15, -15, 0]
+          scale: [1, 1.2, 1],
+          rotate: [0, 10, -10, 0]
         } : {}}
         transition={{ duration: 0.3 }}
       >
