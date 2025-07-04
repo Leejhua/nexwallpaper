@@ -70,7 +70,7 @@ const LikeButton = ({
         transition-all duration-200 border
         ${isLikedState 
           ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
-          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
         }
         ${className}
       `}

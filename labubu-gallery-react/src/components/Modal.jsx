@@ -359,7 +359,7 @@ const Modal = memo(({ isOpen, item, onClose }) => {
 
                     <button
                       onClick={handleShare}
-                      className="share-btn no-focus-outline border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      className="share-btn no-focus-outline border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200"
                       style={{ 
                         height: isMobile ? '32px' : '40px', // 32px = 8*4, 40px = 8*5
                         padding: isMobile ? '0 8px' : '0 12px'
