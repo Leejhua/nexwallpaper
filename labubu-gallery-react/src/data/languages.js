@@ -235,7 +235,8 @@ export const languages = {
       instagramShareTip: '链接已复制！请打开Instagram应用并粘贴到你的动态中',
       copyLinkForInstagram: '请复制以下内容到Instagram：',
       wechatShareTip: '链接已复制，请粘贴到微信分享',
-      copyLinkToWechat: '复制链接到微信'
+      copyLinkToWechat: '复制链接到微信',
+      clickToSearch: '点击搜索'
     }
   },
   en: {
@@ -474,7 +475,8 @@ export const languages = {
       instagramShareTip: 'Link copied! Please open Instagram app and paste it to your story',
       copyLinkForInstagram: 'Please copy the following content to Instagram:',
       wechatShareTip: 'Link copied, please paste to WeChat to share',
-      copyLinkToWechat: 'Copy link to WeChat'
+      copyLinkToWechat: 'Copy link to WeChat',
+      clickToSearch: 'Click to search'
     }
   },
   es: {
@@ -713,7 +715,8 @@ export const languages = {
       instagramShareTip: '¡Enlace copiado! Por favor abre la app de Instagram y pégalo en tu historia',
       copyLinkForInstagram: 'Por favor copia el siguiente contenido a Instagram:',
       wechatShareTip: 'Enlace copiado, por favor pégalo en WeChat para compartir',
-      copyLinkToWechat: 'Copiar enlace a WeChat'
+      copyLinkToWechat: 'Copiar enlace a WeChat',
+      clickToSearch: 'Haz clic para buscar'
     }
   }
 };

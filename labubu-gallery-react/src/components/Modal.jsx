@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Heart, Share2, Maximize2, AlertCircle } from 'lucide-react';
+import { X, Download, Heart, Share2, Maximize2, AlertCircle, Search } from 'lucide-react';
 import { getHighResUrl, getThumbnailUrl } from '../utils/imageUtils';
 import LikeButton from './LikeButton';
 import LikeCounter from './LikeCounter';
@@ -13,7 +13,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 /**
  * 模态框组件 - 移动端优化版本
  */
-const Modal = memo(({ isOpen, item, onClose }) => {
+const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
   const { t, currentLanguage } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -182,8 +182,13 @@ const Modal = memo(({ isOpen, item, onClose }) => {
     }
   }, [isDownloading, item]);
 
-  // 分享功能 - 打开分享模态框
-  const handleShare = useCallback(() => {
+  // 标签点击处理
+  const handleTagClick = useCallback((tag) => {
+    if (onTagClick) {
+      onTagClick(tag);
+      onClose(); // 关闭详情页，返回主页面查看搜索结果
+    }
+  }, [onTagClick, onClose]);
     if (!item) return;
     setIsShareModalOpen(true);
   }, [item]);
@@ -372,10 +377,20 @@ const Modal = memo(({ isOpen, item, onClose }) => {
 
                 {/* 标签区域 - Pixiv风格 */}
                 <div className="p-6 border-b border-gray-100">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">{t('tags')}</h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <h3 className="text-sm font-medium text-gray-900">{t('tags')}</h3>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Search className="w-3 h-3" />
+                      <span>{t('clickToSearch')}</span>
+                    </div>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {/* 分类标签 */}
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors">
+                    <span 
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 hover:bg-blue-200 cursor-pointer transition-all duration-200 hover:scale-105"
+                      onClick={() => handleTagClick(getCategoryName(item.category))}
+                      title={`${t('search')} ${getCategoryName(item.category)} ${t('wallpapers')}`}
+                    >
                       #{getCategoryName(item.category)}
                     </span>
                     
@@ -396,7 +411,9 @@ const Modal = memo(({ isOpen, item, onClose }) => {
                       return (
                         <span
                           key={`tag-${tag}-${index}`}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 hover:bg-gray-200 cursor-pointer transition-all duration-200 hover:scale-105"
+                          onClick={() => handleTagClick(tag)}
+                          title={`${t('search')} ${displayTag} ${t('wallpapers')}`}
                         >
                           #{displayTag}
                         </span>

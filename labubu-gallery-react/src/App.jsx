@@ -51,7 +51,10 @@ function App() {
     closeModal
   } = useModal();
 
-  // 响应式侧边栏控制
+  // 标签点击处理 - 搜索对应标签
+  const handleTagClick = useCallback((tag) => {
+    handleSearch(tag); // 使用现有的搜索功能
+  }, [handleSearch]);
   useEffect(() => {
     const handleResize = () => {
       // 在移动端（小于1024px）时自动关闭侧边栏
@@ -170,6 +173,7 @@ function App() {
         isOpen={isModalOpen}
         onClose={closeModal}
         item={selectedItem}
+        onTagClick={handleTagClick}
       />
 
       {/* Pixiv风格全局样式注入 - 优化版本 */}
