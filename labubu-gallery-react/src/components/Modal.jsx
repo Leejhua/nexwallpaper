@@ -189,6 +189,9 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
       onClose(); // 关闭详情页，返回主页面查看搜索结果
     }
   }, [onTagClick, onClose]);
+
+  // 分享功能 - 打开分享模态框
+  const handleShare = useCallback(() => {
     if (!item) return;
     setIsShareModalOpen(true);
   }, [item]);
