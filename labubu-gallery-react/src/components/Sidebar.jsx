@@ -112,9 +112,6 @@ const Sidebar = ({
                       <span>Labubu Gallery</span>
                     </div>
                   </h2>
-                  <p style={{ fontSize: '14px', color: '#666666' }}>
-                    {filteredItems} / {totalItems} {t('stats.items')}
-                  </p>
                 </div>
 
                 {/* Pixiv风格搜索框 */}
@@ -244,12 +241,6 @@ const Sidebar = ({
                     <span className="font-medium">{t('buttons.reset')}</span>
                   </motion.button>
                 )}
-
-                {/* 版本信息 */}
-                <div className="text-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-                  <p>{t('version')}</p>
-                  <p>{t('features')}</p>
-                </div>
               </div>
             </motion.div>
           </>
