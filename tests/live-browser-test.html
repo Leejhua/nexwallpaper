@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时浏览器测试验证</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .results.error {
+            border-left-color: #dc3545;
+        }
+        
+        .device-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 实时浏览器测试验证</h1>
+        
+        <!-- 设备信息 -->
+        <div class="device-info">
+            <h3>📱 当前环境信息</h3>
+            <div id="device-info"></div>
+        </div>
+        
+        <!-- 测试脚本加载验证 -->
+        <div class="test-section">
+            <h3>📦 测试脚本加载验证</h3>
+            <p>验证测试脚本是否正确加载到浏览器环境中</p>
+            <button class="test-button" onclick="validateScriptLoading()">验证脚本加载</button>
+            <div class="progress"><div class="progress-bar" id="script-progress"></div></div>
+            <div id="script-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 功能测试验证 -->
+        <div class="test-section">
+            <h3>🔧 功能测试验证</h3>
+            <p>验证测试函数是否能正常执行</p>
+            <button class="test-button" onclick="validateFunctionality()">验证功能测试</button>
+            <div class="progress"><div class="progress-bar" id="function-progress"></div></div>
+            <div id="function-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 实际测试运行 -->
+        <div class="test-section">
+            <h3>🚀 实际测试运行</h3>
+            <p>运行实际的测试套件并查看结果</p>
+            <button class="test-button" onclick="runActualTests()">运行实际测试</button>
+            <div class="progress"><div class="progress-bar" id="actual-progress"></div></div>
+            <div id="actual-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 主应用连接测试 -->
+        <div class="test-section">
+            <h3>🌐 主应用连接测试</h3>
+            <p>测试与主应用的连接和交互</p>
+            <button class="test-button" onclick="testMainAppConnection()">测试主应用连接</button>
+            <button class="test-button" onclick="openMainAppForTesting()">打开主应用测试</button>
+            <div id="connection-results" class="results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 加载测试脚本 -->
+    <script src="desktop-mobile-test.js"></script>
+    <script src="desktop-specific-test.js"></script>
+    <script src="mobile-specific-test.js"></script>
+    
+    <script>
+        // 初始化设备信息
+        function initDeviceInfo() {
+            const deviceInfo = document.getElementById('device-info');
+            const isMobile = window.innerWidth <= 768;
+            const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+            const isDesktop = window.innerWidth > 1024;
+            
+            deviceInfo.innerHTML = `
+                <div><strong>设备类型:</strong> ${isMobile ? '📱 移动端' : isTablet ? '📟 平板端' : '🖥️ 桌面端'}</div>
+                <div><strong>屏幕尺寸:</strong> ${window.innerWidth} × ${window.innerHeight}</div>
+                <div><strong>像素比:</strong> ${window.devicePixelRatio || 1}</div>
+                <div><strong>浏览器:</strong> ${getBrowserName()}</div>
+                <div><strong>用户代理:</strong> ${navigator.userAgent.substring(0, 80)}...</div>
+                <div><strong>支持触摸:</strong> ${'ontouchstart' in window ? '✅ 是' : '❌ 否'}</div>
+                <div><strong>本地存储:</strong> ${typeof Storage !== 'undefined' ? '✅ 支持' : '❌ 不支持'}</div>
+            `;
+        }
+        
+        function getBrowserName() {
+            const ua = navigator.userAgent;
+            if (ua.includes('Chrome')) return 'Chrome';
+            if (ua.includes('Firefox')) return 'Firefox';
+            if (ua.includes('Safari')) return 'Safari';
+            if (ua.includes('Edge')) return 'Edge';
+            return 'Unknown';
+        }
+        
+        // 更新进度条
+        function updateProgress(progressId, percentage) {
+            const progressBar = document.getElementById(progressId);
+            if (progressBar) {
+                progressBar.style.width = `${percentage}%`;
+            }
+        }
+        
+        // 显示结果
+        function showResults(resultsId, content, isError = false) {
+            const resultsDiv = document.getElementById(resultsId);
+            resultsDiv.style.display = 'block';
+            resultsDiv.className = `results ${isError ? 'error' : ''}`;
+            resultsDiv.innerHTML = content;
+        }
+        
+        // 验证脚本加载
+        async function validateScriptLoading() {
+            updateProgress('script-progress', 0);
+            let results = '🔍 开始验证测试脚本加载...\n\n';
+            
+            const scriptsToCheck = [
+                { name: 'ResponsiveTestRunner', description: '综合测试' },
+                { name: 'DesktopTestRunner', description: '桌面端测试' },
+                { name: 'MobileTestRunner', description: '移动端测试' }
+            ];
+            
+            let loadedCount = 0;
+            
+            for (let i = 0; i < scriptsToCheck.length; i++) {
+                const script = scriptsToCheck[i];
+                const isLoaded = typeof window[script.name] !== 'undefined';
+                const status = isLoaded ? '✅' : '❌';
+                
+                results += `${status} ${script.name} (${script.description}): ${isLoaded ? '已加载' : '未加载'}\n`;
+                
+                if (isLoaded) {
+                    loadedCount++;
+                    
+                    // 检查关键方法
+                    try {
+                        const instance = new window[script.name]();
+                        const hasRunMethod = typeof instance.runAllTests === 'function';
+                        const hasLogMethod = typeof instance.logResult === 'function';
+                        
+                        results += `  └─ runAllTests方法: ${hasRunMethod ? '✅' : '❌'}\n`;
+                        results += `  └─ logResult方法: ${hasLogMethod ? '✅' : '❌'}\n`;
+                    } catch (error) {
+                        results += `  └─ 实例化失败: ${error.message}\n`;
+                    }
+                }
+                
+                updateProgress('script-progress', ((i + 1) / scriptsToCheck.length) * 100);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            const loadRate = (loadedCount / scriptsToCheck.length * 100).toFixed(1);
+            results += `\n📊 脚本加载率: ${loadedCount}/${scriptsToCheck.length} (${loadRate}%)\n`;
+            results += `状态: ${loadRate >= 66.7 ? '✅ 良好' : '⚠️ 需要检查'}`;
+            
+            showResults('script-results', results, loadRate < 66.7);
+        }
+        
+        // 验证功能测试
+        async function validateFunctionality() {
+            updateProgress('function-progress', 0);
+            let results = '🔧 开始验证功能测试...\n\n';
+            
+            const functionsToCheck = [
+                'runResponsiveTests',
+                'runDesktopTests', 
+                'runMobileTests'
+            ];
+            
+            let workingCount = 0;
+            
+            for (let i = 0; i < functionsToCheck.length; i++) {
+                const funcName = functionsToCheck[i];
+                const exists = typeof window[funcName] === 'function';
+                const status = exists ? '✅' : '❌';
+                
+                results += `${status} ${funcName}: ${exists ? '函数存在' : '函数不存在'}\n`;
+                
+                if (exists) {
+                    workingCount++;
+                }
+                
+                updateProgress('function-progress', ((i + 1) / functionsToCheck.length) * 100);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            const workRate = (workingCount / functionsToCheck.length * 100).toFixed(1);
+            results += `\n📊 功能可用率: ${workingCount}/${functionsToCheck.length} (${workRate}%)\n`;
+            results += `状态: ${workRate >= 66.7 ? '✅ 良好' : '⚠️ 需要检查'}`;
+            
+            showResults('function-results', results, workRate < 66.7);
+        }
+        
+        // 运行实际测试
+        async function runActualTests() {
+            updateProgress('actual-progress', 0);
+            let results = '🚀 开始运行实际测试...\n\n';
+            
+            const isMobile = window.innerWidth <= 768;
+            const testType = isMobile ? 'mobile' : 'desktop';
+            
+            results += `检测到${isMobile ? '移动端' : '桌面端'}环境，运行对应测试...\n\n`;
+            
+            try {
+                if (isMobile && typeof runMobileTests === 'function') {
+                    results += '📱 运行移动端测试...\n';
+                    updateProgress('actual-progress', 30);
+                    
+                    // 捕获控制台输出
+                    const originalLog = console.log;
+                    let testOutput = '';
+                    console.log = (...args) => {
+                        testOutput += args.join(' ') + '\n';
+                        originalLog(...args);
+                    };
+                    
+                    await runMobileTests();
+                    console.log = originalLog;
+                    
+                    results += testOutput || '测试已运行，请查看浏览器控制台获取详细结果\n';
+                    updateProgress('actual-progress', 100);
+                    
+                } else if (!isMobile && typeof runDesktopTests === 'function') {
+                    results += '🖥️ 运行桌面端测试...\n';
+                    updateProgress('actual-progress', 30);
+                    
+                    // 捕获控制台输出
+                    const originalLog = console.log;
+                    let testOutput = '';
+                    console.log = (...args) => {
+                        testOutput += args.join(' ') + '\n';
+                        originalLog(...args);
+                    };
+                    
+                    await runDesktopTests();
+                    console.log = originalLog;
+                    
+                    results += testOutput || '测试已运行，请查看浏览器控制台获取详细结果\n';
+                    updateProgress('actual-progress', 100);
+                    
+                } else {
+                    results += '❌ 对应的测试函数不可用\n';
+                    results += '请检查测试脚本是否正确加载\n';
+                    updateProgress('actual-progress', 100);
+                }
+                
+                results += '\n✅ 实际测试运行完成\n';
+                results += '💡 提示: 打开浏览器开发者工具(F12)查看详细测试结果';
+                
+            } catch (error) {
+                results += `❌ 测试运行失败: ${error.message}\n`;
+                updateProgress('actual-progress', 100);
+            }
+            
+            showResults('actual-results', results);
+        }
+        
+        // 测试主应用连接
+        async function testMainAppConnection() {
+            let results = '🌐 测试主应用连接...\n\n';
+            
+            try {
+                const response = await fetch('http://localhost:3000');
+                const isOk = response.ok;
+                
+                results += `${isOk ? '✅' : '❌'} 服务器连接: HTTP ${response.status}\n`;
+                results += `${isOk ? '✅' : '❌'} 内容类型: ${response.headers.get('content-type')}\n`;
+                
+                if (isOk) {
+                    results += '✅ 主应用服务器正常运行\n';
+                    results += '✅ 可以进行实际测试\n';
+                } else {
+                    results += '❌ 主应用服务器异常\n';
+                    results += '⚠️ 请检查开发服务器是否启动\n';
+                }
+                
+            } catch (error) {
+                results += `❌ 连接失败: ${error.message}\n`;
+                results += '⚠️ 请确保开发服务器在 http://localhost:3000 运行\n';
+            }
+            
+            showResults('connection-results', results);
+        }
+        
+        // 打开主应用进行测试
+        function openMainAppForTesting() {
+            const mainWindow = window.open('http://localhost:3000', '_blank');
+            
+            setTimeout(() => {
+                if (mainWindow) {
+                    alert('🎯 主应用已打开！\n\n' +
+                          '请在新窗口中：\n' +
+                          '1. 按 F12 打开开发者工具\n' +
+                          '2. 切换到 Console 标签\n' +
+                          '3. 运行以下测试命令：\n\n' +
+                          '• runDesktopTests()    - 桌面端测试\n' +
+                          '• runMobileTests()     - 移动端测试\n' +
+                          '• runResponsiveTests() - 综合测试\n\n' +
+                          '测试结果将显示在控制台中。');
+                } else {
+                    alert('❌ 无法打开主应用窗口\n请手动访问: http://localhost:3000');
+                }
+            }, 1000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initDeviceInfo();
+            
+            // 监听窗口大小变化
+            window.addEventListener('resize', initDeviceInfo);
+            
+            console.log('🧪 实时浏览器测试验证页面已加载');
+            console.log('💡 您可以点击按钮进行各项验证测试');
+        });
+    </script>
+</body>
+</html>

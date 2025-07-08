@@ -1,0 +1,138 @@
+{
+  "testConfig": {
+    "baseUrl": "http://localhost:3000",
+    "timeout": 10000,
+    "retryCount": 3,
+    "screenshotOnFailure": true,
+    "generateReport": true
+  },
+  "deviceSizes": {
+    "mobile": {
+      "width": 375,
+      "height": 667,
+      "name": "移动端",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
+    },
+    "tablet": {
+      "width": 768,
+      "height": 1024,
+      "name": "平板端",
+      "userAgent": "Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
+    },
+    "desktop": {
+      "width": 1920,
+      "height": 1080,
+      "name": "桌面端",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    }
+  },
+  "testSuites": {
+    "responsive": {
+      "name": "响应式布局测试",
+      "description": "测试不同设备尺寸下的布局适配",
+      "tests": [
+        "页面加载",
+        "响应式布局",
+        "搜索功能",
+        "筛选功能",
+        "详情页功能",
+        "动画效果",
+        "性能指标"
+      ]
+    },
+    "desktop": {
+      "name": "桌面端专项测试",
+      "description": "测试桌面端特有功能",
+      "tests": [
+        "侧边栏显示",
+        "键盘快捷键",
+        "鼠标悬停效果",
+        "右键菜单",
+        "多窗口支持",
+        "桌面端布局",
+        "桌面端性能"
+      ]
+    },
+    "mobile": {
+      "name": "移动端专项测试",
+      "description": "测试移动端特有功能",
+      "tests": [
+        "移动端侧边栏",
+        "触摸滚动",
+        "移动端详情页",
+        "移动端搜索",
+        "移动端手势",
+        "移动端性能"
+      ]
+    },
+    "functional": {
+      "name": "功能完整性测试",
+      "description": "测试核心功能的完整性",
+      "tests": [
+        "搜索功能",
+        "分类筛选",
+        "标签点击搜索",
+        "详情页操作",
+        "喜欢按钮",
+        "分享功能",
+        "下载功能",
+        "多语言支持"
+      ]
+    },
+    "performance": {
+      "name": "性能基准测试",
+      "description": "测试应用性能指标",
+      "tests": [
+        "页面加载时间",
+        "首屏渲染时间",
+        "内存使用量",
+        "滚动性能",
+        "动画流畅度",
+        "图片懒加载",
+        "网络请求优化"
+      ]
+    }
+  },
+  "expectedResults": {
+    "pageLoadTime": 3000,
+    "memoryUsage": {
+      "desktop": 150,
+      "mobile": 50
+    },
+    "scrollFPS": {
+      "desktop": 50,
+      "mobile": 30
+    },
+    "passRate": {
+      "excellent": 90,
+      "good": 80,
+      "acceptable": 70
+    }
+  },
+  "selectors": {
+    "sidebar": ".sidebar, [class*='sidebar']",
+    "gallery": ".gallery, [class*='gallery']",
+    "galleryItem": ".gallery-item, [class*='gallery-item']",
+    "modal": ".modal, [class*='modal']",
+    "searchInput": "input[type='text'], input[placeholder*='搜索']",
+    "filterButtons": "button[class*='filter'], .filter-btn, [class*='category']",
+    "likeButton": ".like-btn, [class*='like-btn']",
+    "shareButton": ".share-btn, [class*='share-btn']",
+    "downloadButton": ".download-btn, [class*='download-btn']",
+    "closeButton": "button[class*='close'], .close-btn, [aria-label*='关闭']",
+    "menuButton": "button[class*='menu'], .menu-btn, [aria-label*='菜单']",
+    "tags": "[class*='tag'], .tag"
+  },
+  "testData": {
+    "searchTerms": ["奇幻", "桌面", "手机", "4K", "动态"],
+    "categories": ["fantasy", "desktop", "mobile", "4k", "video"],
+    "languages": ["zh", "en", "es"]
+  },
+  "reporting": {
+    "outputDir": "./test-reports",
+    "formats": ["html", "json"],
+    "includeScreenshots": true,
+    "includePerformanceMetrics": true,
+    "includeDeviceInfo": true
+  }
+}

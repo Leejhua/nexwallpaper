@@ -1,0 +1,116 @@
+/* 全局按钮focus样式修正 */
+
+/* 移除所有按钮的默认focus outline */
+button:focus,
+button:focus-visible,
+.btn:focus,
+.btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 为可访问性保留键盘导航的focus样式 */
+button:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5) !important;
+  outline-offset: 2px !important;
+}
+
+/* Motion按钮特殊处理 */
+[data-framer-name]:focus,
+[data-framer-name]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 特定组件的focus样式修正 */
+
+/* Sidebar按钮 */
+.pixiv-btn-icon:focus,
+.pixiv-btn-icon:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 分类筛选按钮 */
+.category-filter-btn:focus,
+.category-filter-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 分享按钮 */
+.share-option-btn:focus,
+.share-option-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 模态框按钮 */
+.modal-btn:focus,
+.modal-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 排序控制按钮 */
+.sort-control-btn:focus,
+.sort-control-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 语言选择器按钮 */
+.language-selector-btn:focus,
+.language-selector-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 点赞按钮 */
+.like-btn:focus,
+.like-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 搜索清除按钮 */
+.search-clear-btn:focus,
+.search-clear-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 重置按钮 */
+.reset-btn:focus,
+.reset-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 下载按钮 */
+.download-btn:focus,
+.download-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 关闭按钮 */
+.close-btn:focus,
+.close-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 确保所有motion.button都没有focus outline */
+motion-button:focus,
+motion-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 通用类名修正 */
+.no-focus-outline:focus,
+.no-focus-outline:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}

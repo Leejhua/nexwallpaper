@@ -1,0 +1,92 @@
+// 高清Labubu壁纸数据 - React版本 (更新版)
+// 数据来源: labubuwallpaper.com
+// 更新时间: 2025/7/7 11:52:09
+// 图片数量: 4张
+// 视频数量: 0个
+// 总计: 4个项目
+
+export const galleryData = [
+  {
+    "id": 1,
+    "url": "https://labubuwallpaper.com/cdn-cgi/image/width=800,height=450,fit=cover,quality=85,format=auto/hero-labubu.jpg",
+    "title": "Labubu Hero Image",
+    "category": "fantasy",
+    "resolution": "高清",
+    "source": "com",
+    "type": "image",
+    "format": "jpg",
+    "tags": [
+      "Labubu"
+    ]
+  },
+  {
+    "id": 2,
+    "url": "https://labubuwallpaper.com/cdn-cgi/image/width=250,height=500,fit=cover,quality=90,format=auto/labubu-on-stone-bench-in-rose-garden%2CLabubu-iPhone-Wallpaper.png",
+    "title": "Labubu在玫瑰园的石凳上,Labubu iPhone 壁纸",
+    "category": "mobile",
+    "resolution": "iPhone",
+    "source": "com",
+    "type": "image",
+    "format": "png",
+    "tags": [
+      "Labubu",
+      "手机壁纸",
+      "竖屏",
+      "移动设备",
+      "便携"
+    ]
+  },
+  {
+    "id": 3,
+    "url": "https://labubuwallpaper.com/cdn-cgi/image/width=250,height=500,fit=cover,quality=90,format=auto/labubu-on-quilt-in-moonlit-meadow-with-meteors%2CLabubu-iPhone-Wallpaper.png",
+    "title": "Labubu在月光草甸的被子上与流星,Labubu iPhone 壁纸",
+    "category": "mobile",
+    "resolution": "iPhone",
+    "source": "com",
+    "type": "image",
+    "format": "png",
+    "tags": [
+      "Labubu",
+      "手机壁纸",
+      "竖屏",
+      "移动设备",
+      "便携"
+    ]
+  },
+  {
+    "id": 4,
+    "url": "https://labubuwallpaper.com/cdn-cgi/image/width=250,height=500,fit=cover,quality=90,format=auto/labubu-on-mossy-log-in-forest-glade%2CLabubu-iPhone-Wallpaper.png",
+    "title": "Labubu在森林空地的苔藓原木上,Labubu iPhone 壁纸",
+    "category": "mobile",
+    "resolution": "iPhone",
+    "source": "com",
+    "type": "image",
+    "format": "png",
+    "tags": [
+      "Labubu",
+      "森林",
+      "树木",
+      "自然",
+      "手机壁纸",
+      "竖屏",
+      "移动设备",
+      "便携"
+    ]
+  }
+];
+
+// 导出统计信息
+export const stats = {
+  totalItems: 4,
+  images: 4,
+  videos: 0,
+  categories: {
+    '4k': 0,
+    'mobile': 3,
+    'desktop': 0,
+    'fantasy': 1,
+    'seasonal': 0,
+    'dynamic': 0
+  },
+  lastUpdate: '2025/7/7 11:52:09'
+};

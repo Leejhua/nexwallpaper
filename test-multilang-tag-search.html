@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多语言标签搜索测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-link {
+            display: inline-block;
+            background: #0096fa;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        .test-link:hover {
+            background: #0084d6;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔍 多语言标签搜索测试</h1>
+    
+    <div class="test-card">
+        <h2>📋 测试说明</h2>
+        <p>本页面用于测试 Labubu Gallery 的多语言标签搜索功能。</p>
+        <ul>
+            <li>点击详情页中的标签后，搜索框应显示翻译后的标签内容</li>
+            <li>支持中英文标签搜索</li>
+            <li>搜索结果应准确匹配相关壁纸</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h2>🚀 快速测试</h2>
+        <div class="status info">
+            <strong>服务器状态：</strong> <span id="server-status">检查中...</span>
+        </div>
+        
+        <div>
+            <a href="http://localhost:3000" class="test-link" target="_blank">
+                打开主应用
+            </a>
+            <a href="http://localhost:3001/health" class="test-link" target="_blank">
+                检查API服务器
+            </a>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>🧪 测试步骤</h2>
+        <ol>
+            <li><strong>打开主应用：</strong> 点击上方"打开主应用"链接</li>
+            <li><strong>选择任意壁纸：</strong> 点击任意壁纸打开详情页</li>
+            <li><strong>点击标签：</strong> 在详情页点击任意标签</li>
+            <li><strong>验证搜索框：</strong> 确认侧边栏搜索框显示翻译后的标签</li>
+            <li><strong>检查结果：</strong> 确认搜索结果正确匹配</li>
+            <li><strong>切换语言：</strong> 在侧边栏切换语言，重复测试</li>
+        </ol>
+    </div>
+
+    <div class="test-card">
+        <h2>🎯 测试用例</h2>
+        <h3>中文环境测试</h3>
+        <ul>
+            <li>点击标签"可爱" → 搜索框应显示"可爱"</li>
+            <li>点击标签"萌系" → 搜索框应显示"萌系"</li>
+            <li>点击标签"4K超清" → 搜索框应显示"4K超清"</li>
+        </ul>
+        
+        <h3>英文环境测试</h3>
+        <ul>
+            <li>点击标签"可爱" → 搜索框应显示"Cute"</li>
+            <li>点击标签"萌系" → 搜索框应显示"Kawaii"</li>
+            <li>点击标签"4K超清" → 搜索框应显示"4K Ultra HD"</li>
+        </ul>
+
+        <h3>西班牙语环境测试</h3>
+        <ul>
+            <li>点击标签"可爱" → 搜索框应显示"Lindo"</li>
+            <li>点击标签"萌系" → 搜索框应显示"Kawaii"</li>
+            <li>点击标签"4K超清" → 搜索框应显示"4K Ultra HD"</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h2>✅ 预期行为</h2>
+        <div class="status success">
+            <ul>
+                <li>标签点击触发搜索：✓</li>
+                <li>搜索框显示翻译后内容：✓</li>
+                <li>搜索结果准确匹配：✓</li>
+                <li>多语言支持正常：✓</li>
+                <li>详情页自动关闭：✓</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 检查服务器状态
+        async function checkServerStatus() {
+            const statusEl = document.getElementById('server-status');
+            
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    statusEl.textContent = '✅ 运行正常';
+                    statusEl.style.color = '#155724';
+                } else {
+                    statusEl.textContent = '❌ 服务器响应异常';
+                    statusEl.style.color = '#721c24';
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ 无法连接到服务器 (请确保npm start已运行)';
+                statusEl.style.color = '#721c24';
+            }
+        }
+
+        // 页面加载时检查服务器状态
+        checkServerStatus();
+        
+        // 每30秒检查一次
+        setInterval(checkServerStatus, 30000);
+    </script>
+</body>
+</html> 

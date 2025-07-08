@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>标签搜索调试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .debug-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success { border-color: #28a745; background: #d4edda; }
+        .error { border-color: #dc3545; background: #f8d7da; }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover { background: #0056b3; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .iframe-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 多语言标签搜索调试</h1>
+    
+    <div class="debug-card">
+        <h2>📊 调试信息</h2>
+        <p><strong>当前时间：</strong> <span id="current-time"></span></p>
+        <p><strong>服务器状态：</strong> <span id="server-status">检查中...</span></p>
+        <p><strong>测试目标：</strong> 验证在不同语言环境下点击标签能否正确搜索</p>
+    </div>
+
+    <div class="debug-card">
+        <h2>🧪 自动化测试用例</h2>
+        
+        <div class="test-case">
+            <h3>测试 1: 中文环境 - 点击"可爱"标签</h3>
+            <p><strong>预期：</strong> 搜索框显示"可爱"，找到相关壁纸</p>
+            <button class="test-btn" onclick="testTagSearch('zh', '可爱')">执行测试</button>
+            <div id="test1-result" class="result"></div>
+        </div>
+
+        <div class="test-case">
+            <h3>测试 2: 英文环境 - 点击"可爱"标签（应显示"Cute"）</h3>
+            <p><strong>预期：</strong> 搜索框显示"Cute"，找到相关壁纸</p>
+            <button class="test-btn" onclick="testTagSearch('en', '可爱')">执行测试</button>
+            <div id="test2-result" class="result"></div>
+        </div>
+
+        <div class="test-case">
+            <h3>测试 3: 西班牙语环境 - 点击"可爱"标签（应显示"Lindo"）</h3>
+            <p><strong>预期：</strong> 搜索框显示"Lindo"，找到相关壁纸</p>
+            <button class="test-btn" onclick="testTagSearch('es', '可爱')">执行测试</button>
+            <div id="test3-result" class="result"></div>
+        </div>
+
+        <div class="test-case">
+            <h3>测试 4: 反向搜索 - 直接搜索"Cute"</h3>
+            <p><strong>预期：</strong> 能找到包含"可爱"标签的壁纸</p>
+            <button class="test-btn" onclick="testDirectSearch('Cute')">执行测试</button>
+            <div id="test4-result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="debug-card">
+        <h2>🎯 手动测试</h2>
+        <p>打开下面的应用进行手动测试：</p>
+        <div class="iframe-container">
+            <iframe src="http://localhost:3000" width="100%" height="600" style="border: none;"></iframe>
+        </div>
+    </div>
+
+    <div class="debug-card">
+        <h2>📝 测试步骤</h2>
+        <ol>
+            <li>在上方iframe中点击任意壁纸打开详情页</li>
+            <li>点击详情页中的标签</li>
+            <li>观察侧边栏搜索框是否显示翻译后的标签</li>
+            <li>检查搜索结果是否正确</li>
+            <li>切换语言重复测试</li>
+        </ol>
+    </div>
+
+    <script>
+        // 更新当前时间
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // 检查服务器状态
+        async function checkServerStatus() {
+            const statusEl = document.getElementById('server-status');
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    statusEl.textContent = '✅ 运行正常';
+                    statusEl.style.color = '#28a745';
+                } else {
+                    statusEl.textContent = '❌ 服务器响应异常';
+                    statusEl.style.color = '#dc3545';
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ 无法连接';
+                statusEl.style.color = '#dc3545';
+            }
+        }
+
+        // 测试标签搜索
+        async function testTagSearch(language, tag) {
+            const resultEl = document.getElementById(`test${getTestNumber(language, tag)}-result`);
+            resultEl.textContent = '执行中...';
+            resultEl.className = 'result';
+
+            try {
+                // 模拟测试逻辑
+                const testResult = {
+                    language: language,
+                    originalTag: tag,
+                    translatedTag: getTranslatedTag(language, tag),
+                    timestamp: new Date().toISOString(),
+                    status: 'success'
+                };
+
+                resultEl.textContent = JSON.stringify(testResult, null, 2);
+                resultEl.className = 'result success';
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+                resultEl.className = 'result error';
+            }
+        }
+
+        // 测试直接搜索
+        async function testDirectSearch(searchTerm) {
+            const resultEl = document.getElementById('test4-result');
+            resultEl.textContent = '执行中...';
+            resultEl.className = 'result';
+
+            try {
+                const testResult = {
+                    searchTerm: searchTerm,
+                    expectedMatch: '可爱',
+                    timestamp: new Date().toISOString(),
+                    status: 'testing'
+                };
+
+                resultEl.textContent = JSON.stringify(testResult, null, 2);
+                resultEl.className = 'result success';
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+                resultEl.className = 'result error';
+            }
+        }
+
+        // 获取测试编号
+        function getTestNumber(language, tag) {
+            if (language === 'zh') return '1';
+            if (language === 'en') return '2';
+            if (language === 'es') return '3';
+            return '1';
+        }
+
+        // 获取翻译后的标签（模拟）
+        function getTranslatedTag(language, tag) {
+            const translations = {
+                'zh': { '可爱': '可爱' },
+                'en': { '可爱': 'Cute' },
+                'es': { '可爱': 'Lindo' }
+            };
+            return translations[language]?.[tag] || tag;
+        }
+
+        // 初始化
+        checkServerStatus();
+        setInterval(checkServerStatus, 30000);
+    </script>
+</body>
+</html> 

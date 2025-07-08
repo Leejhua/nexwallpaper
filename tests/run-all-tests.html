@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labubu Gallery 测试套件</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .test-section h2 {
+            color: #495057;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .results.error {
+            border-left-color: #dc3545;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status.running {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .device-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .device-info h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .test-button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐰 Labubu Gallery 测试套件</h1>
+        
+        <!-- 设备信息 -->
+        <div class="device-info">
+            <h3>📱 当前设备信息</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>设备类型:</strong> <span id="deviceType"></span>
+                </div>
+                <div class="info-item">
+                    <strong>屏幕尺寸:</strong> <span id="screenSize"></span>
+                </div>
+                <div class="info-item">
+                    <strong>浏览器:</strong> <span id="browser"></span>
+                </div>
+                <div class="info-item">
+                    <strong>用户代理:</strong> <span id="userAgent"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 综合测试 -->
+        <div class="test-section">
+            <h2>🔄 综合测试</h2>
+            <p>运行所有设备的完整测试套件，包括响应式布局、功能测试和性能测试。</p>
+            <button class="test-button" onclick="runComprehensiveTest()">
+                运行完整测试套件
+            </button>
+            <span id="comprehensive-status"></span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="comprehensive-progress"></div>
+            </div>
+            <div id="comprehensive-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 桌面端测试 -->
+        <div class="test-section">
+            <h2>🖥️ 桌面端专项测试</h2>
+            <p>测试桌面端特有功能：键盘快捷键、鼠标悬停、右键菜单、多窗口支持等。</p>
+            <button class="test-button" onclick="runDesktopTest()">
+                运行桌面端测试
+            </button>
+            <span id="desktop-status"></span>
+            <div id="desktop-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 移动端测试 -->
+        <div class="test-section">
+            <h2>📱 移动端专项测试</h2>
+            <p>测试移动端特有功能：触摸操作、手势识别、虚拟键盘、移动端布局等。</p>
+            <button class="test-button" onclick="runMobileTest()">
+                运行移动端测试
+            </button>
+            <span id="mobile-status"></span>
+            <div id="mobile-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 性能测试 -->
+        <div class="test-section">
+            <h2>⚡ 性能基准测试</h2>
+            <p>测试应用性能指标：加载时间、内存使用、滚动流畅度、动画性能等。</p>
+            <button class="test-button" onclick="runPerformanceTest()">
+                运行性能测试
+            </button>
+            <span id="performance-status"></span>
+            <div id="performance-results" class="results" style="display: none;"></div>
+        </div>
+        
+        <!-- 功能测试 -->
+        <div class="test-section">
+            <h2>🔧 功能完整性测试</h2>
+            <p>测试核心功能：搜索、筛选、详情页、标签点击、按钮交互等。</p>
+            <button class="test-button" onclick="runFunctionalTest()">
+                运行功能测试
+            </button>
+            <span id="functional-status"></span>
+            <div id="functional-results" class="results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 加载测试脚本 -->
+    <script src="desktop-mobile-test.js"></script>
+    <script src="desktop-specific-test.js"></script>
+    <script src="mobile-specific-test.js"></script>
+    
+    <script>
+        // 初始化设备信息
+        function initDeviceInfo() {
+            const deviceType = window.innerWidth > 768 ? '🖥️ 桌面端' : '📱 移动端';
+            const screenSize = `${window.innerWidth} × ${window.innerHeight}`;
+            const browser = getBrowserName();
+            const userAgent = navigator.userAgent.substring(0, 50) + '...';
+            
+            document.getElementById('deviceType').textContent = deviceType;
+            document.getElementById('screenSize').textContent = screenSize;
+            document.getElementById('browser').textContent = browser;
+            document.getElementById('userAgent').textContent = userAgent;
+        }
+        
+        function getBrowserName() {
+            const ua = navigator.userAgent;
+            if (ua.includes('Chrome')) return 'Chrome';
+            if (ua.includes('Firefox')) return 'Firefox';
+            if (ua.includes('Safari')) return 'Safari';
+            if (ua.includes('Edge')) return 'Edge';
+            return 'Unknown';
+        }
+        
+        // 更新状态
+        function updateStatus(testType, status, message = '') {
+            const statusElement = document.getElementById(`${testType}-status`);
+            statusElement.className = `status ${status}`;
+            
+            switch (status) {
+                case 'running':
+                    statusElement.textContent = '运行中...';
+                    break;
+                case 'success':
+                    statusElement.textContent = `✅ 完成 ${message}`;
+                    break;
+                case 'error':
+                    statusElement.textContent = `❌ 失败 ${message}`;
+                    break;
+            }
+        }
+        
+        // 更新进度条
+        function updateProgress(testType, percentage) {
+            const progressElement = document.getElementById(`${testType}-progress`);
+            if (progressElement) {
+                progressElement.style.width = `${percentage}%`;
+            }
+        }
+        
+        // 显示结果
+        function showResults(testType, results, isError = false) {
+            const resultsElement = document.getElementById(`${testType}-results`);
+            resultsElement.style.display = 'block';
+            resultsElement.className = `results ${isError ? 'error' : ''}`;
+            resultsElement.innerHTML = results;
+        }
+        
+        // 运行综合测试
+        async function runComprehensiveTest() {
+            updateStatus('comprehensive', 'running');
+            updateProgress('comprehensive', 0);
+            
+            try {
+                const testRunner = new ResponsiveTestRunner();
+                let progress = 0;
+                
+                // 模拟进度更新
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    updateProgress('comprehensive', Math.min(progress, 90));
+                }, 500);
+                
+                const results = await testRunner.runAllTests();
+                
+                clearInterval(progressInterval);
+                updateProgress('comprehensive', 100);
+                
+                const report = testRunner.generateReport();
+                updateStatus('comprehensive', 'success', `(${report.overallPassRate}% 通过)`);
+                
+                showResults('comprehensive', formatComprehensiveResults(report));
+                
+            } catch (error) {
+                updateStatus('comprehensive', 'error', error.message);
+                showResults('comprehensive', `错误: ${error.message}`, true);
+            }
+        }
+        
+        // 运行桌面端测试
+        async function runDesktopTest() {
+            updateStatus('desktop', 'running');
+            
+            try {
+                const testRunner = new DesktopTestRunner();
+                const results = await testRunner.runAllTests();
+                const report = testRunner.generateReport();
+                
+                updateStatus('desktop', 'success', `(${report.passRate}% 通过)`);
+                showResults('desktop', formatTestResults(report.results));
+                
+            } catch (error) {
+                updateStatus('desktop', 'error', error.message);
+                showResults('desktop', `错误: ${error.message}`, true);
+            }
+        }
+        
+        // 运行移动端测试
+        async function runMobileTest() {
+            updateStatus('mobile', 'running');
+            
+            try {
+                const testRunner = new MobileTestRunner();
+                const results = await testRunner.runAllTests();
+                const report = testRunner.generateReport();
+                
+                updateStatus('mobile', 'success', `(${report.passRate}% 通过)`);
+                showResults('mobile', formatTestResults(report.results));
+                
+            } catch (error) {
+                updateStatus('mobile', 'error', error.message);
+                showResults('mobile', `错误: ${error.message}`, true);
+            }
+        }
+        
+        // 运行性能测试
+        async function runPerformanceTest() {
+            updateStatus('performance', 'running');
+            
+            try {
+                const results = await runPerformanceBenchmark();
+                updateStatus('performance', 'success', '(基准测试完成)');
+                showResults('performance', formatPerformanceResults(results));
+                
+            } catch (error) {
+                updateStatus('performance', 'error', error.message);
+                showResults('performance', `错误: ${error.message}`, true);
+            }
+        }
+        
+        // 运行功能测试
+        async function runFunctionalTest() {
+            updateStatus('functional', 'running');
+            
+            try {
+                const results = await runFunctionalTests();
+                updateStatus('functional', 'success', '(功能测试完成)');
+                showResults('functional', formatFunctionalResults(results));
+                
+            } catch (error) {
+                updateStatus('functional', 'error', error.message);
+                showResults('functional', `错误: ${error.message}`, true);
+            }
+        }
+        
+        // 格式化综合测试结果
+        function formatComprehensiveResults(report) {
+            let html = '<h4>📊 综合测试报告</h4>';
+            
+            Object.entries(report.deviceResults).forEach(([device, stats]) => {
+                const total = stats.passed + stats.failed;
+                const passRate = ((stats.passed / total) * 100).toFixed(1);
+                
+                html += `<div style="margin-bottom: 15px;">`;
+                html += `<strong>${device}:</strong> ${stats.passed}/${total} 通过 (${passRate}%)<br>`;
+                
+                if (stats.failed > 0) {
+                    html += `<span style="color: #dc3545;">失败项目:</span><br>`;
+                    stats.tests.filter(t => !t.passed).forEach(test => {
+                        html += `&nbsp;&nbsp;❌ ${test.test}: ${test.details}<br>`;
+                    });
+                }
+                
+                html += `</div>`;
+            });
+            
+            html += `<div style="border-top: 1px solid #dee2e6; padding-top: 10px; margin-top: 15px;">`;
+            html += `<strong>总体结果:</strong> ${report.totalPassed}/${report.totalTests} (${report.overallPassRate}%)`;
+            html += `</div>`;
+            
+            return html;
+        }
+        
+        // 格式化测试结果
+        function formatTestResults(results) {
+            let html = '';
+            results.forEach(result => {
+                const status = result.passed ? '✅' : '❌';
+                const color = result.passed ? '#28a745' : '#dc3545';
+                html += `<div style="color: ${color}; margin-bottom: 5px;">`;
+                html += `${status} ${result.test}: ${result.details}`;
+                html += `</div>`;
+            });
+            return html;
+        }
+        
+        // 性能基准测试
+        async function runPerformanceBenchmark() {
+            const results = [];
+            
+            // 页面加载时间
+            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+            results.push({ name: '页面加载时间', value: `${loadTime}ms`, passed: loadTime < 3000 });
+            
+            // 内存使用
+            if (performance.memory) {
+                const memoryUsage = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                results.push({ name: '内存使用', value: `${memoryUsage}MB`, passed: memoryUsage < 100 });
+            }
+            
+            // DOM元素数量
+            const domElements = document.querySelectorAll('*').length;
+            results.push({ name: 'DOM元素数量', value: domElements, passed: domElements < 5000 });
+            
+            // 图片数量
+            const images = document.querySelectorAll('img').length;
+            results.push({ name: '图片数量', value: images, passed: images > 0 });
+            
+            return results;
+        }
+        
+        // 功能测试
+        async function runFunctionalTests() {
+            const results = [];
+            
+            // 测试搜索框存在
+            const searchInput = document.querySelector('input[type="text"]');
+            results.push({ name: '搜索框', passed: !!searchInput });
+            
+            // 测试画廊项目存在
+            const galleryItems = document.querySelectorAll('.gallery-item, [class*="gallery-item"]');
+            results.push({ name: '画廊项目', passed: galleryItems.length > 0, count: galleryItems.length });
+            
+            // 测试侧边栏存在
+            const sidebar = document.querySelector('.sidebar, [class*="sidebar"]');
+            results.push({ name: '侧边栏', passed: !!sidebar });
+            
+            // 测试按钮存在
+            const buttons = document.querySelectorAll('button');
+            results.push({ name: '交互按钮', passed: buttons.length > 0, count: buttons.length });
+            
+            return results;
+        }
+        
+        // 格式化性能结果
+        function formatPerformanceResults(results) {
+            let html = '<h4>⚡ 性能基准报告</h4>';
+            results.forEach(result => {
+                const status = result.passed ? '✅' : '❌';
+                const color = result.passed ? '#28a745' : '#dc3545';
+                html += `<div style="color: ${color}; margin-bottom: 5px;">`;
+                html += `${status} ${result.name}: ${result.value}`;
+                html += `</div>`;
+            });
+            return html;
+        }
+        
+        // 格式化功能结果
+        function formatFunctionalResults(results) {
+            let html = '<h4>🔧 功能完整性报告</h4>';
+            results.forEach(result => {
+                const status = result.passed ? '✅' : '❌';
+                const color = result.passed ? '#28a745' : '#dc3545';
+                const count = result.count ? ` (${result.count}个)` : '';
+                html += `<div style="color: ${color}; margin-bottom: 5px;">`;
+                html += `${status} ${result.name}${count}`;
+                html += `</div>`;
+            });
+            return html;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initDeviceInfo();
+            
+            // 监听窗口大小变化
+            window.addEventListener('resize', initDeviceInfo);
+            
+            console.log('🧪 Labubu Gallery 测试套件已加载');
+            console.log('💡 您可以点击按钮运行测试，或在控制台中直接调用测试函数');
+        });
+    </script>
+</body>
+</html>

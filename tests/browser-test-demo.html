@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试套件演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Labubu Gallery 测试套件演示</h1>
+    
+    <div class="test-container">
+        <h2>📋 基础功能测试</h2>
+        <button class="test-button" onclick="testBasicFunctions()">运行基础测试</button>
+        <div id="basic-results" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>🖥️ 桌面端功能测试</h2>
+        <button class="test-button" onclick="testDesktopFeatures()">测试桌面端功能</button>
+        <div id="desktop-results" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>📱 移动端功能测试</h2>
+        <button class="test-button" onclick="testMobileFeatures()">测试移动端功能</button>
+        <div id="mobile-results" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>🔗 主应用链接</h2>
+        <p>在新窗口中打开主应用进行手动测试：</p>
+        <button class="test-button" onclick="openMainApp()">打开主应用</button>
+        <button class="test-button" onclick="openMainAppWithDevTools()">打开主应用（开发者工具）</button>
+    </div>
+
+    <script>
+        // 基础功能测试
+        async function testBasicFunctions() {
+            const resultsDiv = document.getElementById('basic-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '🔍 开始基础功能测试...\n\n';
+            
+            const tests = [
+                { name: '浏览器支持检测', test: () => checkBrowserSupport() },
+                { name: '本地存储测试', test: () => testLocalStorage() },
+                { name: '网络连接测试', test: () => testNetworkConnection() },
+                { name: 'JavaScript功能测试', test: () => testJavaScriptFeatures() }
+            ];
+            
+            for (const testCase of tests) {
+                try {
+                    const result = await testCase.test();
+                    const status = result ? '✅' : '❌';
+                    resultsDiv.innerHTML += `${status} ${testCase.name}: ${result ? '通过' : '失败'}\n`;
+                } catch (error) {
+                    resultsDiv.innerHTML += `❌ ${testCase.name}: 错误 - ${error.message}\n`;
+                }
+            }
+            
+            resultsDiv.innerHTML += '\n📊 基础功能测试完成\n';
+        }
+        
+        // 桌面端功能测试
+        async function testDesktopFeatures() {
+            const resultsDiv = document.getElementById('desktop-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '🖥️ 开始桌面端功能测试...\n\n';
+            
+            const isDesktop = window.innerWidth > 768;
+            resultsDiv.innerHTML += `设备类型: ${isDesktop ? '桌面端' : '非桌面端'}\n`;
+            resultsDiv.innerHTML += `屏幕尺寸: ${window.innerWidth} × ${window.innerHeight}\n\n`;
+            
+            const tests = [
+                { name: '键盘事件支持', test: () => testKeyboardEvents() },
+                { name: '鼠标事件支持', test: () => testMouseEvents() },
+                { name: '大屏幕布局', test: () => testDesktopLayout() },
+                { name: '高性能要求', test: () => testDesktopPerformance() }
+            ];
+            
+            for (const testCase of tests) {
+                try {
+                    const result = await testCase.test();
+                    const status = result ? '✅' : '❌';
+                    resultsDiv.innerHTML += `${status} ${testCase.name}: ${result ? '支持' : '不支持'}\n`;
+                } catch (error) {
+                    resultsDiv.innerHTML += `❌ ${testCase.name}: 错误 - ${error.message}\n`;
+                }
+            }
+            
+            resultsDiv.innerHTML += '\n📊 桌面端功能测试完成\n';
+        }
+        
+        // 移动端功能测试
+        async function testMobileFeatures() {
+            const resultsDiv = document.getElementById('mobile-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '📱 开始移动端功能测试...\n\n';
+            
+            const isMobile = window.innerWidth <= 768;
+            resultsDiv.innerHTML += `设备类型: ${isMobile ? '移动端' : '非移动端'}\n`;
+            resultsDiv.innerHTML += `屏幕尺寸: ${window.innerWidth} × ${window.innerHeight}\n\n`;
+            
+            const tests = [
+                { name: '触摸事件支持', test: () => testTouchEvents() },
+                { name: '移动端布局', test: () => testMobileLayout() },
+                { name: '虚拟键盘支持', test: () => testVirtualKeyboard() },
+                { name: '移动端性能', test: () => testMobilePerformance() }
+            ];
+            
+            for (const testCase of tests) {
+                try {
+                    const result = await testCase.test();
+                    const status = result ? '✅' : '❌';
+                    resultsDiv.innerHTML += `${status} ${testCase.name}: ${result ? '支持' : '不支持'}\n`;
+                } catch (error) {
+                    resultsDiv.innerHTML += `❌ ${testCase.name}: 错误 - ${error.message}\n`;
+                }
+            }
+            
+            resultsDiv.innerHTML += '\n📊 移动端功能测试完成\n';
+        }
+        
+        // 测试函数实现
+        function checkBrowserSupport() {
+            return !!(window.fetch && window.Promise && window.localStorage);
+        }
+        
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('test', 'value');
+                const value = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                return value === 'value';
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        async function testNetworkConnection() {
+            try {
+                const response = await fetch('http://localhost:3000', { method: 'HEAD' });
+                return response.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        function testJavaScriptFeatures() {
+            return !!(Array.from && Object.assign && window.requestAnimationFrame);
+        }
+        
+        function testKeyboardEvents() {
+            return 'KeyboardEvent' in window;
+        }
+        
+        function testMouseEvents() {
+            return 'MouseEvent' in window;
+        }
+        
+        function testDesktopLayout() {
+            return window.innerWidth >= 1024;
+        }
+        
+        function testDesktopPerformance() {
+            return !!(performance && performance.memory);
+        }
+        
+        function testTouchEvents() {
+            return 'TouchEvent' in window || 'ontouchstart' in window;
+        }
+        
+        function testMobileLayout() {
+            return window.innerWidth <= 768;
+        }
+        
+        function testVirtualKeyboard() {
+            return 'visualViewport' in window;
+        }
+        
+        function testMobilePerformance() {
+            return navigator.hardwareConcurrency <= 4; // 移动设备通常CPU核心较少
+        }
+        
+        // 打开主应用
+        function openMainApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+        
+        function openMainAppWithDevTools() {
+            const newWindow = window.open('http://localhost:3000', '_blank');
+            // 提示用户打开开发者工具
+            setTimeout(() => {
+                if (newWindow) {
+                    alert('请在新打开的窗口中按 F12 打开开发者工具，然后在控制台中运行测试函数：\n\n' +
+                          '- runDesktopTests()    # 桌面端测试\n' +
+                          '- runMobileTests()     # 移动端测试\n' +
+                          '- runResponsiveTests() # 综合测试');
+                }
+            }, 1000);
+        }
+        
+        // 页面加载完成后显示设备信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 测试套件演示页面已加载');
+            console.log(`📱 设备信息: ${window.innerWidth}×${window.innerHeight}`);
+            console.log(`🌐 用户代理: ${navigator.userAgent}`);
+        });
+    </script>
+</body>
+</html>
