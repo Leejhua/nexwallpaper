@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>缩略图加载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .image-test {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .image-test img {
+            width: 150px;
+            height: auto;
+            margin-right: 15px;
+            border: 1px solid #ccc;
+        }
+        .status {
+            flex: 1;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: orange; }
+        
+        #console-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>缩略图加载诊断测试</h1>
+    
+    <div class="test-container">
+        <h2>1. 测试图片URL生成</h2>
+        <div id="url-tests"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>2. 实际加载测试</h2>
+        <div id="load-tests"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>3. 控制台输出</h2>
+        <div id="console-output"></div>
+    </div>
+
+    <script type="module">
+        // 捕获控制台输出
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        const consoleOutput = document.getElementById('console-output');
+        
+        function addToConsole(type, ...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleOutput.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addToConsole('log', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addToConsole('warn', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addToConsole('error', ...args);
+        };
+
+        // 测试用的样本URL
+        const testUrls = [
+            'https://labubuwallpaper.com/test-image.jpg',
+            'https://labubuwallpaper.com/cdn-cgi/image/width=250,height=500,fit=cover,quality=90,format=auto/sample.png',
+            'https://labubuwallpaper.com/uploads/wallpaper.png',
+            'https://external-site.com/image.jpg'
+        ];
+
+        // 模拟缩略图URL生成函数
+        function getThumbnailUrl(originalUrl) {
+            console.log('正在生成缩略图URL:', originalUrl);
+            
+            if (!originalUrl) return originalUrl;
+            
+            try {
+                // 对于非labubuwallpaper.com的图片，直接返回原URL
+                if (!originalUrl.includes('labubuwallpaper.com')) {
+                    console.log('非目标域名，返回原URL');
+                    return originalUrl;
+                }
+                
+                // 首先尝试提取原始文件路径
+                let imagePath = '';
+                
+                if (originalUrl.includes('cdn-cgi/image/')) {
+                    const pathMatch = originalUrl.match(/cdn-cgi\/image\/[^\/]+\/(.+)$/);
+                    if (pathMatch) {
+                        imagePath = pathMatch[1];
+                    }
+                } else {
+                    imagePath = originalUrl.replace('https://labubuwallpaper.com/', '').replace(/^\/+/, '');
+                }
+                
+                if (!imagePath) {
+                    console.warn('无法提取图片路径:', originalUrl);
+                    return originalUrl;
+                }
+                
+                const thumbnailParams = 'width=350,height=525,fit=cover,quality=80,format=auto';
+                const thumbnailUrl = `https://labubuwallpaper.com/cdn-cgi/image/${thumbnailParams}/${imagePath}`;
+                
+                console.log('生成的缩略图URL:', thumbnailUrl);
+                return thumbnailUrl;
+                
+            } catch (error) {
+                console.error('生成缩略图URL失败:', error, originalUrl);
+                return originalUrl;
+            }
+        }
+
+        // 测试URL生成
+        function testUrlGeneration() {
+            const container = document.getElementById('url-tests');
+            
+            testUrls.forEach((url, index) => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <strong>测试 ${index + 1}:</strong><br>
+                    原始: ${url}<br>
+                    缩略图: ${getThumbnailUrl(url)}
+                `;
+                div.style.margin = '10px 0';
+                div.style.padding = '10px';
+                div.style.border = '1px solid #ddd';
+                div.style.borderRadius = '4px';
+                container.appendChild(div);
+            });
+        }
+
+        // 测试实际加载
+        function testImageLoading() {
+            const container = document.getElementById('load-tests');
+            
+            const realTestUrls = [
+                'https://labubuwallpaper.com/cdn-cgi/image/width=350,height=525,fit=cover,quality=80,format=auto/test.jpg',
+                'https://labubuwallpaper.com/test.jpg',
+                'https://httpbin.org/image/png',  // 测试外部图片
+            ];
+            
+            realTestUrls.forEach((url, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-test';
+                
+                const img = document.createElement('img');
+                const status = document.createElement('div');
+                status.className = 'status loading';
+                status.innerHTML = `<strong>测试 ${index + 1}:</strong><br>URL: ${url}<br>状态: 加载中...`;
+                
+                img.onload = () => {
+                    status.className = 'status success';
+                    status.innerHTML = `<strong>测试 ${index + 1}:</strong><br>URL: ${url}<br>状态: ✅ 加载成功<br>尺寸: ${img.naturalWidth}x${img.naturalHeight}`;
+                    console.log(`图片加载成功: ${url}, 尺寸: ${img.naturalWidth}x${img.naturalHeight}`);
+                };
+                
+                img.onerror = (e) => {
+                    status.className = 'status error';
+                    status.innerHTML = `<strong>测试 ${index + 1}:</strong><br>URL: ${url}<br>状态: ❌ 加载失败<br>错误: ${e.type}`;
+                    console.error(`图片加载失败: ${url}`, e);
+                };
+                
+                img.src = url;
+                div.appendChild(img);
+                div.appendChild(status);
+                container.appendChild(div);
+            });
+        }
+
+        // 启动测试
+        console.log('开始缩略图诊断测试...');
+        testUrlGeneration();
+        testImageLoading();
+        
+        // 从主应用获取数据进行测试
+        fetch('/api/wallpapers?page=1&limit=3')
+            .then(response => response.json())
+            .then(data => {
+                console.log('获取到的实际数据样本:', data);
+                if (data.wallpapers && data.wallpapers.length > 0) {
+                    console.log('第一个壁纸数据:', data.wallpapers[0]);
+                    
+                    // 测试第一个实际的壁纸
+                    const firstWallpaper = data.wallpapers[0];
+                    const thumbnailUrl = getThumbnailUrl(firstWallpaper.url);
+                    
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'image-test';
+                    testDiv.innerHTML = `
+                        <img src="${thumbnailUrl}" alt="Real wallpaper test">
+                        <div class="status">
+                            <strong>实际壁纸测试:</strong><br>
+                            ID: ${firstWallpaper.id}<br>
+                            原始URL: ${firstWallpaper.url}<br>
+                            缩略图URL: ${thumbnailUrl}<br>
+                            状态: 测试中...
+                        </div>
+                    `;
+                    
+                    document.getElementById('load-tests').appendChild(testDiv);
+                }
+            })
+            .catch(error => {
+                console.error('获取实际数据失败:', error);
+            });
+    </script>
+</body>
+</html> 

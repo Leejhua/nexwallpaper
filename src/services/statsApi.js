@@ -6,12 +6,13 @@ const getApiUrl = () => {
     const isDevelopment = window.location.hostname === 'localhost' || 
                          window.location.hostname === '127.0.0.1' ||
                          window.location.hostname.startsWith('192.168.') ||
-                         window.location.port === '3000';
+                         window.location.port === '3000' ||
+                         window.location.port === '3001';
     
     if (isDevelopment) {
       // 开发环境使用独立API服务器
       const host = window.location.hostname;
-      return `http://${host}:3001/api`;
+      return `http://${host}:3002/api`;
     } else {
       // 生产环境，使用相对路径
       return `${window.location.origin}/api`;

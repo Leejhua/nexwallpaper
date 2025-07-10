@@ -7,6 +7,7 @@ import Modal from './components/Modal';
 import SortControls from './components/SortControls';
 import { useGallery } from './hooks/useGallery';
 import { useModal } from './hooks/useModal';
+import { useScrollPosition } from './hooks/useScrollPosition';
 import { ClickStatsProvider } from './contexts/ClickStatsProvider';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { useTagTranslation } from './hooks/useTagTranslation';
@@ -18,7 +19,7 @@ import './styles/button-focus-fix.css';
  */
 function AppContent() {
   const { translateTag } = useTagTranslation();
-  
+  const { scrollToTop } = useScrollPosition(); // 滚动位置管理
   // 根据屏幕大小设置侧边栏初始状态
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     // 如果是服务端渲染或者窗口对象不存在，默认为true
@@ -58,7 +59,9 @@ function AppContent() {
     // 直接传递原始标签，搜索逻辑会自动匹配
     // 搜索框会通过translateTag显示翻译后的内容
     handleSearch(tag);
-  }, [handleSearch]);
+    // 🔝 新搜索时滚动到顶部，提供清晰的浏览体验
+    scrollToTop();
+  }, [handleSearch, scrollToTop]);
 
   useEffect(() => {
     const handleResize = () => {

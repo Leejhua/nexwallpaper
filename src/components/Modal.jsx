@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Heart, Share2, Maximize2, AlertCircle, Search } from 'lucide-react';
-import { getHighResUrl, getThumbnailUrl } from '../utils/imageUtils';
+import { getHighQualityUrl, getThumbnailUrl } from '../utils/imageUtils';
+import { getUrlByPurpose, fixUrlEncoding, hasEncodingIssues } from '../utils/imageUtils-fallback';
 import LikeButton from './LikeButton';
 import LikeCounter from './LikeCounter';
 import ErrorBoundary from './ErrorBoundary';
@@ -145,8 +146,9 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
     const fileExtension = item?.format?.toLowerCase() || (item?.type === 'video' ? 'mp4' : 'jpg');
     const fileName = `${cleanTitle}.${fileExtension}`;
     
-    // 使用代理URL
-    const proxyUrl = url.replace('https://labubuwallpaper.com', '/download-proxy');
+    // 使用智能降级URL和代理
+    const reliableUrl = getUrlByPurpose(item, 'download');
+    const proxyUrl = reliableUrl.replace('https://labubuwallpaper.com', '/download-proxy');
 
     console.log('🚀 开始高级下载:', { url, proxyUrl, fileName, itemType: item?.type });
     
@@ -347,7 +349,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                     {isVideo ? (
                       <video
                         className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
-                        src={isMobile ? getThumbnailUrl(item.url) : getHighResUrl(item.url)}
+                        src={getUrlByPurpose(item, 'video')}
                         controls
                         muted
                         playsInline
@@ -363,7 +365,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                     ) : (
                       <img
                         className={`max-w-full ${isMobile ? 'max-h-[50vh]' : 'max-h-[70vh]'} object-contain rounded-lg shadow-lg`}
-                        src={isMobile ? getThumbnailUrl(item.url) : getHighResUrl(item.url)}
+                        src={getUrlByPurpose(item, 'modal')}
                         alt={translateTitle(item.title)}
                         onLoad={(e) => {
                           setImageLoaded(true);

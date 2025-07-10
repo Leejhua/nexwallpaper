@@ -191,6 +191,20 @@
   background: #9e9e9e;
 }
 
+/* 隐藏滚动条但保持滚动功能 */
+.scrollbar-hide {
+  /* 隐藏 webkit 浏览器滚动条 */
+  -webkit-scrollbar: none;
+  /* 隐藏 Firefox 滚动条 */
+  scrollbar-width: none;
+  /* 隐藏 IE/Edge 滚动条 */
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Pixiv风格加载动画 */
 .loading-spinner {
   width: 24px;
@@ -198,6 +212,33 @@
   border: 2px solid #e0e0e0;
   border-top: 2px solid #0096fa;
   border-radius: 50%;
+
+/* 骨架屏动画 */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-slide {
+  animation: slide 1.5s ease-in-out infinite;
+}
   animation: pixiv-spin 1s linear infinite;
 }
 

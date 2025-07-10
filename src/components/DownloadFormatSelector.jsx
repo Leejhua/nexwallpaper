@@ -2,7 +2,8 @@ import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, ChevronDown, Video, Image, Sparkles, Zap } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getHighResUrl } from '../utils/imageUtils';
+import { getHighQualityUrl } from '../utils/imageUtils';
+import { mobileDownload, detectMobileEnvironment, createDownloadStatus } from '../utils/mobileDownloader';
 
 const DownloadFormatSelector = ({ 
   item, 
@@ -623,63 +624,72 @@ const DownloadFormatSelector = ({
       let downloadBlob = null;
               let fileName = `${item.title || 'nexwallpaper'}`;
       
-      const highResUrl = getHighResUrl(item.url);
+      const highResUrl = getHighQualityUrl(item.url);
       
       // 使用代理URL
       const proxyUrl = highResUrl.replace('https://labubuwallpaper.com', '/download-proxy');
 
       switch (format.id) {
         case 'original':
-          // 使用高级下载方法 - fetch + Blob
+          // 使用移动端优化的下载方法
           try {
-            console.log('🚀 FormatSelector高级下载:', { url: highResUrl, proxyUrl, fileName });
+            const env = detectMobileEnvironment();
+            const cleanFileName = fileName.replace(/[<>:"/\\|?*]/g, '_');
             
-            // 方案1：使用fetch + Blob的方式，解决CORS问题
-            const response = await fetch(proxyUrl, {
-              method: 'GET',
-              // mode: 'cors', // 不再需要
-              cache: 'no-cache',
-              headers: {
-                'Accept': item?.type === 'video' ? 'video/*' : 'image/*',
+            if (env.isMobile || env.isTablet) {
+              // 移动端优化下载
+              const downloadStatus = createDownloadStatus();
+              downloadStatus.show();
+              downloadStatus.update('正在准备下载...');
+              
+              try {
+                const result = await mobileDownload(proxyUrl, cleanFileName);
+                
+                if (result.success) {
+                  downloadStatus.update('下载已开始', false);
+                  setTimeout(() => downloadStatus.hide(), 2000);
+                } else {
+                  downloadStatus.update('下载取消', true);
+                  setTimeout(() => downloadStatus.hide(), 2000);
+                }
+              } finally {
+                downloadStatus.hide();
               }
-            });
-            
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            } else {
+              // 桌面端使用标准下载
+              const response = await fetch(proxyUrl, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                  'Accept': item?.type === 'video' ? 'video/*' : 'image/*',
+                }
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              
+              const blob = await response.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              
+              const link = document.createElement('a');
+              link.href = blobUrl;
+              link.download = cleanFileName;
+              link.style.display = 'none';
+              
+              document.body.appendChild(link);
+              link.click();
+              
+              setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(blobUrl);
+              }, 100);
             }
             
-            // 获取文件数据
-            const blob = await response.blob();
-            console.log('📦 FormatSelector文件数据获取成功:', { 
-              size: blob.size, 
-              type: blob.type,
-              sizeKB: Math.round(blob.size / 1024) 
-            });
-            
-            // 创建Blob URL并下载
-            const blobUrl = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = fileName.replace(/[<>:"/\\|?*]/g, '_');
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            link.click();
-            
-            // 延迟清理，确保下载被触发
-            setTimeout(() => {
-              document.body.removeChild(link);
-              URL.revokeObjectURL(blobUrl);
-              console.log('🧹 FormatSelector Blob URL和链接已清理');
-            }, 100);
-            
-            console.log('✅ FormatSelector Fetch+Blob下载完成');
-            
           } catch (fetchError) {
-            console.warn('⚠️ FormatSelector Fetch下载失败，尝试降级方案:', fetchError.message);
+            console.warn('FormatSelector下载失败，尝试回调方案:', fetchError.message);
             
-            // 方案2：降级到onDownload回调 (也使用代理)
+            // 降级到onDownload回调
             await onDownload(proxyUrl, fileName);
           }
           return;
@@ -893,7 +903,7 @@ const DownloadFormatSelector = ({
           video.muted = true;
           video.preload = 'metadata';
           
-          const proxyUrl = getHighResUrl(item.url).replace('https://labubuwallpaper.com', '/download-proxy');
+          const proxyUrl = getHighQualityUrl(item.url).replace('https://labubuwallpaper.com', '/download-proxy');
           
           return new Promise((resolve) => {
             video.onloadedmetadata = () => {
@@ -942,7 +952,7 @@ const DownloadFormatSelector = ({
         }
       } else {
         // 对于原始格式，降级到直接下载
-        const fallbackUrl = getHighResUrl(item.url);
+        const fallbackUrl = getHighQualityUrl(item.url);
         const fallbackProxyUrl = fallbackUrl.replace('https://labubuwallpaper.com', '/download-proxy');
         onDownload(fallbackProxyUrl, `${item.title || 'nexwallpaper'}`);
       }
@@ -951,7 +961,7 @@ const DownloadFormatSelector = ({
 
   // 如果不是视频，也使用包含下拉图标的统一样式，但功能为直接下载
   const handleSimpleDownload = () => {
-    const highResUrl = getHighResUrl(item.url);
+    const highResUrl = getHighQualityUrl(item.url);
     const proxyUrl = highResUrl.replace('https://labubuwallpaper.com', '/download-proxy');
     onDownload(proxyUrl, item.title);
   };

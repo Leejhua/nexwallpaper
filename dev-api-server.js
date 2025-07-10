@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { promises as fs } from 'fs';
 import path from 'path';
+import fetch from 'node-fetch';
 
 const app = express();
 const PORT = 3001;
@@ -163,6 +164,84 @@ app.post('/api/stats/batch', async (req, res) => {
   } catch (error) {
     console.error('API Error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 代理路由 - 用于代理外部资源访问
+app.get('/api/proxy', async (req, res) => {
+  // 启用 CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  try {
+    // 从查询参数获取目标URL
+    const { url: targetUrl } = req.query;
+    
+    if (!targetUrl) {
+      return res.status(400).json({ error: '缺少url参数' });
+    }
+
+    // 验证URL是否为允许的域名
+    const allowedDomains = ['labubuwallpaper.com'];
+    const urlObj = new URL(targetUrl);
+    
+    if (!allowedDomains.some(domain => urlObj.hostname.includes(domain))) {
+      return res.status(403).json({ error: '不允许的域名' });
+    }
+
+    // 配置请求头
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': req.headers.accept || '*/*',
+      'Referer': 'https://labubuwallpaper.com/',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    };
+
+    console.log(`[代理请求] ${targetUrl}`);
+
+    // 发起请求
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      headers,
+      timeout: 30000, // 30秒超时
+    });
+
+    if (!response.ok) {
+      console.error(`[代理错误] ${response.status} ${response.statusText}`);
+      return res.status(response.status).json({ 
+        error: `上游服务器错误: ${response.status} ${response.statusText}` 
+      });
+    }
+
+    // 获取内容类型
+    const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
+
+    // 设置响应头
+    res.setHeader('Content-Type', contentType || 'application/octet-stream');
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+    
+    // 设置缓存头
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Last-Modified', new Date().toUTCString());
+
+    // 流式传输响应
+    response.body.pipe(res);
+
+  } catch (error) {
+    console.error('[代理接口错误]:', error);
+    
+    if (error.name === 'AbortError') {
+      return res.status(408).json({ error: '请求超时' });
+    }
+    
+    return res.status(500).json({ 
+      error: '代理服务器内部错误',
+      details: error.message 
+    });
   }
 });
 
