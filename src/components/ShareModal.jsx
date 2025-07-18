@@ -7,6 +7,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTitleTranslation } from '../hooks/useTitleTranslation';
 import { generateShareMetadata, optimizeForPlatform } from '../utils/shareUtils';
+import ReactGA from 'react-ga4';
 
 /**
  * 分享模态框组件 - 支持多平台分享

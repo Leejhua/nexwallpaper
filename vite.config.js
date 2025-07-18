@@ -27,6 +27,22 @@ export default defineConfig({
     ],
     proxy: {
       // 配置代理来解决CORS问题
+      '/api': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log(`[API Proxy] ==> Request: ${req.method} ${req.url} to ${proxyReq.path}`);
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log(`[API Proxy] <== Response: ${proxyRes.statusCode} from ${req.url}`);
+          });
+          proxy.on('error', (err, req, res) => {
+            console.error('[API Proxy] Error: ', err);
+          });
+        }
+      },
       '/download-proxy': {
         target: 'https://labubuwallpaper.com',
         changeOrigin: true,

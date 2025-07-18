@@ -1,34 +1,7 @@
 // 统计API服务
 // 兼容不同的环境变量获取方式
 const getApiUrl = () => {
-  // 开发环境检测：检查URL是否包含开发服务器端口
-  if (typeof window !== 'undefined') {
-    const isDevelopment = window.location.hostname === 'localhost' || 
-                         window.location.hostname === '127.0.0.1' ||
-                         window.location.hostname.startsWith('192.168.') ||
-                         window.location.port === '3000' ||
-                         window.location.port === '3001';
-    
-    if (isDevelopment) {
-      // 开发环境使用独立API服务器
-      const host = window.location.hostname;
-      return `http://${host}:3002/api`;
-    } else {
-      // 生产环境，使用相对路径
-      return `${window.location.origin}/api`;
-    }
-  }
-  
-  // Vite环境变量
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env.VITE_STATS_API_URL;
-  }
-  // Create React App环境变量 (备用)
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.REACT_APP_STATS_API_URL;
-  }
-  // 默认值
-  return null;
+  return '/api';
 };
 
 const API_BASE_URL = getApiUrl() || '/api';
@@ -44,6 +17,7 @@ class StatsAPI {
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
         ...options.headers,
       },
       ...options,
