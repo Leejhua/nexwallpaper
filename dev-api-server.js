@@ -11,8 +11,16 @@ const PORT = 3001;
 const DATA_FILE = './dev-stats.json';
 
 // 中间件
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.path} ${req.originalUrl}`);
+  next();
+});
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf, encoding) => {
+    console.log(`Raw body for ${req.method} ${req.url}:`, buf.toString(encoding));
+  }
+}));
 
 // 确保数据文件存在
 async function ensureDataFile() {
@@ -170,4 +178,4 @@ app.post('/api/stats/batch', async (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 开发API服务器运行在: http://localhost:${PORT}`);
   console.log(`📊 数据文件: ${path.resolve(DATA_FILE)}`);
-}); 
+});

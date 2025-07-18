@@ -25,7 +25,7 @@ const Gallery = ({
   const [hasMore, setHasMore] = useState(true);
   
   // 获取统计上下文
-  const { loadBatchStats, isOnline } = useClickStatsContext();
+  const { clickStats, loadBatchStats, isOnline } = useClickStatsContext();
   const loadBatchStatsRef = useRef(loadBatchStats);
   
   // 更新ref
@@ -250,20 +250,25 @@ const Gallery = ({
   // 加载统计数据 - 当显示的项目变化时，使用防抖避免频繁调用
   useEffect(() => {
     if (displayedItems.length > 0 && isOnline) {
-      const wallpaperIds = displayedItems.map(item => item.id);
+      // 计算新添加的 IDs
+      const allIds = displayedItems.map(item => item.id);
+      const loadedIds = new Set(Object.keys(clickStats));
+      const newIds = allIds.filter(id => !loadedIds.has(id));
       
-      // 防抖处理，避免频繁调用
+      if (newIds.length === 0) return;
+      
+      // 防抖处理
       const timeoutId = setTimeout(() => {
         if (loadBatchStatsRef.current) {
-          loadBatchStatsRef.current(wallpaperIds).catch(error => {
+          loadBatchStatsRef.current(newIds).catch(error => {
             console.error('Failed to load batch stats:', error);
           });
         }
-      }, 1000); // 1秒防抖，避免频繁调用
+      }, 1000);
       
       return () => clearTimeout(timeoutId);
     }
-  }, [displayedItems.length, isOnline]); // 只依赖长度，不依赖整个数组
+  }, [displayedItems.length, isOnline, clickStats]);
 
   // 加载更多数据 - 优化版本，避免闪烁
   const loadMore = useCallback(() => {

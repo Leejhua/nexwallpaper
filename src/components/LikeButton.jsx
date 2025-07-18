@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import { useLanguage } from '../contexts/LanguageContext';
+import ReactGA from 'react-ga';
 
 const LikeButton = ({ 
   wallpaperId, 
@@ -44,6 +45,13 @@ const LikeButton = ({
       setIsAnimating(true);
       if (toggleLike) {
         const newLikeState = await toggleLike(wallpaperId);
+        
+        // 发送GA事件
+        ReactGA.event({
+          category: 'Interaction',
+          action: newLikeState ? 'Like' : 'Unlike',
+          label: wallpaperId
+        });
       } else {
         console.error('toggleLike function not available');
       }

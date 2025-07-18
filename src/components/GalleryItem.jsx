@@ -7,6 +7,7 @@ import PopularityBadge from './PopularityBadge';
 import HoverInfoOverlay from './HoverInfoOverlay';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTitleTranslation } from '../hooks/useTitleTranslation';
+import ReactGA from 'react-ga4';
 
 /**
  * 画廊项目组件 - 单个壁纸/视频卡片
@@ -414,6 +415,11 @@ const GalleryItem = ({ item, onPreview, index }) => {
   const handleCardClick = useCallback((e) => {
     // 记录点击统计
     recordClick(item.id, 'view');
+    ReactGA.event({
+      category: 'Interaction',
+      action: 'Card Click',
+      label: String(item.id)
+    });
     onPreview(item);
   }, [item, onPreview, recordClick]);
 

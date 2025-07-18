@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, ChevronDown, Video, Image, Sparkles, Zap } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getHighResUrl } from '../utils/imageUtils';
+import ReactGA from 'react-ga';
 
 const DownloadFormatSelector = ({ 
   item, 
@@ -954,6 +955,14 @@ const DownloadFormatSelector = ({
     const highResUrl = getHighResUrl(item.url);
     const proxyUrl = highResUrl.replace('https://labubuwallpaper.com', '/download-proxy');
     onDownload(proxyUrl, item.title);
+    
+    // 发送GA事件
+    ReactGA.event({
+      category: 'Download',
+      action: 'Download',
+      label: item.id || item._id,
+      value: 1
+    });
   };
 
   const buttonContent = (isDownloading || convertingFormat) ? (
@@ -1058,4 +1067,4 @@ const DownloadFormatSelector = ({
   );
 };
 
-export default DownloadFormatSelector; 
+export default DownloadFormatSelector;

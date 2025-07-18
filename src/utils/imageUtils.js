@@ -45,21 +45,16 @@ export const getThumbnailUrl = (originalUrl) => {
  */
 export const getHighResUrl = (originalUrl) => {
   if (!originalUrl) return originalUrl;
-  
-  // 对于已经优化的CDN URL，提供更高质量版本
+
   if (originalUrl.includes('labubuwallpaper.com/cdn-cgi/image/')) {
-    // 提取图片路径
     const imagePath = originalUrl.split('/cdn-cgi/image/')[1];
     if (imagePath && imagePath.includes('/')) {
       const actualPath = imagePath.substring(imagePath.indexOf('/') + 1);
-      // 返回高质量版本或原始图片
-      const baseUrl = 'https://labubuwallpaper.com/cdn-cgi/image/';
-      const highQualityParams = 'width=1200,height=1800,fit=cover,quality=95,format=auto';
-      return `${baseUrl}${highQualityParams}/${actualPath}`;
+      return `https://labubuwallpaper.com/${actualPath}`;
     }
   }
-  
-  return originalUrl; // 详情页使用原始高清URL
+
+  return originalUrl;
 };
 
 /**
