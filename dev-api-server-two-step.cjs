@@ -134,6 +134,12 @@ app.post('/generate-timed-video', async (req, res) => {
     const imagePath = path.join(tempDir, `input_${Date.now()}.jpg`);
     fs.writeFileSync(imagePath, imageBuffer);
 
+    // 覆盖图片路径
+    const overlayImagePath = './trapezoid_beam_1753430219451.png';
+    if (!fs.existsSync(overlayImagePath)) {
+      throw new Error('找不到覆盖图片文件: trapezoid_beam_1753430219451.png');
+    }
+
     // 创建梯形遮罩
     const maskSvg = createTrapezoidMask(beamData.polygon, beamData.width, beamData.height);
     const maskPath = path.join(tempDir, `trapezoid_mask_${Date.now()}.svg`);
@@ -147,8 +153,10 @@ app.post('/generate-timed-video', async (req, res) => {
     // 时间设置
     const startTime = timingData.effectStartTime || 0.5;
     const fadeInDuration = timingData.fadeTransition.fadeIn.duration || 0.8;
-    const maxOpacity = timingData.fadeTransition.fadeIn.endOpacity || 0.5;
+    const maxOpacity = timingData.fadeTransition.fadeIn.endOpacity || 1.0;
     const endTime = timingData.effectEndTime || 2.5;
+    
+    console.log(`🎭 渐入效果: 开始时间${startTime}s, 持续${fadeInDuration}s, 最高不透明度${(maxOpacity * 100)}%`);
 
     console.log('🎯 两步处理方案:');
     console.log('   步骤1: 生成完整5秒效果视频');
@@ -241,43 +249,31 @@ app.post('/generate-timed-video', async (req, res) => {
         '-y',
         '-i', inputVideo,
         '-i', imagePath,
+        '-i', overlayImagePath,  // 添加覆盖图片作为第三个输入
         '-i', maskPath,
         '-filter_complex', [
-          // 🔧 新流程：三步处理方案（修复标签冲突）
-          // 步骤1: 处理图片 - 缩放、定位、应用梯形遮罩
+          // 增强流程：用户图片 + 覆盖图片合成 + 梯形裁剪
+          // 步骤1: 处理用户图片 - 缩放、定位
           `[1:v]scale=${beamData.width}:-1[base_img]`, 
           `[base_img]scale=iw*${transform.scale}:ih*${transform.scale}[scaled_img]`, 
           `color=black:size=${beamData.width}x${beamData.height}:duration=5[bg]`, 
           `[bg][scaled_img]overlay=x='(W-w)/2+${actualOffsetX}':y='(H-h)/2+${actualOffsetY}'[positioned_img]`, 
-          `[2:v]scale=${beamData.width}:${beamData.height}[img_mask]`, 
-          `[positioned_img][img_mask]alphamerge[masked_img]`, 
           
-          // 步骤2: 创建光束效果 - 中间清晰，两侧模糊白光
-          // 创建白色基础光束
-          `color=white:size=${beamData.width}x${beamData.height}:duration=5[light_base]`,
-          // 水平渐变：中心完全不透明(255)，边缘完全透明(0)
-          `[light_base]geq=r='255':g='255':b='255':a='255*max(0,1-2*abs(X/W-0.5))'[light_gradient]`,
-          // 应用高斯模糊使两侧柔和扩散
-          `[light_gradient]gblur=sigma=25[blurred_light]`,
-          // 为光束创建独立的遮罩副本
-          `[2:v]scale=${beamData.width}:${beamData.height}[light_mask]`,
-          // 应用梯形遮罩
-          `[blurred_light][light_mask]alphamerge[masked_light]`,
+          // 步骤2: 处理覆盖图片并合成到用户图片上方
+          `[2:v]scale=${beamData.width}:${beamData.height},format=yuva420p[overlay_scaled]`,
+          `[positioned_img][overlay_scaled]overlay=0:0[composite_img]`,
           
-          // 步骤3: 图片与光束叠加形成复合图片
-          // 先降低光束强度，然后使用screen混合模式实现柔和叠加
-          `[masked_light]colorchannelmixer=aa=0.4[dimmed_light]`,
-          `[masked_img][dimmed_light]overlay=0:0:eval=frame:format=auto[composite_img]`,
+          // 步骤3: 应用梯形遮罩到合成图片
+          `[3:v]scale=${beamData.width}:${beamData.height}[img_mask]`, 
+          `[composite_img][img_mask]alphamerge[masked_img]`, 
           
-          // 步骤4: 复合图片转为视频流并添加渐出效果
-          `[composite_img]loop=loop=-1:size=300:start=0[img_loop]`,
-          // 渐入效果：从startTime开始，持续fadeInDuration
+          // 步骤4: 图片转为视频流并添加渐入效果
+          `[masked_img]loop=loop=-1:size=300:start=0[img_loop]`,
+          // 渐入效果：从startTime开始，持续fadeInDuration，alpha=1表示完全不透明
           `[img_loop]fade=t=in:st=${startTime}:d=${fadeInDuration}:alpha=1[fade_in]`,
-          // 渐出效果：在视频结束前开始渐出
-          `[fade_in]fade=t=out:st=${endTime-0.3}:d=0.3:alpha=1[fade_out]`,
-          `[fade_out]format=yuva420p[final_composite]`,
+          `[fade_in]format=yuva420p[final_composite]`,
           
-          // 步骤5: 将复合图片覆盖到原视频上
+          // 步骤5: 将合成结果覆盖到原视频上
           `[0:v][final_composite]overlay=0:0:enable='between(t,${startTime},${endTime})'[output]`
         ].join(';'),
         '-map', '[output]',
@@ -321,7 +317,7 @@ app.post('/generate-timed-video', async (req, res) => {
 
         res.json({
           success: true,
-          message: `两步处理成功！完整效果 + 短视频`,
+          message: `渐入效果已更新！最高不透明度100%，无渐出效果`,
           videoUrl: `/${outputFileName}`,
           fileName: outputFileName,
           fileSize: fileSizeKB + ' KB',
@@ -331,21 +327,21 @@ app.post('/generate-timed-video', async (req, res) => {
             startTime: startTime + '秒',
             endTime: endTime + '秒',
             fadeInDuration: fadeInDuration + '秒',
-            fadeOutDuration: '无渐出',
+            fadeOutDuration: '0秒（已移除）',
             maxOpacity: (maxOpacity * 100) + '%'
           },
           croppingInfo: {
-            method: '两步处理梯形遮罩',
+            method: '简化梯形遮罩',
             shape: '向下收窄的梯形',
             topWidth: topWidth + 'px',
             bottomWidth: bottomWidth + 'px',
             height: height + 'px',
             coordinates: beamData.polygon,
-            explanation: '先生成完整5秒效果，再剪短到原视频长度'
+            explanation: '纯图片梯形裁切，无光束效果'
           },
           processingSteps: [
-            '步骤1: 生成完整5秒梯形裁切效果',
-            '步骤2: 剪短到1.06秒保持效果完整'
+            '步骤1: 图片缩放定位并应用梯形裁切，渐入至100%不透明度',
+            '步骤2: 剪短到1.06秒保持效果完整，无渐出效果'
           ]
         });
       } else {
@@ -372,8 +368,8 @@ app.post('/generate-timed-video', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 两步处理API运行在: http://localhost:${PORT}`);
-  console.log(`🎯 方案: 完整效果生成 → 剪短输出`);
+  console.log(`🚀 简化处理API运行在: http://localhost:${PORT}`);
+  console.log(`🎯 方案: 纯图片梯形裁切 → 剪短输出`);
   console.log(`⏰ 最终时长: 1.06秒（原视频长度）`);
-  console.log(`✨ 效果: 保持完整梯形裁切效果`);
+  console.log(`✨ 效果: 纯图片梯形裁切，无光束效果`);
 });

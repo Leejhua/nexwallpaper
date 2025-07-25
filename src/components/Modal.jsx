@@ -12,7 +12,6 @@ import { useClickStatsContext } from '../contexts/ClickStatsProvider';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTagTranslation } from '../hooks/useTagTranslation';
 import { useTitleTranslation } from '../hooks/useTitleTranslation';
-import ReactGA from 'react-ga';
 
 /**
  * 模态框组件 - 移动端优化版本
@@ -58,13 +57,6 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
       setImageError(false);
       setIsDownloading(false);
       setImageDimensions(null);
-      
-      // 发送GA页面浏览事件
-      ReactGA.event({
-        category: 'View',
-        action: 'View Wallpaper',
-        label: item.id || item._id
-      });
     }
   }, [item]);
 

@@ -125,8 +125,8 @@ function VideoGenerator() {
         tempCtx.translate(positionX * canvasScale, positionY * canvasScale);
         tempCtx.scale(scale, scale);
         
-        // 设置透明度（与最终处理后的透明度一致）
-        tempCtx.globalAlpha = 0.7;
+        // 移除透明度设置，显示完全不透明的图片
+        tempCtx.globalAlpha = 1.0;
         
         // 计算图片显示尺寸
         const imgScale = canvasWidth / img.width;
@@ -144,21 +144,30 @@ function VideoGenerator() {
         
         tempCtx.restore();
         
-        // 应用梯形遮罩裁切（只保留坐标框内的图片）
-        tempCtx.save();
-        tempCtx.globalCompositeOperation = 'destination-in';
+        // 应用梯形遮罩裁切
+        console.log('🖼️ 预览模式：应用梯形裁切');
         
-        tempCtx.beginPath();
+        // 创建梯形遮罩
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = canvasWidth;
+        maskCanvas.height = canvasHeight;
+        const maskCtx = maskCanvas.getContext('2d');
+        
+        // 绘制梯形遮罩（白色梯形在透明背景上）
+        maskCtx.fillStyle = 'white';
+        maskCtx.beginPath();
         const polygon = beamData.polygon;
-        tempCtx.moveTo(polygon[0].x * canvasScale, polygon[0].y * canvasScale);
+        maskCtx.moveTo(polygon[0].x * canvasScale, polygon[0].y * canvasScale);
         for (let i = 1; i < polygon.length; i++) {
-          tempCtx.lineTo(polygon[i].x * canvasScale, polygon[i].y * canvasScale);
+          maskCtx.lineTo(polygon[i].x * canvasScale, polygon[i].y * canvasScale);
         }
-        tempCtx.closePath();
-        tempCtx.fillStyle = '#fff';
-        tempCtx.fill();
+        maskCtx.closePath();
+        maskCtx.fill();
         
-        tempCtx.restore();
+        // 应用遮罩到图片
+        tempCtx.globalCompositeOperation = 'destination-in';
+        tempCtx.drawImage(maskCanvas, 0, 0);
+        tempCtx.globalCompositeOperation = 'source-over'; // 重置合成操作
         
         // 将处理后的图片绘制到主画布
         ctx.drawImage(tempCanvas, 0, 0);

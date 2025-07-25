@@ -1,4 +1,4 @@
-﻿{
+{
   "effectStartTime": 0.5,
   "effectDuration": 2.0,
   "effectEndTime": 2.5,
@@ -12,20 +12,14 @@
   "fadeTransition": {
     "fadeIn": {
       "startTime": 0.5,
-      "duration": 0.8,
+      "duration": 0.5,
       "startOpacity": 0,
-      "endOpacity": 0.5
+      "endOpacity": 1.0
     },
     "sustain": {
-      "startTime": 1.3,
-      "duration": 0.4,
-      "opacity": 0.5
-    },
-    "fadeOut": {
-      "startTime": 1.7,
-      "duration": 0.8,
-      "startOpacity": 0.5,
-      "endOpacity": 0
+      "startTime": 1.0,
+      "duration": 1.5,
+      "opacity": 1.0
     }
   },
   "keyframes": [
@@ -35,23 +29,17 @@
       "description": "开始渐入"
     },
     {
-      "time": 1.3,
-      "opacity": 0.5,
-      "description": "渐入完成"
-    },
-    {
-      "time": 1.7,
-      "opacity": 0.5,
-      "description": "开始渐出"
+      "time": 1.0,
+      "opacity": 1.0,
+      "description": "渐入完成，保持100%不透明度"
     },
     {
       "time": 2.5,
-      "opacity": 0,
-      "description": "渐出完成"
+      "opacity": 1.0,
+      "description": "效果结束，保持100%不透明度"
     }
   ],
   "easing": {
-    "fadeIn": "ease-in-out",
-    "fadeOut": "ease-in-out"
+    "fadeIn": "ease-in-out"
   }
 }

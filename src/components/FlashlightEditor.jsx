@@ -24,7 +24,7 @@ function FlashlightEditor() {
   const [fadeSettings, setFadeSettings] = useState({
     enabled: true,
     duration: 1.0,
-    opacity: 0.5
+    opacity: 1.0
   });
 
 
@@ -127,69 +127,77 @@ function FlashlightEditor() {
     
     const ctx = canvas.getContext('2d');
     
-    // 设置canvas尺寸
-    canvas.width = beamData.width;
-    canvas.height = beamData.height;
+    // 设置合理的预览尺寸（固定300px宽度）
+    const previewWidth = 300;
+    const aspectRatio = beamData.height / beamData.width;
+    const previewHeight = Math.round(previewWidth * aspectRatio);
     
-    // 清空画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = previewWidth;
+    canvas.height = previewHeight;
     
-    // 绘制半透明背景显示光束区域
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    // 清空画布并设置黑色背景（模拟手电筒效果）
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 绘制光束轮廓
-    ctx.save();
-    ctx.beginPath();
-    beamData.polygon.forEach((p, idx) => {
-      if (idx === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-    ctx.closePath();
-    ctx.strokeStyle = '#00ff00';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // 计算缩放比例
+    const scale = previewWidth / beamData.width;
     
-    // 在光束区域内显示用户图片
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = 'black';
-    ctx.fill();
-    
-    ctx.globalCompositeOperation = 'source-over';
+    // 应用梯形裁切预览
+    console.log('🖼️ 预览模式：应用梯形裁切');
     
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      ctx.save();
+      // 应用变换（调整到预览尺寸）
+      const centerX = previewWidth / 2 + imageTransform.x * scale;
+      const centerY = previewHeight / 2 + imageTransform.y * scale;
       
-      // 应用变换
-      const centerX = imageTransform.x + (img.width * imageTransform.scale) / 2;
-      const centerY = imageTransform.y + (img.height * imageTransform.scale) / 2;
+      // 绘制图片到临时画布
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempCtx = tempCanvas.getContext('2d');
       
-      ctx.translate(centerX, centerY);
-      ctx.rotate((imageTransform.rotation * Math.PI) / 180);
-      ctx.scale(imageTransform.scale, imageTransform.scale);
+      tempCtx.save();
+      tempCtx.translate(centerX, centerY);
+      tempCtx.rotate((imageTransform.rotation * Math.PI) / 180);
+      tempCtx.scale(imageTransform.scale, imageTransform.scale);
+      tempCtx.drawImage(img, -img.width / 2, -img.height / 2, img.width, img.height);
+      tempCtx.restore();
       
-      // 裁剪到光束区域
-      ctx.beginPath();
-      beamData.polygon.forEach((p, idx) => {
-        const transformedX = (p.x - centerX) / imageTransform.scale;
-        const transformedY = (p.y - centerY) / imageTransform.scale;
-        if (idx === 0) ctx.moveTo(transformedX, transformedY);
-        else ctx.lineTo(transformedX, transformedY);
-      });
-      ctx.closePath();
-      ctx.clip();
+      // 创建梯形遮罩
+      const maskCanvas = document.createElement('canvas');
+      maskCanvas.width = canvas.width;
+      maskCanvas.height = canvas.height;
+      const maskCtx = maskCanvas.getContext('2d');
       
-      ctx.drawImage(img, -img.width / 2, -img.height / 2);
-      ctx.restore();
+      // 绘制梯形遮罩（白色梯形在透明背景上）
+      maskCtx.fillStyle = 'white';
+      maskCtx.beginPath();
+      const polygon = beamData.polygon;
+      maskCtx.moveTo(polygon[0].x * scale, polygon[0].y * scale);
+      for (let i = 1; i < polygon.length; i++) {
+        maskCtx.lineTo(polygon[i].x * scale, polygon[i].y * scale);
+      }
+      maskCtx.closePath();
+      maskCtx.fill();
+      
+      // 应用遮罩到图片
+      tempCtx.globalCompositeOperation = 'destination-in';
+      tempCtx.drawImage(maskCanvas, 0, 0);
+      tempCtx.globalCompositeOperation = 'source-over'; // 重置合成操作
+      
+      // 调试：检查遮罩是否正确应用
+      console.log('🔍 遮罩应用完成，画布尺寸:', tempCanvas.width, 'x', tempCanvas.height);
+      console.log('🔍 梯形坐标 (缩放后):', polygon.map(p => ({x: p.x * scale, y: p.y * scale})));
+      
+      // 将处理后的图片绘制到主画布
+      ctx.drawImage(tempCanvas, 0, 0);
     };
     img.onerror = () => {
       console.warn('⚠️ 预览图片加载失败');
     };
     img.src = userImage;
-    
-    ctx.restore();
   }, [userImage, beamData, imageTransform]);
 
   // 清除错误
@@ -325,23 +333,13 @@ function FlashlightEditor() {
         console.log('🖼️ 图片加载成功，尺寸:', img.width, 'x', img.height);
         
         try {
-          // 清空并准备canvas
+          // 清空canvas并设置黑色背景
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // 设置透明背景
-          ctx.globalCompositeOperation = 'source-over';
-          
-          // 1. 先绘制多边形遮罩区域
+          // 应用梯形裁切
           ctx.save();
-          ctx.beginPath();
-          beam.polygon.forEach((p, idx) => {
-            if (idx === 0) ctx.moveTo(p.x, p.y);
-            else ctx.lineTo(p.x, p.y);
-          });
-          ctx.closePath();
-          ctx.clip(); // 裁剪到光束区域
-          
-          // 2. 在裁剪区域内绘制变换后的图片
           const centerX = imageTransform.x + (img.width * imageTransform.scale) / 2;
           const centerY = imageTransform.y + (img.height * imageTransform.scale) / 2;
           
@@ -349,9 +347,46 @@ function FlashlightEditor() {
           ctx.rotate((imageTransform.rotation * Math.PI) / 180);
           ctx.scale(imageTransform.scale, imageTransform.scale);
           
-          // 绘制图片
-          ctx.drawImage(img, -img.width / 2, -img.height / 2);
+          // 绘制图片到临时画布
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          tempCtx.save();
+          tempCtx.translate(centerX, centerY);
+          tempCtx.rotate((imageTransform.rotation * Math.PI) / 180);
+          tempCtx.scale(imageTransform.scale, imageTransform.scale);
+          tempCtx.drawImage(img, -img.width / 2, -img.height / 2);
+          tempCtx.restore();
+          
+          // 创建梯形遮罩
+          const maskCanvas = document.createElement('canvas');
+          maskCanvas.width = canvas.width;
+          maskCanvas.height = canvas.height;
+          const maskCtx = maskCanvas.getContext('2d');
+          
+          // 绘制梯形遮罩（白色梯形在透明背景上）
+          maskCtx.fillStyle = 'white';
+          maskCtx.beginPath();
+          const polygon = beam.polygon;
+          maskCtx.moveTo(polygon[0].x, polygon[0].y);
+          for (let i = 1; i < polygon.length; i++) {
+            maskCtx.lineTo(polygon[i].x, polygon[i].y);
+          }
+          maskCtx.closePath();
+          maskCtx.fill();
+          
+          // 应用遮罩到图片
+          tempCtx.globalCompositeOperation = 'destination-in';
+          tempCtx.drawImage(maskCanvas, 0, 0);
+          tempCtx.globalCompositeOperation = 'source-over'; // 重置合成操作
+          
+          // 将处理后的图片绘制到主画布
+          ctx.drawImage(tempCanvas, 0, 0);
           ctx.restore();
+          
+          console.log('🖼️ 图片已绘制完成，已应用梯形裁切');
           
           // 检查canvas是否有内容
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -434,7 +469,7 @@ function FlashlightEditor() {
     setError(null);
     
     try {
-      console.log('🎬 开始生成50%透明度渐入视频...');
+      console.log('🎬 开始生成100%不透明度渐入视频...');
       
       // 将遮罩PNG转换为base64
       const canvas = document.createElement('canvas');
@@ -471,7 +506,7 @@ function FlashlightEditor() {
       
       console.log('📤 发送视频生成请求...');
       
-      // 调用50%透明度渐入API
+      // 调用100%不透明度渐入API
       const response = await fetch('http://localhost:3001/generate-timed-video', {
         method: 'POST',
         headers: {
@@ -609,10 +644,10 @@ function FlashlightEditor() {
           </label>
           
           
-        {/* 50%透明度渐入视频生成 */}
+        {/* 100%不透明度渐入视频生成 */}
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
           <h3 className="text-xl font-semibold mb-4 text-purple-300">
-            🎭 50%透明度渐入视频
+            🎭 100%不透明度渐入视频
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -846,4 +881,4 @@ function FlashlightEditor() {
   );
 }
 
-export default FlashlightEditor; 
+export default FlashlightEditor;

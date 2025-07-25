@@ -127,69 +127,45 @@ function FlashlightEditor() {
     
     const ctx = canvas.getContext('2d');
     
-    // 设置canvas尺寸
-    canvas.width = beamData.width;
-    canvas.height = beamData.height;
+    // 设置合理的预览尺寸（固定300px宽度）
+    const previewWidth = 300;
+    const aspectRatio = beamData.height / beamData.width;
+    const previewHeight = Math.round(previewWidth * aspectRatio);
     
-    // 清空画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = previewWidth;
+    canvas.height = previewHeight;
     
-    // 绘制半透明背景显示光束区域
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    // 清空画布并设置黑色背景（模拟手电筒效果）
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 绘制光束轮廓
-    ctx.save();
-    ctx.beginPath();
-    beamData.polygon.forEach((p, idx) => {
-      if (idx === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-    ctx.closePath();
-    ctx.strokeStyle = '#00ff00';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // 计算缩放比例
+    const scale = previewWidth / beamData.width;
     
-    // 在光束区域内显示用户图片
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = 'black';
-    ctx.fill();
-    
-    ctx.globalCompositeOperation = 'source-over';
+    // 不绘制梯形轮廓，显示完整图片预览
+    console.log('🖼️ 预览模式：不显示梯形轮廓');
     
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       ctx.save();
       
-      // 应用变换
-      const centerX = imageTransform.x + (img.width * imageTransform.scale) / 2;
-      const centerY = imageTransform.y + (img.height * imageTransform.scale) / 2;
+      // 应用变换（调整到预览尺寸）
+      const centerX = previewWidth / 2 + imageTransform.x * scale;
+      const centerY = previewHeight / 2 + imageTransform.y * scale;
       
       ctx.translate(centerX, centerY);
       ctx.rotate((imageTransform.rotation * Math.PI) / 180);
       ctx.scale(imageTransform.scale, imageTransform.scale);
       
-      // 裁剪到光束区域
-      ctx.beginPath();
-      beamData.polygon.forEach((p, idx) => {
-        const transformedX = (p.x - centerX) / imageTransform.scale;
-        const transformedY = (p.y - centerY) / imageTransform.scale;
-        if (idx === 0) ctx.moveTo(transformedX, transformedY);
-        else ctx.lineTo(transformedX, transformedY);
-      });
-      ctx.closePath();
-      ctx.clip();
-      
-      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      // 直接绘制图片，保持原始尺寸比例
+      ctx.drawImage(img, -img.width / 2, -img.height / 2, img.width, img.height);
       ctx.restore();
     };
     img.onerror = () => {
       console.warn('⚠️ 预览图片加载失败');
     };
     img.src = userImage;
-    
-    ctx.restore();
   }, [userImage, beamData, imageTransform]);
 
   // 清除错误
@@ -325,23 +301,13 @@ function FlashlightEditor() {
         console.log('🖼️ 图片加载成功，尺寸:', img.width, 'x', img.height);
         
         try {
-          // 清空并准备canvas
+          // 清空canvas并设置黑色背景
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // 设置透明背景
-          ctx.globalCompositeOperation = 'source-over';
-          
-          // 1. 先绘制多边形遮罩区域
+          // 直接绘制完整图片，不应用梯形裁切
           ctx.save();
-          ctx.beginPath();
-          beam.polygon.forEach((p, idx) => {
-            if (idx === 0) ctx.moveTo(p.x, p.y);
-            else ctx.lineTo(p.x, p.y);
-          });
-          ctx.closePath();
-          ctx.clip(); // 裁剪到光束区域
-          
-          // 2. 在裁剪区域内绘制变换后的图片
           const centerX = imageTransform.x + (img.width * imageTransform.scale) / 2;
           const centerY = imageTransform.y + (img.height * imageTransform.scale) / 2;
           
@@ -349,9 +315,11 @@ function FlashlightEditor() {
           ctx.rotate((imageTransform.rotation * Math.PI) / 180);
           ctx.scale(imageTransform.scale, imageTransform.scale);
           
-          // 绘制图片
+          // 绘制完整图片，不进行任何裁切
           ctx.drawImage(img, -img.width / 2, -img.height / 2);
           ctx.restore();
+          
+          console.log('🖼️ 图片已绘制完成，未应用梯形裁切');
           
           // 检查canvas是否有内容
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -846,4 +814,4 @@ function FlashlightEditor() {
   );
 }
 
-export default FlashlightEditor; 
+export default FlashlightEditor;

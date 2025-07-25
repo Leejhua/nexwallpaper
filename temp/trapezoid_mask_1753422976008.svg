@@ -1,0 +1,10 @@
+
+<svg width="1080" height="1920" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="trapezoidMask">
+      <rect width="100%" height="100%" fill="black"/>
+      <polygon points="540,400 740,400 840,1520 240,1520" fill="white"/>
+    </mask>
+  </defs>
+  <rect width="100%" height="100%" fill="white" mask="url(#trapezoidMask)"/>
+</svg>

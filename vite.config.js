@@ -11,9 +11,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
-    host: '0.0.0.0',  // 监听所有接口
-    strictPort: true,
+    port: 9090,
+    host: '0.0.0.0',  // 监听所有接�?    strictPort: true,
     cors: true,       // 启用CORS
     // 允许的主机名
     allowedHosts: [
@@ -43,22 +42,6 @@ export default defineConfig({
         }
       },
       // 配置代理来解决CORS问题
-      '/api': {
-        target: 'http://127.0.0.1:3001',
-        changeOrigin: true,
-        secure: false,
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log(`[API Proxy] ==> Request: ${req.method} ${req.url} to ${proxyReq.path}`);
-          });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log(`[API Proxy] <== Response: ${proxyRes.statusCode} from ${req.url}`);
-          });
-          proxy.on('error', (err, req, res) => {
-            console.error('[API Proxy] Error: ', err);
-          });
-        }
-      },
       '/download-proxy': {
         target: 'https://labubuwallpaper.com',
         changeOrigin: true,

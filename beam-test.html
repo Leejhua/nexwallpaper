@@ -328,8 +328,8 @@
             // 保存当前状态
             ctx.save();
             
-            // 应用多边形裁切
-             ctx.clip(polygonPath);
+            // 不应用多边形裁切，保持完整图片
+            console.log('🖼️ 预览模式：不应用多边形裁切，显示完整图片');
             
             // 获取透明度变化速度参数
             const fadeSpeed = parseFloat(controls.fadeSpeed.value);
@@ -405,7 +405,8 @@
              const polygonPath = createPolygonPath(coordinates);
             
             exportCtx.save();
-             exportCtx.clip(polygonPath);
+            // 不应用多边形裁切，保持完整图片
+            console.log('🖼️ 导出模式：不应用多边形裁切，显示完整图片');
             
             const fadeSpeed = parseFloat(controls.fadeSpeed.value);
             
