@@ -142,12 +142,13 @@ const Gallery = ({
   // 骨架屏组件
   const SkeletonItem = ({ height = 200 }) => (
     <div 
-      className="bg-gray-200 rounded-xl animate-pulse mb-4"
+      className="bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse mb-4"
       style={{ height: `${height}px` }}
     >
+
       <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-        <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+        <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
       </div>
     </div>
   );
@@ -353,7 +354,7 @@ const Gallery = ({
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between"
         >
-          <div className="text-gray-600">
+          <div className="text-gray-600 dark:text-gray-300">
             <span className="inline-flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
               {t('loading')}
@@ -362,7 +363,7 @@ const Gallery = ({
         </motion.div>
 
         {/* 骨架屏 */}
-        <div className="flex gap-6 gallery-container">
+        <div className="flex gap-4 gallery-container dark:text-gray-300">
           {showSkeleton && renderSkeleton()}
         </div>
       </div>
@@ -377,13 +378,13 @@ const Gallery = ({
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center justify-center min-h-[400px] text-center"
       >
-        <div className="text-gray-400 mb-4">
+        <div className="text-gray-400 dark:text-gray-500 mb-4">
           <Search size={64} />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
           {t('noResults')}
         </h3>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           尝试更换筛选条件或搜索关键词
         </p>
         <motion.button
@@ -402,36 +403,36 @@ const Gallery = ({
   return (
     <div className="space-y-6">
       {/* 稳定瀑布流容器 */}
-      <div 
+      <div
         ref={containerRef}
-        className="flex gap-6 gallery-container"
+        className="flex gap-4"
         style={{ minHeight: '400px' }}
       >
         {Array.from({ length: columnCount }).map((_, columnIndex) => (
-          <div 
+          <div
             key={`column-${columnIndex}`}
-            className="flex-1 space-y-6 masonry-column"
-            style={{ minHeight: '100px' }}
+            className="flex-1 flex-col space-y-4"
           >
             <AnimatePresence mode="popLayout">
               {columns[columnIndex]?.map((item, itemIndex) => {
                 const globalIndex = displayedItems.findIndex(displayedItem => displayedItem.id === item.id);
                 return (
-                  <BlurFade
-                    key={`${item.id}-${currentFilter.join('-')}`}
-                    className="masonry-item"
-                    delay={globalIndex * 0.02}
-                    duration={0.4}
-                    direction="down"
-                    inView={true}
-                    blur="6px"
-                  >
-                    <GalleryItem
-                      item={item}
-                      onPreview={onPreview}
-                      index={globalIndex}
-                    />
-                  </BlurFade>
+                  <div key={`${item.id}-${currentFilter.join('-')}`} className="break-inside-avoid">
+                    <BlurFade
+                      className="masonry-item"
+                      delay={globalIndex * 0.02}
+                      duration={0.4}
+                      direction="down"
+                      inView={true}
+                      blur="6px"
+                    >
+                      <GalleryItem
+                        item={item}
+                        onPreview={onPreview}
+                        index={globalIndex}
+                      />
+                    </BlurFade>
+                  </div>
                 );
               })}
             </AnimatePresence>
@@ -458,8 +459,8 @@ const Gallery = ({
                 className="text-center"
               >
                 <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-gray-600 text-sm">正在加载更多精美壁纸...</p>
-                <p className="text-gray-400 text-xs mt-1">每次加载 {LOAD_SIZE} 张</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载更多精美壁纸...</p>
+                <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">每次加载 {LOAD_SIZE} 张</p>
               </motion.div>
             ) : (
               <motion.button
@@ -490,7 +491,7 @@ const Gallery = ({
           animate={{ opacity: 1 }}
           className="text-center py-8"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 rounded-full">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/50 dark:to-blue-900/50 text-gray-700 dark:text-gray-200 rounded-full">
             <Sparkles className="text-green-500" size={16} />
             <span className="font-medium">{t('allDisplayed')} {displayedItems.length} {t('wallpapers')}</span>
             <span className="text-blue-500">🎉</span>

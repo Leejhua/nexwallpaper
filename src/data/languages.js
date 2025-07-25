@@ -4,8 +4,10 @@ export const languages = {
     name: '中文',
     flag: '🇨🇳',
     translations: {
-      title: 'NexWallpaper',
-      searchPlaceholder: '搜索标题、标签...',
+        title: 'NexWallpaper',
+        gallery: '画廊',
+        custom: '自定义',
+        searchPlaceholder: '搜索标题、标签...',
       categories: {
         all: '全部作品',
         fantasy: '奇幻',
@@ -37,6 +39,10 @@ export const languages = {
       selectLanguage: '选择语言',
       languageOptions: '语言选项',
       language: '语言',
+      settings: '设置',
+      darkMode: '夜间模式',
+      lightMode: '日间模式',
+      theme: '主题',
       buttons: {
         download: '保存',
         share: '分享',
@@ -279,6 +285,8 @@ export const languages = {
     flag: '🇺🇸',
     translations: {
       title: 'NexWallpaper',
+      gallery: 'Gallery',
+      custom: 'Custom',
       searchPlaceholder: 'Search titles, tags...',
       categories: {
         all: 'All Works',
@@ -311,6 +319,10 @@ export const languages = {
       selectLanguage: 'Select Language',
       languageOptions: 'Language Options',
       language: 'Language',
+      settings: 'Settings',
+      darkMode: 'Dark Mode',
+      lightMode: 'Light Mode',
+      theme: 'Theme',
       buttons: {
         download: 'Download',
         share: 'Share',

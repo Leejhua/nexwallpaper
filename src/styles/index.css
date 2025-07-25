@@ -11,6 +11,14 @@
   }
   
   body {
+  @apply bg-white text-gray-800;
+}
+
+.dark body {
+  @apply bg-gray-900 text-gray-200 !important;
+}
+
+body {
     /* 使用Pixiv风格背景 */
     background: #fafafa !important;
     color: #333333 !important;
@@ -50,7 +58,6 @@
   /* Pixiv风格视频卡片 */
   .video-card {
     @apply relative overflow-hidden;
-    border: 1px solid #e0e0e0;
   }
 
   .video-card::before {
@@ -68,7 +75,6 @@
 
   /* Pixiv风格视频播放指示器 */
   .video-playing {
-    border: 2px solid #0096fa;
     box-shadow: 0 0 0 4px rgba(0, 150, 250, 0.2);
     animation: pixiv-pulse 2s infinite;
   }
@@ -102,7 +108,6 @@
   /* Pixiv风格画廊容器 */
   .gallery-container {
     contain: layout style paint;
-    background: #fafafa;
   }
 
   .gallery-item {

@@ -73,7 +73,7 @@ const LanguageSelector = () => {
             setIsOpen(true);
           }
         }}
-        className="language-selector-btn no-focus-outline w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-all duration-200"
+        className="language-selector-btn no-focus-outline w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-lg transition-all duration-200"
         style={{ height: '40px', padding: '0 12px' }} // 40px = 8 * 5
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -85,12 +85,12 @@ const LanguageSelector = () => {
           <span className="text-lg" role="img" aria-label={`${currentLangData.name} flag`}>
             {currentLangData.flag}
           </span>
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
             {currentLangData.name}
           </span>
         </div>
         <motion.svg 
-          className="w-4 h-4 text-gray-600"
+          className="w-4 h-4 text-gray-600 dark:text-gray-400"
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -108,7 +108,7 @@ const LanguageSelector = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
+            className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50"
             role="listbox"
             aria-label={t('languageOptions')}
           >
@@ -119,8 +119,8 @@ const LanguageSelector = () => {
                 onKeyDown={(e) => handleKeyDown(e, code)}
                 className={`language-option-btn no-focus-outline w-full flex items-center gap-3 text-left transition-colors duration-200 ${
                   currentLanguage === code 
-                    ? 'bg-blue-100 text-blue-800 font-medium border-l-4 border-blue-500' 
-                    : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    ? 'bg-blue-100 dark:bg-blue-900 dark:bg-opacity-50 text-blue-800 dark:text-blue-200 font-medium border-l-4 border-blue-500 dark:border-blue-400' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300'
                 }`}
                 style={{ height: '40px', padding: '0 12px' }} // 40px = 8 * 5
                 whileHover={{ backgroundColor: currentLanguage === code ? undefined : 'rgba(59, 130, 246, 0.08)' }}
@@ -141,7 +141,7 @@ const LanguageSelector = () => {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="ml-auto text-blue-700 font-bold"
+                    className="ml-auto text-blue-700 dark:text-blue-300 font-bold"
                   >
                     ✓
                   </motion.span>

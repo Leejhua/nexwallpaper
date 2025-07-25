@@ -48,24 +48,12 @@ const Sidebar = ({
   
   return (
     <>
-      {/* Pixiv风格侧边栏切换按钮 */}
+      {/* Pixiv风格侧边栏切换按钮 - 仅桌面端显示 */}
       <motion.button
         onClick={onToggle}
-        className={`fixed top-6 z-50 pixiv-btn-icon transition-all duration-300 no-focus-outline ${
-          isOpen ? 'left-[260px]' : 'left-6'
-        }`}
+        className={`fixed top-6 z-50 pixiv-btn-icon transition-all duration-300 no-focus-outline ${isOpen ? 'left-[260px]' : 'left-6'} bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-blue-500 dark:text-blue-400 shadow-lg rounded-lg w-10 h-10 flex items-center justify-center hidden lg:flex`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        style={{
-          width: '40px',
-          height: '40px', // 40px = 8 * 5
-          borderRadius: '8px',
-          background: 'white',
-          border: '1px solid #e0e0e0',
-          color: '#0096fa',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          outline: 'none'
-        }}
       >
         {isOpen ? (
           <X className="w-5 h-5" />
@@ -90,16 +78,11 @@ const Sidebar = ({
 
             {/* Pixiv风格侧边栏内容 */}
             <motion.div
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 h-full w-64 z-40 overflow-y-auto pixiv-sidebar flex flex-col"
-              style={{
-                background: 'white',
-                borderRight: '1px solid #e0e0e0',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)'
-              }}
+              initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed left-0 top-0 h-full w-64 z-40 overflow-y-auto pixiv-sidebar flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg"
             >
               {/* 顶部区域 */}
               <div style={{ padding: '24px', flexShrink: 0 }}>
@@ -121,8 +104,8 @@ const Sidebar = ({
                   </h2>
                 </div>
 
-                {/* Pixiv风格搜索框 */}
-                <div style={{ marginBottom: '24px' }}>
+                {/* Pixiv风格搜索框 - 仅在桌面端显示 */}
+                <div className="hidden lg:block" style={{ marginBottom: '24px' }}>
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -140,18 +123,7 @@ const Sidebar = ({
                       placeholder={t('searchPlaceholder')}
                       value={displaySearchTerm}
                       onChange={(e) => onSearchChange(e.target.value)}
-                      className="pixiv-input"
-                      style={{
-                        width: '100%',
-                        height: '40px', // 40px = 8 * 5
-                        padding: '8px 12px',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        background: 'white',
-                        color: '#333333',
-                        transition: 'all 0.2s ease'
-                      }}
+                      className="pixiv-input w-full h-10 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-all ease-in-out duration-200"
                     />
                     {searchTerm && (
                       <button
@@ -176,7 +148,7 @@ const Sidebar = ({
 
                 {/* 语言选择器 */}
                 <div style={{ marginBottom: '24px' }}>
-                  <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mb-2">
                     <Globe className="w-4 h-4" />
                     <span className="font-medium text-sm">{t('language')}</span>
                   </div>
@@ -185,10 +157,10 @@ const Sidebar = ({
 
                 {/* 分类筛选 - 多选 */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-gray-700">
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                     <Filter className="w-4 h-4" />
                     <span className="font-medium">{t('categoryFilter')}</span>
-                    <span className="text-xs text-gray-500">({t('multiSelect')})</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">({t('multiSelect')})</span>
                   </div>
                   
                   <div className="space-y-2">
@@ -203,7 +175,7 @@ const Sidebar = ({
                           className={`category-filter-btn no-focus-outline w-full flex items-center justify-between rounded-xl transition-all ${
                             isSelected || (isAllSelected && category.key === 'all')
                               ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                              : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                              : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                           }`}
                           style={{ height: '48px', padding: '0 12px' }} // 48px = 8 * 6
                           whileHover={{ scale: 1.02 }}
@@ -216,7 +188,7 @@ const Sidebar = ({
                           <span className={`text-sm px-2 py-1 rounded-full ${
                             isSelected || (isAllSelected && category.key === 'all')
                               ? 'bg-white/20 text-white'
-                              : 'bg-gray-200 text-gray-600'
+                              : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                           }`}>
                             {category.count}
                           </span>
@@ -239,7 +211,7 @@ const Sidebar = ({
                 {(!currentFilter.includes('all') || searchTerm) && (
                   <motion.button
                     onClick={onResetFilters}
-                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
+                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
                     style={{ height: '48px' }} // 48px = 8 * 6
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}

@@ -308,9 +308,9 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
           onClick={onClose}
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black dark:bg-opacity-80"
         >
           {/* Pixiv风格模态框容器 */}
           <motion.div
@@ -319,7 +319,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="relative max-w-6xl max-h-[95vh] w-full bg-white rounded-lg overflow-hidden shadow-2xl"
+            className="relative max-w-6xl max-h-[95vh] w-full bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 关闭按钮 - 在详情页内部完整展示，不遮挡图片 */}
@@ -329,7 +329,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                 isMobile 
                   ? 'top-3 right-3 z-50' 
                   : 'top-4 right-4 z-10'
-              } text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-lg border border-gray-200 group flex items-center justify-center`}
+              } text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors shadow-lg border border-gray-200 dark:border-gray-700 group flex items-center justify-center`}
               style={{ 
                 width: isMobile ? '32px' : '40px',  // 32px = 8*4, 40px = 8*5
                 height: isMobile ? '32px' : '40px'
@@ -347,7 +347,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
             {/* Pixiv风格主要内容区域 - 移动端优化 */}
             <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} h-full max-h-[95vh]`}>
               {/* 左侧图片区域 - 为关闭按钮预留空间 */}
-              <div className={`flex-1 bg-gray-50 flex items-center justify-center relative ${
+              <div className={`flex-1 bg-gray-50 dark:bg-gray-950 flex items-center justify-center relative ${
                 isMobile ? 'p-6 pt-12' : 'p-6 pt-16'
               }`}>
                 {!imageError ? (
@@ -384,8 +384,8 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                     )}
                   </>
                 ) : (
-                  <div className="w-full h-64 flex items-center justify-center bg-gray-100 rounded-lg">
-                    <div className="text-center text-gray-500">
+                  <div className="w-full h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <div className="text-center text-gray-500 dark:text-gray-400">
                       <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-500" />
                       <div className="text-sm">{t('error')}</div>
                     </div>
@@ -394,25 +394,25 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
 
                 {/* Pixiv风格加载状态 */}
                 {!imageLoaded && !imageError && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-950">
                     <div className="text-center">
                       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <div className="text-sm text-gray-600">{t('loading')}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('loading')}</div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* 右侧信息区域 - 移动端优化 */}
-              <div className={`w-full ${isMobile ? '' : 'lg:w-80'} bg-white ${isMobile ? '' : 'border-l border-gray-200'} flex flex-col ${isMobile ? 'max-h-[40vh] overflow-y-auto' : ''}`}>
+              <div className={`w-full ${isMobile ? '' : 'lg:w-80'} bg-white dark:bg-gray-900 ${isMobile ? '' : 'border-l border-gray-200 dark:border-gray-700'} flex flex-col ${isMobile ? 'max-h-[40vh] overflow-y-auto' : ''}`}>
                 {/* 作品标题区域 */}
-                <div className="relative p-4 sm:p-6 border-b border-gray-100">
-                  <h1 className={`${isMobile ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 mb-3 leading-tight ${isMobile ? 'pr-8' : 'pr-4'}`}>
+                <div className="relative p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800">
+                  <h1 className={`${isMobile ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 dark:text-gray-100 mb-3 leading-tight ${isMobile ? 'pr-8' : 'pr-4'}`}>
                     {translateTitle(item.title)}
                   </h1>
                   
                   {/* Pixiv风格作品信息 */}
-                  <div className={`flex items-center gap-4 ${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-4 flex-wrap`}>
+                  <div className={`flex items-center gap-4 ${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 dark:text-gray-400 mb-4 flex-wrap`}>
                     <span>{imageDimensions || item.resolution || t('highQuality')}</span>
                     <span>•</span>
                     <span>{item.format?.toUpperCase() || 'JPG'}</span>
@@ -441,7 +441,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
 
                     <button
                       onClick={handleShare}
-                      className="share-btn no-focus-outline border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200 flex items-center justify-center"
+                      className="share-btn no-focus-outline border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 flex items-center justify-center"
                       style={{ 
                         height: isMobile ? '32px' : '40px',
                         width: isMobile ? '32px' : '40px',
@@ -455,10 +455,10 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                 </div>
 
                 {/* 标签区域 - Pixiv风格 */}
-                <div className="p-6 border-b border-gray-100">
+                <div className="p-6 border-b border-gray-100 dark:border-gray-800">
                   <div className="flex items-center gap-2 mb-3">
-                    <h3 className="text-sm font-medium text-gray-900">{t('tags')}</h3>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200">{t('tags')}</h3>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                       <Search className="w-3 h-3" />
                       <span>{t('clickToSearch')}</span>
                     </div>
@@ -466,7 +466,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                   <div className="flex flex-wrap gap-2">
                     {/* 分类标签 */}
                     <span 
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 hover:bg-blue-200 cursor-pointer transition-all duration-200 hover:scale-105"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 dark:bg-blue-900 dark:bg-opacity-50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 cursor-pointer transition-all duration-200 hover:scale-105"
                       onClick={() => handleTagClick(getCategoryName(item.category))}
                       title={`${t('search')} ${getCategoryName(item.category)} ${t('wallpapers')}`}
                     >
@@ -480,7 +480,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                       return (
                         <span
                           key={`tag-${tag}-${index}`}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 hover:bg-gray-200 cursor-pointer transition-all duration-200 hover:scale-105"
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer transition-all duration-200 hover:scale-105"
                           onClick={() => handleTagClick(tag)}
                           title={`${t('search')} ${displayTag} ${t('wallpapers')}`}
                         >
@@ -493,8 +493,8 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
 
                 {/* 作品详情 - Pixiv风格 */}
                 <div className="p-6 flex-1">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">{t('details')}</h3>
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">{t('details')}</h3>
+                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex justify-between">
                       <span>{t('publishTime')}</span>
                       <span>{new Date().toLocaleDateString(currentLanguage === 'zh' ? 'zh-CN' : currentLanguage === 'es' ? 'es-ES' : 'en-US')}</span>
@@ -511,8 +511,8 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
                 </div>
 
                 {/* 底部统计信息 - Pixiv风格 */}
-                <div className="p-6 border-t border-gray-100 bg-gray-50">
-                  <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-4">
                       <ErrorBoundary>
                         <LikeCounter 

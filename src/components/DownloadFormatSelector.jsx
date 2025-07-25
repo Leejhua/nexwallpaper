@@ -990,8 +990,8 @@ const DownloadFormatSelector = ({
       <button
         onClick={isVideo ? () => setShowFormats(!showFormats) : handleSimpleDownload}
         disabled={isDownloading || convertingFormat}
-        className={`download-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-md font-medium transition-colors ${
-          (isDownloading || convertingFormat) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+        className={`download-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md font-medium transition-colors ${
+          (isDownloading || convertingFormat) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 dark:hover:bg-blue-600'
         }`}
         style={{ 
           height: isMobile ? '32px' : '40px',
@@ -1018,10 +1018,10 @@ const DownloadFormatSelector = ({
                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-[70] overflow-hidden"
+                className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-[70] overflow-hidden"
               >
                 <div className="p-2">
-                  <div className="text-xs text-gray-500 px-2 py-1 border-b border-gray-100 mb-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1 border-b border-gray-100 dark:border-gray-700 mb-1">
                     {t('downloadFormats.selectFormat')}
                   </div>
                   
@@ -1030,28 +1030,28 @@ const DownloadFormatSelector = ({
                       key={format.id}
                       onClick={() => handleFormatDownload(format)}
                       disabled={format.disabled}
-                      className={`w-full text-left px-3 py-2 rounded-md transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        format.recommended ? 'bg-blue-50 border border-blue-200' : ''
+                      className={`w-full text-left px-3 py-2 rounded-md transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        format.recommended ? 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800' : ''
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <format.icon className="w-4 h-4 text-gray-600" />
+                        <format.icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-gray-900">
+                            <span className="font-medium text-sm text-gray-900 dark:text-gray-100">
                               {format.name}
                             </span>
                             {format.recommended && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-1 rounded">
+                              <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-1 rounded">
                                 {t('recommended')}
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-gray-500 mt-0.5">
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {format.description}
                           </div>
                         </div>
-                        <div className="text-xs font-mono text-gray-400">
+                        <div className="text-xs font-mono text-gray-400 dark:text-gray-500">
                           {format.format}
                         </div>
                       </div>

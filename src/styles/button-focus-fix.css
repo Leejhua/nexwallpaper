@@ -24,7 +24,7 @@ button:focus-visible {
 
 /* 特定组件的focus样式修正 */
 
-/* Sidebar按钮 */
+/* 图标按钮 */
 .pixiv-btn-icon:focus,
 .pixiv-btn-icon:focus-visible {
   outline: none !important;

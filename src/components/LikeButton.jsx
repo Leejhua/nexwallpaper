@@ -77,8 +77,8 @@ const LikeButton = ({
         flex items-center ${square ? 'justify-center' : 'gap-2'} rounded-md
         transition-all duration-200 border
         ${isLikedState 
-          ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
-          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+          ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/50 dark:hover:bg-red-900/40' 
+          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
         }
         ${className}
       `}

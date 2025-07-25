@@ -486,15 +486,12 @@ const GalleryItem = ({ item, onPreview, index }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
-      className={`group relative pixiv-card cursor-pointer gallery-item optimize-rendering ${
-        isVideo ? 'video-card' : ''
-      } ${isPlaying ? 'video-playing' : ''}`}
+      className={`group relative pixiv-card cursor-pointer gallery-item optimize-rendering dark:bg-gray-800 ${isVideo ? 'video-card' : ''} ${isPlaying ? 'video-playing' : ''}`}
       whileHover={{ y: -2 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleCardClick}
       style={{
-        background: 'white',
         borderRadius: '12px',
         overflow: 'hidden',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -502,7 +499,7 @@ const GalleryItem = ({ item, onPreview, index }) => {
     >
       {/* 图片/视频容器 - 现在占满整个卡片，自适应图片尺寸 */}
       <div 
-        className="relative overflow-hidden rounded-lg shadow-sm w-full bg-gray-50"
+        className="relative overflow-hidden rounded-lg shadow-sm w-full bg-gray-50 dark:bg-gray-700"
         style={{ 
           minHeight: imageLoaded ? 'auto' : '200px'
         }}
@@ -526,28 +523,11 @@ const GalleryItem = ({ item, onPreview, index }) => {
                 />
                 
                 {/* 播放状态指示器 */}
-                {isPlaying && (
-                  <div className="absolute top-3 left-3">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
-                    >
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                      {t('live')}
-                    </motion.div>
-                  </div>
-                )}
+                
 
-                {/* 悬停提示 */}
-                {!isHovered && imageLoaded && !isPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-gray-800 flex items-center gap-2">
-                      <Play className="w-4 h-4" />
-                      {t('hoverToPlay')}
-                    </div>
-                  </div>
-                )}
+
+
+
               </div>
             ) : (
               <img

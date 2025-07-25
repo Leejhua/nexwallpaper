@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Gallery from './components/Gallery';
+import CustomTemplates from './components/CustomTemplates';
 import Modal from './components/Modal';
 import SortControls from './components/SortControls';
+import BottomNavigation from './components/BottomNavigation';
+import Sidebar from './components/Sidebar';
 import { useGallery } from './hooks/useGallery';
 import { useModal } from './hooks/useModal';
 import { ClickStatsProvider } from './contexts/ClickStatsProvider';
@@ -17,15 +19,10 @@ import './styles/button-focus-fix.css';
  * 主应用组件内容 - 优化懒加载版本，避免闪屏白屏
  */
 function AppContent() {
+  const [activeTab, setActiveTab] = useState('gallery'); // 'gallery' or 'custom'
   const { translateTag } = useTagTranslation();
-  
-  // 根据屏幕大小设置侧边栏初始状态
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    // 如果是服务端渲染或者窗口对象不存在，默认为true
-    if (typeof window === 'undefined') return true;
-    // 桌面端默认展开，移动端默认收起
-    return window.innerWidth >= 1024;
-  });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [sortMode, setSortMode] = useState('default');
   
   // 画廊数据管理
@@ -60,20 +57,19 @@ function AppContent() {
     handleSearch(tag);
   }, [handleSearch]);
 
+
+
+  // PC端侧边栏响应式处理
   useEffect(() => {
     const handleResize = () => {
-      // 在移动端（小于1024px）时自动关闭侧边栏
-      if (window.innerWidth < 1024) {
-        setSidebarOpen(false);
-      } else {
-        // 在桌面端（大于等于1024px）时保持侧边栏展开
+      if (window.innerWidth >= 1024) {
         setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
       }
     };
 
-    // 初始化时根据屏幕大小设置侧边栏状态
     handleResize();
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -103,48 +99,40 @@ function AppContent() {
 
   return (
     <ClickStatsProvider>
-      <div className="min-h-screen custom-scrollbar">
-        {/* Pixiv风格侧边栏 */}
+      <div className="min-h-screen bg-white dark:bg-gray-900 custom-scrollbar">
+        {/* PC端侧边栏 - 只在大屏幕显示 */}
         <Sidebar
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
-          currentFilter={selectedFilters}
+          selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearch}
-          onClearSearch={clearSearch}
           onResetFilters={resetFilters}
-          filteredItems={filteredItems}
+          stats={galleryStats}
           totalItems={totalItems}
+          filteredCount={filteredItems.length}
+          className="hidden lg:block"
         />
-
+        
         {/* Pixiv风格主内容区域 */}
-        <div className={`transition-all duration-300 ${
-          sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
-        }`}>
+        <div className={`bg-white dark:bg-gray-900 ${sidebarOpen ? 'lg:ml-64' : ''}`}>
           {/* Pixiv风格容器 - 在剩余空间中居中 */}
           <div className="pixiv-container flex justify-center min-h-screen" style={{ padding: '0 16px' }}>
             <div style={{ maxWidth: '1200px', width: '100%' }}>
               {/* Pixiv风格头部 */}
-              <div className="pixiv-header w-full" style={{ 
-                marginBottom: '24px',
-                paddingTop: '24px'
+              <div className="pixiv-header w-full lg:pt-6 pt-0" style={{ 
+                marginBottom: '24px'
               }}>
-                {/* Header组件 - 保持居中 */}
-                <div className="w-full flex justify-center mb-6">
-                  <Header />
-                </div>
-                
-                {/* 排序控制 - 居中显示 */}
-                <div className="w-full flex justify-center">
-                  <SortControls 
-                    onSortChange={setSortMode}
-                    currentSort={sortMode}
-                  />
-                </div>
+                {/* 搜索框 */}
+                <Header 
+                  searchTerm={searchTerm}
+                  onSearchChange={handleSearch}
+                  onClearSearch={clearSearch}
+                  onSortChange={setSortMode}
+                  currentSort={sortMode}
+                />
               </div>
 
-              {/* Pixiv风格画廊内容 - 添加过渡效果 */}
+              {/* Pixiv风格画廊内容 - 添加过渡效果和底部间距 */}
               <motion.main
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ 
@@ -156,17 +144,21 @@ function AppContent() {
                   duration: isTransitioning ? 0.2 : 0.4, 
                   ease: "easeOut" 
                 }}
-                className="gallery-container"
+                className="gallery-container pb-20 lg:pb-8"
               >
-                <Gallery
-                  items={items}
-                  loading={loading}
-                  onPreview={openModal}
-                  currentFilter={selectedFilters}
-                  filteredItems={filteredItems}
-                  sortMode={sortMode}
-                  randomSeed={randomSeed}
-                />
+                                {activeTab === 'gallery' ? (
+                  <Gallery
+                    items={items}
+                    loading={loading}
+                    onPreview={openModal}
+                    currentFilter={selectedFilters}
+                    filteredItems={filteredItems}
+                    sortMode={sortMode}
+                    randomSeed={randomSeed}
+                  />
+                ) : (
+                  <CustomTemplates />
+                )}
               </motion.main>
             </div>
           </div>
@@ -179,6 +171,9 @@ function AppContent() {
           item={selectedItem}
           onTagClick={handleTagClick}
         />
+
+        {/* 底部导航栏 - 仅在移动端显示 */}
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Pixiv风格全局样式注入 - 优化版本 */}
         <style>{`
@@ -255,6 +250,18 @@ function AppContent() {
             
             .gallery-item:active {
               transform: scale(0.98);
+            }
+          }
+          
+          /* 底部导航栏样式优化 */
+          .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+          
+          /* 确保内容不被底部导航栏遮挡 */
+          @media (max-width: 1023px) {
+            body {
+              padding-bottom: env(safe-area-inset-bottom);
             }
           }
         `}</style>

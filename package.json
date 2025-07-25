@@ -22,11 +22,18 @@
     "crawler:run-cleanup": "node scripts/run-cleanup.js",
     "crawler:run-crawl": "node scripts/run-crawl.js",
     "crawler:cleanup": "node scripts/standalone-cleanup.js",
-    "crawler:crawl": "node scripts/standalone-crawl.js"
+    "crawler:crawl": "node scripts/standalone-crawl.js",
+    "precompute-beam": "node scripts/precompute-beam.mjs",
+    "analyze-beam": "node scripts/analyze-video-beam.mjs"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "canvas": "^3.1.2",
     "cheerio": "^1.1.0",
     "clsx": "^2.0.0",
+    "ffmpeg-static": "^5.2.0",
+    "formidable": "^3.5.4",
     "framer-motion": "^10.16.4",
     "gif.js": "^0.2.0",
     "jszip": "^3.10.1",
@@ -51,10 +58,10 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
-    "express": "^5.1.0",
+    "express": "^4.17.1",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "vite": "^4.5.0",
+    "vite": "^4.5.14",
     "vite-plugin-vercel": "^9.0.7"
   },
   "keywords": [
