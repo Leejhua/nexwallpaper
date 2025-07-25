@@ -79,7 +79,7 @@ const SortControls = ({ onSortChange, currentSort = 'default', isMobile = false 
             className={`
               absolute top-full left-0 mt-1 w-full bg-white dark:bg-gray-800
               border border-gray-200 dark:border-gray-600 shadow-lg dark:shadow-gray-900/20
-              z-50 overflow-hidden
+              z-[9999] overflow-hidden
               ${isMobile ? 'rounded-xl' : 'rounded-lg'}
             `}
             style={{

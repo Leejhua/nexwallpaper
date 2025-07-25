@@ -276,7 +276,15 @@ export const languages = {
       copyLinkForInstagram: '请复制以下内容到Instagram：',
       wechatShareTip: '链接已复制，请粘贴到微信分享',
       copyLinkToWechat: '复制链接到微信',
-      clickToSearch: '点击搜索'
+      clickToSearch: '点击搜索',
+      customTemplates: {
+        title: '选择一个模板开始创作',
+        backToTemplates: '返回模板选择',
+        twoStepEditor: {
+          title: '两步Labubu风格编辑器',
+          description: '上传您自己的视频和遮罩，通过简单的两步操作即可生成独特的Labubu动态壁纸。'
+        }
+      }
     }
   },
   en: {
@@ -556,7 +564,15 @@ export const languages = {
       copyLinkForInstagram: 'Please copy the following content to Instagram:',
       wechatShareTip: 'Link copied, please paste to WeChat to share',
       copyLinkToWechat: 'Copy link to WeChat',
-      clickToSearch: 'Click to search'
+      clickToSearch: 'Click to search',
+      customTemplates: {
+        title: 'Choose a Template to Start Creating',
+        backToTemplates: 'Back to Template Selection',
+        twoStepEditor: {
+          title: 'Two-Step Labubu Style Editor',
+          description: 'Upload your own videos and masks to create unique Labubu dynamic wallpapers through simple two-step operations.'
+        }
+      }
     }
   },
   es: {
@@ -830,7 +846,15 @@ export const languages = {
       copyLinkForInstagram: 'Por favor copia el siguiente contenido a Instagram:',
       wechatShareTip: 'Enlace copiado, por favor pégalo en WeChat para compartir',
       copyLinkToWechat: 'Copiar enlace a WeChat',
-      clickToSearch: 'Haz clic para buscar'
+      clickToSearch: 'Haz clic para buscar',
+      customTemplates: {
+        backButton: 'Volver',
+        title: 'Plantillas Personalizadas',
+        twoStepEditor: {
+          title: 'Editor de Dos Pasos',
+          description: 'Crea videos únicos con nuestro editor de dos pasos: sube una imagen y genera un video personalizado'
+        }
+      }
     }
   }
 };

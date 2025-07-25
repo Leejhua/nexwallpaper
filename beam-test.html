@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔦 光束效果测试页面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            height: fit-content;
+        }
+        .preview {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .value-display {
+            font-size: 12px;
+            color: #ccc;
+        }
+        #canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            max-width: 100%;
+            background: #000;
+        }
+        .button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .coordinates {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔦 光束效果测试页面</h1>
+    
+    <div class="container">
+        <div class="controls">
+            <h3>光束参数调整</h3>
+            
+            <div class="control-group">
+                <label for="centerOpacity">中心透明度</label>
+                <input type="range" id="centerOpacity" min="0" max="1" step="0.01" value="1">
+                <div class="value-display">值: <span id="centerOpacityValue">1</span></div>
+            </div>
+            
+            <div class="control-group">
+                <label for="edgeOpacity">边缘透明度</label>
+                <input type="range" id="edgeOpacity" min="0" max="1" step="0.01" value="0">
+                <div class="value-display">值: <span id="edgeOpacityValue">0</span></div>
+            </div>
+            
+            <div class="control-group">
+                <label for="blurRadius">模糊半径</label>
+                <input type="range" id="blurRadius" min="0" max="50" step="1" value="25">
+                <div class="value-display">值: <span id="blurRadiusValue">25</span>px</div>
+            </div>
+            
+            <div class="control-group">
+                <label for="beamWidth">光束宽度比例</label>
+                <input type="range" id="beamWidth" min="0.1" max="2" step="0.1" value="1">
+                <div class="value-display">值: <span id="beamWidthValue">1</span></div>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalAlpha">整体透明度</label>
+                <input type="range" id="globalAlpha" min="0" max="1" step="0.01" value="0.4">
+                <div class="value-display">值: <span id="globalAlphaValue">0.4</span></div>
+            </div>
+            
+            <div class="control-group">
+                <label for="fadeSpeed">透明度变化速度</label>
+                <input type="range" id="fadeSpeed" min="0.1" max="5" step="0.1" value="1">
+                <div class="value-display">值: <span id="fadeSpeedValue">1</span> (1=线性, >1=快速衰减, <1=缓慢衰减)</div>
+            </div>
+            
+            <h3>梯形坐标</h3>
+            <div class="control-group">
+                <label for="topWidth">顶部宽度</label>
+                <input type="number" id="topWidth" value="200" min="50" max="500">
+            </div>
+            
+            <div class="control-group">
+                <label for="bottomWidth">底部宽度</label>
+                <input type="number" id="bottomWidth" value="400" min="100" max="800">
+            </div>
+            
+            <div class="control-group">
+                <label for="trapezoidHeight">梯形高度</label>
+                <input type="number" id="trapezoidHeight" value="600" min="200" max="1000">
+            </div>
+            
+            <div class="control-group">
+                <label for="offsetY">垂直偏移</label>
+                <input type="number" id="offsetY" value="100" min="0" max="300">
+            </div>
+            
+            <button class="button" onclick="generateBeam()">🔄 重新生成光束</button>
+            <button class="button" onclick="downloadBeam()">💾 下载光束图</button>
+            <button class="button" onclick="loadAnnotatedData().then(() => generateBeam())">📥 重新加载标注数据</button>
+            <button class="button" onclick="resetParams()">🔄 重置参数</button>
+            
+            <div class="coordinates">
+                <strong>当前坐标:</strong>
+                <div id="coordinatesDisplay"></div>
+                <div style="margin-top: 10px; font-size: 11px; color: #aaa;">
+                    💡 优先使用 beam-data.json 中的用户标注数据<br>
+                    如无标注数据则使用上方梯形参数
+                </div>
+            </div>
+        </div>
+        
+        <div class="preview">
+            <h3>光束预览</h3>
+            <canvas id="canvas" width="540" height="960"></canvas>
+            <div style="margin-top: 10px; font-size: 14px; color: #ccc;">
+                画布尺寸: 540 × 960 (模拟手机屏幕比例)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 获取所有控件
+        const controls = {
+            centerOpacity: document.getElementById('centerOpacity'),
+            edgeOpacity: document.getElementById('edgeOpacity'),
+            blurRadius: document.getElementById('blurRadius'),
+            beamWidth: document.getElementById('beamWidth'),
+            globalAlpha: document.getElementById('globalAlpha'),
+            fadeSpeed: document.getElementById('fadeSpeed'),
+            topWidth: document.getElementById('topWidth'),
+            bottomWidth: document.getElementById('bottomWidth'),
+            trapezoidHeight: document.getElementById('trapezoidHeight'),
+            offsetY: document.getElementById('offsetY')
+        };
+        
+        // 更新显示值
+        function updateDisplayValues() {
+            document.getElementById('centerOpacityValue').textContent = controls.centerOpacity.value;
+            document.getElementById('edgeOpacityValue').textContent = controls.edgeOpacity.value;
+            document.getElementById('blurRadiusValue').textContent = controls.blurRadius.value;
+            document.getElementById('beamWidthValue').textContent = controls.beamWidth.value;
+            document.getElementById('globalAlphaValue').textContent = controls.globalAlpha.value;
+            document.getElementById('fadeSpeedValue').textContent = controls.fadeSpeed.value;
+        }
+        
+        // 用户标注数据
+        let annotatedData = null;
+        
+        // 加载用户标注数据
+        async function loadAnnotatedData() {
+            try {
+                const response = await fetch('/beam-data.json');
+                if (response.ok) {
+                    annotatedData = await response.json();
+                    console.log('✅ 加载用户标注数据:', annotatedData);
+                    updateControlsFromAnnotatedData();
+                    return true;
+                }
+            } catch (error) {
+                console.log('⚠️ 无法加载标注数据，使用默认参数:', error);
+            }
+            return false;
+        }
+        
+        // 根据标注数据更新控件
+        function updateControlsFromAnnotatedData() {
+            if (!annotatedData || !annotatedData.polygon) return;
+            
+            // 缩放标注数据到当前画布尺寸
+            const scaleX = canvas.width / annotatedData.width;
+            const scaleY = canvas.height / annotatedData.height;
+            
+            // 计算缩放后的坐标
+            const scaledPolygon = annotatedData.polygon.map(point => ({
+                x: Math.round(point.x * scaleX),
+                y: Math.round(point.y * scaleY)
+            }));
+            
+            // 更新坐标显示
+            const coordText = scaledPolygon.map((coord, i) => 
+                `点${i+1}: (${coord.x}, ${coord.y})`
+            ).join('\n');
+            document.getElementById('coordinatesDisplay').innerHTML = 
+                `<strong>用户标注坐标 (已缩放):</strong><br>${coordText.replace(/\n/g, '<br>')}`;
+        }
+        
+        // 计算坐标（优先使用标注数据）
+        function calculateCoordinates() {
+            if (annotatedData && annotatedData.polygon) {
+                // 使用标注数据
+                const scaleX = canvas.width / annotatedData.width;
+                const scaleY = canvas.height / annotatedData.height;
+                
+                const coordinates = annotatedData.polygon.map(point => [
+                    Math.round(point.x * scaleX),
+                    Math.round(point.y * scaleY)
+                ]);
+                
+                updateControlsFromAnnotatedData();
+                return coordinates;
+            } else {
+                // 使用梯形参数
+                const topWidth = parseInt(controls.topWidth.value);
+                const bottomWidth = parseInt(controls.bottomWidth.value);
+                const height = parseInt(controls.trapezoidHeight.value);
+                const offsetY = parseInt(controls.offsetY.value);
+                
+                const centerX = canvas.width / 2;
+                const startY = offsetY;
+                const endY = startY + height;
+                
+                const coordinates = [
+                    [centerX - topWidth/2, startY],      // 左上
+                    [centerX + topWidth/2, startY],      // 右上
+                    [centerX + bottomWidth/2, endY],     // 右下
+                    [centerX - bottomWidth/2, endY]      // 左下
+                ];
+                
+                // 更新坐标显示
+                const coordText = coordinates.map((coord, i) => 
+                    `${['左上', '右上', '右下', '左下'][i]}: (${coord[0]}, ${coord[1]})`
+                ).join('\n');
+                document.getElementById('coordinatesDisplay').textContent = coordText;
+                
+                return coordinates;
+            }
+        }
+        
+        // 创建多边形路径
+         function createPolygonPath(coordinates) {
+             const path = new Path2D();
+             path.moveTo(coordinates[0][0], coordinates[0][1]);
+             for (let i = 1; i < coordinates.length; i++) {
+                 path.lineTo(coordinates[i][0], coordinates[i][1]);
+             }
+             path.closePath();
+             return path;
+         }
+        
+        // 生成光束效果
+        function generateBeam() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 获取参数
+            const centerOpacity = parseFloat(controls.centerOpacity.value);
+            const edgeOpacity = parseFloat(controls.edgeOpacity.value);
+            const blurRadius = parseInt(controls.blurRadius.value);
+            const beamWidth = parseFloat(controls.beamWidth.value);
+            const globalAlpha = parseFloat(controls.globalAlpha.value);
+            
+            // 计算坐标（优先使用标注数据）
+             const coordinates = calculateCoordinates();
+             
+             // 创建多边形裁切路径
+             const polygonPath = createPolygonPath(coordinates);
+            
+            // 保存当前状态
+            ctx.save();
+            
+            // 应用多边形裁切
+             ctx.clip(polygonPath);
+            
+            // 获取透明度变化速度参数
+            const fadeSpeed = parseFloat(controls.fadeSpeed.value);
+            
+            // 创建自定义渐变光束
+            const centerX = canvas.width / 2;
+            const beamWidthPixels = canvas.width * beamWidth;
+            const startX = centerX - beamWidthPixels / 2;
+            const endX = centerX + beamWidthPixels / 2;
+            
+            // 创建渐变，使用更多的色标来实现非线性效果
+            const gradient = ctx.createLinearGradient(startX, 0, endX, 0);
+            
+            // 生成多个色标点来模拟非线性渐变
+            const steps = 20; // 渐变步数
+            for (let i = 0; i <= steps; i++) {
+                const position = i / steps; // 0 到 1
+                let opacity;
+                
+                if (position <= 0.5) {
+                    // 从边缘到中心 (0 到 0.5)
+                    const normalizedPos = position * 2; // 0 到 1
+                    const easedPos = Math.pow(normalizedPos, 1 / fadeSpeed); // 应用缓动
+                    opacity = edgeOpacity + (centerOpacity - edgeOpacity) * easedPos;
+                } else {
+                    // 从中心到边缘 (0.5 到 1)
+                    const normalizedPos = (1 - position) * 2; // 1 到 0
+                    const easedPos = Math.pow(normalizedPos, 1 / fadeSpeed); // 应用缓动
+                    opacity = edgeOpacity + (centerOpacity - edgeOpacity) * easedPos;
+                }
+                
+                gradient.addColorStop(position, `rgba(255, 255, 255, ${opacity})`);
+            }
+            
+            // 绘制基础光束
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 应用模糊效果（模拟高斯模糊）
+            if (blurRadius > 0) {
+                ctx.filter = `blur(${blurRadius}px)`;
+                ctx.globalAlpha = globalAlpha;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // 恢复状态
+            ctx.restore();
+            
+            // 绘制多边形边框（用于调试）
+             ctx.save();
+             ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+             ctx.lineWidth = 2;
+             ctx.stroke(polygonPath);
+             ctx.restore();
+        }
+        
+        // 下载光束图
+        function downloadBeam() {
+            // 创建一个新的canvas用于导出（不包含调试边框）
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = canvas.width;
+            exportCanvas.height = canvas.height;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            // 重新绘制光束（不包含边框）
+            const centerOpacity = parseFloat(controls.centerOpacity.value);
+            const edgeOpacity = parseFloat(controls.edgeOpacity.value);
+            const blurRadius = parseInt(controls.blurRadius.value);
+            const beamWidth = parseFloat(controls.beamWidth.value);
+            const globalAlpha = parseFloat(controls.globalAlpha.value);
+            
+            const coordinates = calculateCoordinates();
+             const polygonPath = createPolygonPath(coordinates);
+            
+            exportCtx.save();
+             exportCtx.clip(polygonPath);
+            
+            const fadeSpeed = parseFloat(controls.fadeSpeed.value);
+            
+            const centerX = canvas.width / 2;
+            const beamWidthPixels = canvas.width * beamWidth;
+            const startX = centerX - beamWidthPixels / 2;
+            const endX = centerX + beamWidthPixels / 2;
+            
+            const gradient = exportCtx.createLinearGradient(startX, 0, endX, 0);
+            
+            // 生成多个色标点来模拟非线性渐变（与预览保持一致）
+            const steps = 20;
+            for (let i = 0; i <= steps; i++) {
+                const position = i / steps;
+                let opacity;
+                
+                if (position <= 0.5) {
+                    const normalizedPos = position * 2;
+                    const easedPos = Math.pow(normalizedPos, 1 / fadeSpeed);
+                    opacity = edgeOpacity + (centerOpacity - edgeOpacity) * easedPos;
+                } else {
+                    const normalizedPos = (1 - position) * 2;
+                    const easedPos = Math.pow(normalizedPos, 1 / fadeSpeed);
+                    opacity = edgeOpacity + (centerOpacity - edgeOpacity) * easedPos;
+                }
+                
+                gradient.addColorStop(position, `rgba(255, 255, 255, ${opacity})`);
+            }
+            
+            exportCtx.fillStyle = gradient;
+            exportCtx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (blurRadius > 0) {
+                exportCtx.filter = `blur(${blurRadius}px)`;
+                exportCtx.globalAlpha = globalAlpha;
+                exportCtx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            exportCtx.restore();
+            
+            // 下载图片
+            const link = document.createElement('a');
+            link.download = `trapezoid_beam_${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL();
+            link.click();
+        }
+        
+        // 重置参数
+        function resetParams() {
+            controls.centerOpacity.value = 1;
+            controls.edgeOpacity.value = 0;
+            controls.blurRadius.value = 25;
+            controls.beamWidth.value = 1;
+            controls.globalAlpha.value = 0.4;
+            controls.fadeSpeed.value = 1;
+            controls.topWidth.value = 200;
+            controls.bottomWidth.value = 400;
+            controls.trapezoidHeight.value = 600;
+            controls.offsetY.value = 100;
+            
+            updateDisplayValues();
+            generateBeam();
+        }
+        
+        // 添加事件监听器
+        Object.values(controls).forEach(control => {
+            control.addEventListener('input', () => {
+                updateDisplayValues();
+                generateBeam();
+            });
+        });
+        
+        // 初始化
+         async function initialize() {
+             updateDisplayValues();
+             await loadAnnotatedData();
+             generateBeam();
+         }
+         
+         // 启动初始化
+         initialize();
+    </script>
+</body>
+</html>

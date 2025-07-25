@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labubu 两步视频生成器</title>
+    <style>
+        /* 现代化设计系统变量 */
+        :root {
+            --primary-blue: #0066ff;
+            --primary-blue-hover: #0052cc;
+            --primary-blue-light: #e6f0ff;
+            --primary-blue-dark: #003d99;
+            --accent-purple: #6366f1;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            
+            --neutral-50: #fafafa;
+            --neutral-100: #f5f5f5;
+            --neutral-200: #e5e5e5;
+            --neutral-300: #d4d4d4;
+            --neutral-400: #a3a3a3;
+            --neutral-500: #737373;
+            --neutral-600: #525252;
+            --neutral-700: #404040;
+            --neutral-800: #262626;
+            --neutral-900: #171717;
+            
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --text-white: #ffffff;
+            --text-accent: var(--primary-blue);
+            
+            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-colored: 0 10px 25px -5px rgba(99, 102, 241, 0.2);
+            
+            --radius-xs: 2px;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-2xl: 16px;
+            --radius-3xl: 24px;
+            --radius-full: 9999px;
+            
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+            --space-12: 48px;
+            --space-16: 64px;
+            --space-20: 80px;
+            
+            --gradient-primary: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            --gradient-accent: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            --gradient-success: linear-gradient(135deg, var(--accent-green), #059669);
+            --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, #f8fafc 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: var(--space-6);
+            line-height: 1.6;
+            font-size: 14px;
+            overflow-x: hidden;
+        }
+        
+
+        
+        .header {
+            background: var(--gradient-primary);
+            color: var(--text-white);
+            padding: var(--space-16) var(--space-12);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="80" cy="40" r="0.5" fill="%23ffffff" opacity="0.1"/><circle cx="40" cy="80" r="1.5" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.3;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: var(--space-3);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-3xl);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: var(--space-8);
+            padding: var(--space-12);
+            align-items: start;
+        }
+        
+        .main-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-primary);
+            z-index: 1;
+        }
+        
+        /* 统一的section样式 */
+        .upload-section,
+        .preview-section,
+        .controls-section,
+        .generate-section,
+        .download-section {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            margin-bottom: var(--space-6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        /* 预览区域保持sticky定位 */
+        .preview-section {
+            position: sticky;
+            top: var(--space-6);
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .upload-section:hover,
+            .preview-section:hover,
+            .controls-section:hover,
+            .generate-section:hover,
+            .download-section:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-xl);
+                border-color: rgba(0, 102, 255, 0.3);
+            }
+        }
+        
+        .section-title {
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-full);
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--primary-blue);
+            border-radius: var(--radius-xl);
+            padding: var(--space-12);
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-blue-light), rgba(230, 240, 255, 0.5));
+            margin-bottom: var(--space-8);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        /* 移动端移除hover效果，保留点击反馈 */
+        @media (hover: hover) {
+            .upload-area:hover {
+                background: linear-gradient(135deg, #d6ebff, rgba(214, 235, 255, 0.8));
+                border-color: var(--primary-blue-hover);
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .upload-area:hover::before {
+                left: 100%;
+            }
+        }
+        
+        /* 移动端点击反馈 */
+        @media (hover: none) {
+            .upload-area:active {
+                background: linear-gradient(135deg, #d6ebff, rgba(214, 235, 255, 0.8));
+                border-color: var(--primary-blue-hover);
+                transform: scale(0.98);
+                transition: all 0.1s ease;
+            }
+        }
+        
+        /* 拖拽悬停效果（仅桌面端） */
+        @media (hover: hover) {
+            .upload-area.dragover {
+                background: linear-gradient(135deg, #c7e2ff, rgba(199, 226, 255, 0.9));
+                border-color: var(--primary-blue-hover);
+                transform: scale(1.02);
+                box-shadow: var(--shadow-colored);
+            }
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-4);
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .upload-text {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        
+        .upload-text small {
+            display: block;
+            margin-top: var(--space-2);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* 移动端和桌面端提示文本控制 */
+        .desktop-hint {
+            display: inline;
+        }
+        
+        .mobile-hint {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .desktop-hint {
+                display: none;
+            }
+            
+            .mobile-hint {
+                display: inline;
+            }
+            
+            .upload-text {
+                font-size: 1rem;
+            }
+            
+            .upload-text small {
+                font-size: 0.85rem;
+            }
+            
+            .upload-main-text::after {
+                content: " (点击上传)";
+                color: var(--text-secondary);
+                font-weight: 400;
+            }
+        }
+        
+        /* 桌面端显示拖拽提示 */
+        @media (min-width: 769px) {
+            .upload-main-text::after {
+                content: " (点击或拖拽上传)";
+                color: var(--text-secondary);
+                font-weight: 400;
+            }
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-5);
+            margin-bottom: var(--space-8);
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            position: relative;
+        }
+        
+        .control-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            margin-bottom: var(--space-1);
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px var(--primary-blue-light);
+            transform: translateY(-1px);
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .control-input:hover {
+                border-color: var(--neutral-300);
+            }
+        }
+        
+        .control-input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            background: var(--neutral-200);
+            border-radius: var(--radius-full);
+            border: none;
+            padding: 0;
+        }
+        
+        .control-input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .control-input[type="range"]::-webkit-slider-thumb:hover {
+                transform: scale(1.1);
+                box-shadow: var(--shadow-lg);
+            }
+        }
+        
+        .control-hint {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: var(--space-4);
+            padding: var(--space-4);
+            background: linear-gradient(135deg, var(--neutral-50), rgba(245, 245, 245, 0.8));
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--neutral-200);
+            backdrop-filter: blur(5px);
+        }
+        
+        .preview-canvas {
+            width: 100%;
+            max-width: 320px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            background: #000;
+            margin: 0 auto;
+            display: block;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .preview-canvas:hover {
+                transform: scale(1.02);
+                box-shadow: var(--shadow-2xl);
+            }
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: var(--space-4) var(--space-6);
+            background: var(--gradient-primary);
+            color: var(--text-white);
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: var(--space-8);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .generate-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-xl);
+            }
+            
+            .generate-btn:hover::before {
+                left: 100%;
+            }
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .generate-btn:disabled {
+            background: var(--neutral-400);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .generate-btn:disabled::before {
+            display: none;
+        }
+        
+        .progress {
+            display: none;
+            background: rgba(248, 250, 252, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-top: var(--space-8);
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--neutral-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-bottom: var(--space-4);
+            position: relative;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: var(--radius-full);
+            position: relative;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-top: var(--space-3);
+            font-size: 1rem;
+        }
+        
+        .result {
+            display: none;
+            margin-top: var(--space-8);
+            padding: var(--space-8);
+            background: linear-gradient(135deg, #ecfdf5, rgba(236, 253, 245, 0.8));
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid #a7f3d0;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .result h3 {
+            color: #065f46;
+            margin-bottom: var(--space-5);
+            font-weight: 700;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .video-preview {
+            width: 100%;
+            max-width: 420px;
+            margin: var(--space-5) auto;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            background: #000;
+            display: block;
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .video-preview:hover {
+                transform: scale(1.02);
+                box-shadow: var(--shadow-2xl);
+            }
+        }
+        
+        .video-controls {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-5);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            background: var(--gradient-success);
+            color: var(--text-white);
+            text-decoration: none;
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        /* 移动端移除hover效果 */
+        @media (hover: hover) {
+            .download-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .download-btn:hover::before {
+                left: 100%;
+            }
+        }
+        
+        .error {
+            display: none;
+            margin-top: var(--space-8);
+            padding: var(--space-8);
+            background: linear-gradient(135deg, #fef2f2, rgba(254, 242, 242, 0.8));
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid #fca5a5;
+            color: #991b1b;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .error h3 {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        /* 现代化滚动条 */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--neutral-100);
+            border-radius: var(--radius-full);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--neutral-400), var(--neutral-500));
+            border-radius: var(--radius-full);
+            border: 2px solid var(--neutral-100);
+            transition: all 0.3s ease;
+        }
+        
+        /* 移动端移除滚动条hover效果 */
+        @media (hover: hover) {
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+                border-color: var(--neutral-50);
+            }
+        }
+        
+        /* 响应式设计 - 移动端优化 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: var(--space-6);
+                padding: var(--space-6);
+            }
+            
+            .preview-section {
+                position: static;
+                order: -1; /* 移动端预览区域置顶 */
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+                gap: var(--space-3);
+            }
+            
+            .control-group {
+                background: rgba(255, 255, 255, 0.05);
+                padding: var(--space-4);
+                border-radius: var(--radius-lg);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .control-input[type="range"] {
+                height: 8px;
+                margin: var(--space-2) 0;
+            }
+            
+            .control-input[type="range"]::-webkit-slider-thumb {
+                width: 24px;
+                height: 24px;
+                border: 3px solid var(--primary-blue);
+                box-shadow: 0 2px 8px rgba(0, 102, 255, 0.3);
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+            
+            .header p {
+                font-size: 0.95rem;
+                margin-top: var(--space-2);
+            }
+            
+            body {
+                padding: var(--space-2);
+            }
+            
+
+            
+            .upload-area {
+                padding: var(--space-6);
+                min-height: 140px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .upload-icon {
+                font-size: 2.5rem;
+                margin-bottom: var(--space-2);
+            }
+            
+            .upload-text {
+                text-align: center;
+                font-size: 0.9rem;
+            }
+            
+            .upload-text small {
+                font-size: 0.8rem;
+                opacity: 0.7;
+            }
+            
+            .generate-btn {
+                padding: var(--space-4) var(--space-6);
+                font-size: 1rem;
+                border-radius: var(--radius-xl);
+                min-height: 52px;
+                font-weight: 600;
+            }
+            
+            .preview-canvas {
+                max-width: 100%;
+                height: auto;
+                border-radius: var(--radius-lg);
+            }
+            
+            .video-preview {
+                max-width: 100%;
+                height: auto;
+                border-radius: var(--radius-lg);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: var(--space-6) var(--space-4);
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+                margin-bottom: var(--space-2);
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .main-content {
+                border-radius: var(--radius-xl);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                padding: var(--space-4);
+                gap: var(--space-4);
+            }
+            
+            .upload-section, 
+            .preview-section,
+            .controls-section,
+            .generate-section,
+            .download-section {
+                padding: var(--space-4);
+                margin-bottom: var(--space-4);
+            }
+            
+            .upload-area {
+                padding: var(--space-4);
+                min-height: 120px;
+            }
+            
+            .upload-icon {
+                font-size: 2rem;
+            }
+            
+            .upload-text {
+                font-size: 0.85rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+                margin-bottom: var(--space-3);
+            }
+            
+            .control-group {
+                padding: var(--space-3);
+            }
+            
+            .control-label {
+                font-size: 0.9rem;
+                margin-bottom: var(--space-2);
+            }
+            
+            .control-hint {
+                padding: var(--space-3);
+                font-size: 0.8rem;
+                text-align: center;
+            }
+            
+            .generate-btn {
+                padding: var(--space-3) var(--space-5);
+                font-size: 0.95rem;
+                min-height: 48px;
+            }
+            
+            .progress {
+                padding: var(--space-3);
+            }
+            
+            .progress-text {
+                font-size: 0.9rem;
+            }
+            
+            .result, .error {
+                padding: var(--space-4);
+            }
+            
+            .result h3, .error h3 {
+                font-size: 1.1rem;
+                margin-bottom: var(--space-2);
+            }
+            
+            .download-btn {
+                padding: var(--space-3) var(--space-4);
+                font-size: 0.9rem;
+                width: 100%;
+                text-align: center;
+                border-radius: var(--radius-lg);
+            }
+        }
+        
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            body {
+                padding: var(--space-1);
+            }
+            
+
+            
+            .header {
+                padding: var(--space-4) var(--space-3);
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                border-radius: var(--radius-lg);
+                padding: var(--space-3);
+            }
+            
+            .upload-area {
+                min-height: 100px;
+                padding: var(--space-3);
+            }
+            
+            .upload-icon {
+                font-size: 1.8rem;
+            }
+            
+            .upload-text {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* 移动端触摸优化 */
+        @media (max-width: 768px) {
+            /* 触摸友好的按钮尺寸 */
+            .control-input[type="range"] {
+                -webkit-appearance: none;
+                appearance: none;
+                background: transparent;
+                cursor: pointer;
+            }
+            
+            .control-input[type="range"]::-webkit-slider-track {
+                background: linear-gradient(90deg, var(--neutral-200), var(--neutral-300));
+                height: 8px;
+                border-radius: var(--radius-full);
+            }
+            
+            .control-input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                height: 24px;
+                width: 24px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+                cursor: pointer;
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(0, 102, 255, 0.3), 0 0 0 1px rgba(0, 102, 255, 0.1);
+                transition: all 0.2s ease;
+            }
+            
+            .control-input[type="range"]::-webkit-slider-thumb:active {
+                transform: scale(1.2);
+                box-shadow: 0 4px 16px rgba(0, 102, 255, 0.4), 0 0 0 2px rgba(0, 102, 255, 0.2);
+            }
+            
+            /* 移动端按钮触摸反馈 */
+            .generate-btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+            
+            .download-btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+            
+            /* 移动端上传区域触摸优化 */
+            .upload-area:active {
+                transform: scale(0.99);
+                transition: transform 0.1s ease;
+                background: linear-gradient(135deg, #d6ebff, rgba(214, 235, 255, 0.9));
+                border-color: var(--primary-blue-hover);
+            }
+            
+            /* 移动端禁用拖拽相关样式 */
+            .upload-area.dragover {
+                background: inherit;
+                border-color: inherit;
+                transform: none;
+                box-shadow: inherit;
+            }
+            
+            /* 移动端预览画布触摸优化 */
+            .preview-canvas {
+                touch-action: pan-x pan-y;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+            }
+            
+            /* 移动端滚动优化 */
+            .main-content {
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+            }
+            
+            /* 移动端文本选择优化 */
+            .control-label, .section-title, .upload-text {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            
+            /* 移动端焦点样式优化 */
+            .control-input:focus {
+                outline: 2px solid var(--primary-blue);
+                outline-offset: 2px;
+            }
+            
+            .generate-btn:focus, .download-btn:focus {
+                outline: 2px solid var(--primary-blue);
+                outline-offset: 2px;
+            }
+        }
+        
+        /* 移动端横屏优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+                gap: var(--space-4);
+            }
+            
+            .preview-section {
+                order: 0;
+            }
+            
+            .header {
+                padding: var(--space-4) var(--space-6);
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .upload-area {
+                min-height: 100px;
+            }
+        }
+        
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: #f8fafc;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --neutral-50: #0f172a;
+                --neutral-100: #1e293b;
+                --neutral-200: #334155;
+                --neutral-300: #475569;
+                --neutral-400: #64748b;
+                --neutral-500: #94a3b8;
+            }
+            
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                color: var(--text-primary);
+            }
+            
+            .main-content {
+                background: rgba(30, 41, 59, 0.95);
+                border-color: rgba(51, 65, 85, 0.3);
+            }
+            
+            .upload-section,
+            .preview-section,
+            .controls-section,
+            .generate-section,
+            .download-section {
+                background: rgba(30, 41, 59, 0.8);
+                border-color: rgba(51, 65, 85, 0.5);
+            }
+            
+            .upload-section:hover,
+            .preview-section:hover,
+            .controls-section:hover,
+            .generate-section:hover,
+            .download-section:hover {
+                background: rgba(30, 41, 59, 0.9);
+                border-color: var(--primary-blue);
+            }
+            
+            .upload-area {
+                background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(0, 102, 255, 0.05));
+                border-color: var(--primary-blue);
+            }
+            
+            .upload-area:hover {
+                background: linear-gradient(135deg, rgba(0, 102, 255, 0.15), rgba(0, 102, 255, 0.1));
+            }
+            
+            .control-input {
+                background: rgba(30, 41, 59, 0.8);
+                border-color: var(--neutral-300);
+                color: var(--text-primary);
+            }
+            
+            .control-input:focus {
+                background: rgba(30, 41, 59, 0.9);
+            }
+            
+            .control-hint {
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.6));
+                border-color: var(--neutral-300);
+            }
+            
+            .progress {
+                background: rgba(15, 23, 42, 0.9);
+                border-color: var(--neutral-300);
+            }
+            
+            .result {
+                background: linear-gradient(135deg, rgba(6, 95, 70, 0.2), rgba(6, 95, 70, 0.1));
+                border-color: rgba(16, 185, 129, 0.3);
+            }
+            
+            .error {
+                background: linear-gradient(135deg, rgba(153, 27, 27, 0.2), rgba(153, 27, 27, 0.1));
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: var(--neutral-100);
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, var(--neutral-400), var(--neutral-500));
+                border-color: var(--neutral-200);
+            }
+        }
+    </style>
+</head>
+<body>
+        <div class="main-content">
+            <div class="upload-section">
+                <!-- 1. 上传 -->
+                <h2 class="section-title">
+                    📤 图片上传
+                </h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">
+                        <span class="upload-main-text">选择图片文件</span><br>
+                        <small>支持 JPG, PNG 格式</small>
+                    </div>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*">
+                </div>
+            </div>
+
+            <!-- 2. 预览 -->
+            <div class="preview-section">
+                <h2 class="section-title">
+                    👁️ 实时预览
+                </h2>
+                
+                <canvas id="previewCanvas" class="preview-canvas" width="300" height="533"></canvas>
+                
+                <!-- 隐藏的背景图片元素 -->
+                <img id="backgroundFrame" src="./public/labubu-background-frame.jpg" style="display: none;" crossorigin="anonymous">
+                
+                <div style="margin-top: 20px; text-align: center; color: #666;">
+                    <p>📍 梯形遮罩区域预览</p>
+                    <small>调整参数可实时查看效果</small>
+                </div>
+            </div>
+
+            <!-- 3. 调整 -->
+            <div class="controls-section">
+                <h2 class="section-title">
+                    🎛️ 参数调整
+                </h2>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">水平位置</label>
+                        <input type="range" id="positionX" class="control-input" min="-200" max="200" value="0" step="1">
+                        <span id="positionXValue">0</span>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">垂直位置</label>
+                        <input type="range" id="positionY" class="control-input" min="-200" max="200" value="0" step="1">
+                        <span id="positionYValue">0</span>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">缩放比例</label>
+                        <input type="range" id="scale" class="control-input" min="0.1" max="3" value="1" step="0.1">
+                        <span id="scaleValue">1.0</span>
+                    </div>
+                    <div class="control-hint">
+                        <span class="desktop-hint">💡 提示：在预览区域拖动调整位置，滚轮调整缩放</span>
+                        <span class="mobile-hint">💡 提示：在预览区域触摸拖动调整位置，双指缩放</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 生成 -->
+            <div class="generate-section">
+                <h2 class="section-title">
+                    🎬 视频生成
+                </h2>
+                
+                <button id="generateBtn" class="generate-btn" disabled>
+                    🎬 生成视频
+                </button>
+
+                <div id="progress" class="progress">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div id="progressText" class="progress-text">正在处理...</div>
+                </div>
+            </div>
+
+            <!-- 5. 下载 -->
+            <div class="download-section">
+                <div id="result" class="result">
+                    <h3>✅ 视频生成成功！</h3>
+                    <p id="resultInfo"></p>
+                    
+                    <!-- 视频预览区域 -->
+                    <video id="videoPreview" class="video-preview" controls style="display: none;">
+                        您的浏览器不支持视频播放。
+                    </video>
+                    
+                    <div class="video-controls">
+                        <a id="downloadBtn" class="download-btn" download>📥 下载视频</a>
+                    </div>
+                </div>
+
+                <div id="error" class="error">
+                    <h3>❌ 生成失败</h3>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        // 全局变量
+        let userImage = null;
+        let beamData = null;
+        let timingData = null;
+        let canvas = null;
+        let ctx = null;
+        
+        // 交互状态变量
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartPosX = 0;
+        let dragStartPosY = 0;
+        
+        // 触摸状态变量
+        let lastTouchDistance = 0;
+        let initialScale = 1;
+        let touchStartTime = 0;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            canvas = document.getElementById('previewCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // 加载配置数据
+            await loadConfigData();
+            
+            // 设置事件监听器
+            setupEventListeners();
+            
+            // 设置背景图片加载监听器
+            const backgroundImg = document.getElementById('backgroundFrame');
+            backgroundImg.onload = function() {
+                console.log('背景图片加载成功');
+                renderPreview();
+            };
+            backgroundImg.onerror = function(e) {
+                console.error('背景图片加载失败:', e);
+                renderPreview();
+            };
+            
+            // 如果图片已经加载完成，直接渲染
+            if (backgroundImg.complete) {
+                if (backgroundImg.naturalWidth > 0) {
+                    console.log('背景图片已加载');
+                    renderPreview();
+                } else {
+                    console.error('背景图片加载失败（已完成但无尺寸）');
+                }
+            }
+            
+            // 初始渲染
+            renderPreview();
+            
+            // 初始化移动端优化
+            initMobileOptimizations();
+        });
+
+        // 加载配置数据
+        async function loadConfigData() {
+            try {
+                const [beamResponse, timingResponse] = await Promise.all([
+                    fetch('/beam-data.json'),
+                    fetch('/timing-data.json')
+                ]);
+                
+                beamData = await beamResponse.json();
+                timingData = await timingResponse.json();
+                
+                console.log('配置数据加载成功:', { beamData, timingData });
+            } catch (error) {
+                console.error('配置数据加载失败:', error);
+                showError('配置数据加载失败，请刷新页面重试');
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            // 文件上传
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // 拖拽上传（仅桌面端）
+            if (window.matchMedia('(hover: hover)').matches) {
+                uploadArea.addEventListener('dragover', handleDragOver);
+                uploadArea.addEventListener('dragleave', handleDragLeave);
+                uploadArea.addEventListener('drop', handleDrop);
+            }
+            
+            // 控制参数变化
+            ['positionX', 'positionY', 'scale'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', handleControlChange);
+                }
+            });
+            
+            // 画布交互事件（鼠标）
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel);
+            
+            // 画布交互事件（触摸）
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+            
+            // 移动端双指缩放支持
+            canvas.addEventListener('gesturestart', handleGestureStart, { passive: false });
+            canvas.addEventListener('gesturechange', handleGestureChange, { passive: false });
+            canvas.addEventListener('gestureend', handleGestureEnd, { passive: false });
+            
+            // 生成按钮
+            generateBtn.addEventListener('click', generateVideo);
+        }
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadImage(file);
+            }
+        }
+
+        // 处理拖拽（仅桌面端）
+        function handleDragOver(event) {
+            // 检查是否支持hover（桌面端）
+            if (!window.matchMedia('(hover: hover)').matches) {
+                return;
+            }
+            
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            // 检查是否支持hover（桌面端）
+            if (!window.matchMedia('(hover: hover)').matches) {
+                return;
+            }
+            
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(event) {
+            // 检查是否支持hover（桌面端）
+            if (!window.matchMedia('(hover: hover)').matches) {
+                event.preventDefault();
+                return;
+            }
+            
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                loadImage(files[0]);
+            }
+        }
+
+        // 加载图片
+        function loadImage(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('请选择有效的图片文件');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    userImage = {
+                        element: img,
+                        data: e.target.result,
+                        width: img.width,
+                        height: img.height
+                    };
+                    
+                    document.getElementById('generateBtn').disabled = false;
+                    renderPreview();
+                    
+                    // 更新上传区域显示
+                    const uploadArea = document.getElementById('uploadArea');
+                    uploadArea.innerHTML = `
+                        <div class="upload-icon">✅</div>
+                        <div class="upload-text">
+                            图片已上传: ${file.name}<br>
+                            <small>${img.width} x ${img.height}</small>
+                        </div>
+                    `;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 处理控制参数变化
+        function handleControlChange(event) {
+            const id = event.target.id;
+            const value = event.target.value;
+            
+            // 更新显示值
+            const valueSpan = document.getElementById(id + 'Value');
+            if (id === 'scale') {
+                valueSpan.textContent = parseFloat(value).toFixed(1);
+            } else {
+                valueSpan.textContent = value;
+            }
+            
+            // 重新渲染预览
+            renderPreview();
+        }
+        
+        // 鼠标按下事件
+         function handleMouseDown(event) {
+            if (!userImage) return;
+            
+            isDragging = true;
+            const rect = canvas.getBoundingClientRect();
+            dragStartX = event.clientX - rect.left;
+            dragStartY = event.clientY - rect.top;
+            dragStartPosX = parseFloat(document.getElementById('positionX').value);
+            dragStartPosY = parseFloat(document.getElementById('positionY').value);
+            
+            canvas.style.cursor = 'grabbing';
+        }
+        
+        // 鼠标移动事件
+        function handleMouseMove(event) {
+            if (!isDragging || !userImage) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const currentX = event.clientX - rect.left;
+            const currentY = event.clientY - rect.top;
+            
+            const deltaX = currentX - dragStartX;
+            const deltaY = currentY - dragStartY;
+            
+            const newPosX = Math.max(-200, Math.min(200, dragStartPosX + deltaX));
+            const newPosY = Math.max(-200, Math.min(200, dragStartPosY + deltaY));
+            
+            document.getElementById('positionX').value = newPosX;
+            document.getElementById('positionY').value = newPosY;
+            document.getElementById('positionXValue').textContent = Math.round(newPosX);
+            document.getElementById('positionYValue').textContent = Math.round(newPosY);
+            
+            renderPreview();
+        }
+        
+        // 鼠标释放事件
+        function handleMouseUp(event) {
+            isDragging = false;
+            canvas.style.cursor = 'default';
+        }
+        
+        // 滚轮事件
+        function handleWheel(event) {
+            if (!userImage) return;
+            
+            event.preventDefault();
+            
+            const scaleInput = document.getElementById('scale');
+            const currentScale = parseFloat(scaleInput.value);
+            const delta = event.deltaY > 0 ? -0.1 : 0.1;
+            const newScale = Math.max(0.1, Math.min(3, currentScale + delta));
+            
+            scaleInput.value = newScale;
+            document.getElementById('scaleValue').textContent = newScale.toFixed(1);
+            
+            renderPreview();
+        }
+
+        // 渲染预览
+        function renderPreview() {
+            if (!canvas || !ctx || !beamData) return;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景帧（整个画布背景）
+            const backgroundImg = document.getElementById('backgroundFrame');
+            if (backgroundImg && backgroundImg.complete && backgroundImg.naturalWidth > 0) {
+                // 计算背景图片的显示尺寸，保持宽高比
+                const imgAspect = backgroundImg.naturalWidth / backgroundImg.naturalHeight;
+                const canvasAspect = canvas.width / canvas.height;
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
+                if (imgAspect > canvasAspect) {
+                    // 图片更宽，以高度为准
+                    drawHeight = canvas.height;
+                    drawWidth = drawHeight * imgAspect;
+                    drawX = (canvas.width - drawWidth) / 2;
+                    drawY = 0;
+                } else {
+                    // 图片更高，以宽度为准
+                    drawWidth = canvas.width;
+                    drawHeight = drawWidth / imgAspect;
+                    drawX = 0;
+                    drawY = (canvas.height - drawHeight) / 2;
+                }
+                
+                ctx.drawImage(backgroundImg, drawX, drawY, drawWidth, drawHeight);
+            } else {
+                // 如果背景图片未加载，使用黑色背景
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // 计算缩放比例
+            const scale = canvas.width / beamData.width;
+            
+            // 只有上传图片后才绘制用户图片
+            if (userImage) {
+                // 创建临时画布来处理用户图片的遮罩
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const transform = getTransformValues();
+                
+                tempCtx.save();
+                
+                // 移动到画布中心
+                tempCtx.translate(canvas.width / 2, canvas.height / 2);
+                
+                // 应用用户变换
+                tempCtx.translate(transform.x * scale, transform.y * scale);
+                tempCtx.scale(transform.scale, transform.scale);
+                
+                // 设置透明度（与最终处理后的透明度一致）
+                tempCtx.globalAlpha = 0.7;
+                
+                // 计算图片显示尺寸
+                const imgScale = canvas.width / userImage.width;
+                const displayWidth = userImage.width * imgScale;
+                const displayHeight = userImage.height * imgScale;
+                
+                // 绘制图片到临时画布
+                tempCtx.drawImage(
+                    userImage.element,
+                    -displayWidth / 2,
+                    -displayHeight / 2,
+                    displayWidth,
+                    displayHeight
+                );
+                
+                tempCtx.restore();
+                
+                // 应用梯形遮罩裁切（只保留坐标框内的图片）
+                tempCtx.save();
+                tempCtx.globalCompositeOperation = 'destination-in';
+                
+                tempCtx.beginPath();
+                const polygon = beamData.polygon;
+                tempCtx.moveTo(polygon[0].x * scale, polygon[0].y * scale);
+                for (let i = 1; i < polygon.length; i++) {
+                    tempCtx.lineTo(polygon[i].x * scale, polygon[i].y * scale);
+                }
+                tempCtx.closePath();
+                tempCtx.fillStyle = '#fff';
+                tempCtx.fill();
+                
+                tempCtx.restore();
+                
+                // 将处理后的图片绘制到主画布
+                ctx.drawImage(tempCanvas, 0, 0);
+            }
+            
+            // 绘制梯形边框（弱化显示）
+            ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]); // 虚线效果
+            ctx.beginPath();
+            const polygon = beamData.polygon;
+            ctx.moveTo(polygon[0].x * scale, polygon[0].y * scale);
+            for (let i = 1; i < polygon.length; i++) {
+                ctx.lineTo(polygon[i].x * scale, polygon[i].y * scale);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.setLineDash([]); // 重置虚线
+        }
+
+        // 获取变换值
+        function getTransformValues() {
+            return {
+                x: parseFloat(document.getElementById('positionX').value),
+                y: parseFloat(document.getElementById('positionY').value),
+                scale: parseFloat(document.getElementById('scale').value)
+            };
+        }
+
+        // 生成视频
+        async function generateVideo() {
+            if (!userImage || !beamData || !timingData) {
+                showError('缺少必要数据，请重新加载页面');
+                return;
+            }
+            
+            const generateBtn = document.getElementById('generateBtn');
+            const progress = document.getElementById('progress');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            
+            // 重置状态
+            generateBtn.disabled = true;
+            progress.style.display = 'block';
+            result.style.display = 'none';
+            error.style.display = 'none';
+            
+            try {
+                // 准备请求数据
+                const requestData = {
+                    images: [{
+                        data: userImage.data,
+                        width: userImage.width,
+                        height: userImage.height
+                    }],
+                    beamData: beamData,
+                    timingData: timingData,
+                    imageTransform: getTransformValues()
+                };
+                
+                // 更新进度
+                updateProgress(20, '正在发送请求...');
+                
+                // 发送请求
+                const response = await fetch('http://localhost:3001/generate-timed-video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                updateProgress(50, '正在处理视频...');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const responseData = await response.json();
+                
+                if (responseData.success) {
+                    updateProgress(100, '处理完成！');
+                    
+                    setTimeout(() => {
+                        progress.style.display = 'none';
+                        showResult(responseData);
+                    }, 1000);
+                } else {
+                    throw new Error(responseData.error || '视频生成失败');
+                }
+                
+            } catch (err) {
+                console.error('生成视频失败:', err);
+                progress.style.display = 'none';
+                showError(err.message || '视频生成失败，请重试');
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        // 更新进度
+        function updateProgress(percent, text) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        // 显示结果
+        function showResult(data) {
+            const result = document.getElementById('result');
+            const resultInfo = document.getElementById('resultInfo');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const videoPreview = document.getElementById('videoPreview');
+            
+            resultInfo.innerHTML = `
+                <strong>文件大小:</strong> ${data.fileSize}<br>
+                <strong>处理方式:</strong> ${data.croppingInfo.explanation}<br>
+                <strong>时长:</strong> ${data.timingInfo.finalDuration}
+            `;
+            
+            // 设置视频预览
+            videoPreview.src = data.videoUrl;
+            videoPreview.style.display = 'block';
+            
+            // 设置下载链接
+            downloadBtn.href = data.videoUrl;
+            downloadBtn.download = data.fileName;
+            
+            result.style.display = 'block';
+        }
+
+        // 显示错误
+        function showError(message) {
+            const error = document.getElementById('error');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.textContent = message;
+            error.style.display = 'block';
+        }
+        
+        // 移动端触摸事件处理
+        function handleTouchStart(event) {
+            event.preventDefault();
+            if (!userImage) return;
+            
+            const touches = event.touches;
+            touchStartTime = Date.now();
+            
+            if (touches.length === 1) {
+                // 单指拖拽
+                isDragging = true;
+                const rect = canvas.getBoundingClientRect();
+                const touch = touches[0];
+                dragStartX = touch.clientX - rect.left;
+                dragStartY = touch.clientY - rect.top;
+                dragStartPosX = parseFloat(document.getElementById('positionX').value);
+                dragStartPosY = parseFloat(document.getElementById('positionY').value);
+                
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+                
+                canvas.style.cursor = 'grabbing';
+            } else if (touches.length === 2) {
+                // 双指缩放准备
+                isDragging = false;
+                const touch1 = touches[0];
+                const touch2 = touches[1];
+                lastTouchDistance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+                initialScale = parseFloat(document.getElementById('scale').value);
+            }
+        }
+        
+        function handleTouchMove(event) {
+            event.preventDefault();
+            if (!userImage) return;
+            
+            const touches = event.touches;
+            
+            if (touches.length === 1 && isDragging) {
+                // 单指拖拽
+                const rect = canvas.getBoundingClientRect();
+                const touch = touches[0];
+                const currentX = touch.clientX - rect.left;
+                const currentY = touch.clientY - rect.top;
+                
+                const deltaX = currentX - dragStartX;
+                const deltaY = currentY - dragStartY;
+                
+                const newPosX = Math.max(-200, Math.min(200, dragStartPosX + deltaX));
+                const newPosY = Math.max(-200, Math.min(200, dragStartPosY + deltaY));
+                
+                document.getElementById('positionX').value = newPosX;
+                document.getElementById('positionY').value = newPosY;
+                document.getElementById('positionXValue').textContent = Math.round(newPosX);
+                document.getElementById('positionYValue').textContent = Math.round(newPosY);
+                
+                renderPreview();
+            } else if (touches.length === 2) {
+                // 双指缩放
+                const touch1 = touches[0];
+                const touch2 = touches[1];
+                const currentDistance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+                
+                if (lastTouchDistance > 0) {
+                    const scaleChange = currentDistance / lastTouchDistance;
+                    const newScale = Math.max(0.1, Math.min(3, initialScale * scaleChange));
+                    
+                    document.getElementById('scale').value = newScale;
+                    document.getElementById('scaleValue').textContent = newScale.toFixed(1);
+                    
+                    renderPreview();
+                }
+            }
+        }
+        
+        function handleTouchEnd(event) {
+            event.preventDefault();
+            
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // 检测双击（快速连续两次触摸）
+            if (event.touches.length === 0 && touchDuration < 300) {
+                // 可以在这里添加双击重置功能
+                // resetTransform();
+            }
+            
+            isDragging = false;
+            lastTouchDistance = 0;
+            canvas.style.cursor = 'default';
+        }
+        
+        // Safari手势事件支持
+        function handleGestureStart(event) {
+            event.preventDefault();
+            if (!userImage) return;
+            
+            initialScale = parseFloat(document.getElementById('scale').value);
+        }
+        
+        function handleGestureChange(event) {
+            event.preventDefault();
+            if (!userImage) return;
+            
+            const newScale = Math.max(0.1, Math.min(3, initialScale * event.scale));
+            
+            document.getElementById('scale').value = newScale;
+            document.getElementById('scaleValue').textContent = newScale.toFixed(1);
+            
+            renderPreview();
+        }
+        
+        function handleGestureEnd(event) {
+            event.preventDefault();
+        }
+        
+        // 重置变换（可选功能）
+        function resetTransform() {
+            document.getElementById('positionX').value = 0;
+            document.getElementById('positionY').value = 0;
+            document.getElementById('scale').value = 1;
+            document.getElementById('positionXValue').textContent = '0';
+            document.getElementById('positionYValue').textContent = '0';
+            document.getElementById('scaleValue').textContent = '1.0';
+            renderPreview();
+        }
+        
+        // 移动端优化初始化（需要在DOM加载完成后调用）
+        function initMobileOptimizations() {
+            // 防止页面滚动干扰
+            document.addEventListener('touchmove', function(event) {
+                if (event.target === canvas) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+            
+            // 防止双击缩放
+            document.addEventListener('gesturestart', function(event) {
+                event.preventDefault();
+            });
+            
+            // 防止长按菜单
+            if (canvas) {
+                canvas.addEventListener('contextmenu', function(event) {
+                    event.preventDefault();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+﻿{
+  "effectStartTime": 0.5,
+  "effectDuration": 2.0,
+  "effectEndTime": 2.5,
+  "videoMetadata": {
+    "duration": 5.0,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920,
+    "format": "mp4"
+  },
+  "fadeTransition": {
+    "fadeIn": {
+      "startTime": 0.5,
+      "duration": 0.8,
+      "startOpacity": 0,
+      "endOpacity": 0.5
+    },
+    "sustain": {
+      "startTime": 1.3,
+      "duration": 0.4,
+      "opacity": 0.5
+    },
+    "fadeOut": {
+      "startTime": 1.7,
+      "duration": 0.8,
+      "startOpacity": 0.5,
+      "endOpacity": 0
+    }
+  },
+  "keyframes": [
+    {
+      "time": 0.5,
+      "opacity": 0,
+      "description": "开始渐入"
+    },
+    {
+      "time": 1.3,
+      "opacity": 0.5,
+      "description": "渐入完成"
+    },
+    {
+      "time": 1.7,
+      "opacity": 0.5,
+      "description": "开始渐出"
+    },
+    {
+      "time": 2.5,
+      "opacity": 0,
+      "description": "渐出完成"
+    }
+  ],
+  "easing": {
+    "fadeIn": "ease-in-out",
+    "fadeOut": "ease-in-out"
+  }
+}

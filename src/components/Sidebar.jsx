@@ -165,8 +165,8 @@ const Sidebar = ({
                   
                   <div className="space-y-2">
                     {categories.map((category) => {
-                      const isSelected = currentFilter.includes(category.key);
-                      const isAllSelected = currentFilter.includes('all');
+                      const isSelected = currentFilter && currentFilter.includes(category.key);
+                      const isAllSelected = currentFilter && currentFilter.includes('all');
                       
                       return (
                         <motion.button
@@ -208,7 +208,7 @@ const Sidebar = ({
               {/* 底部区域 */}
               <div style={{ padding: '0 24px 24px 24px', flexShrink: 0 }}>
                 {/* 重置按钮 */}
-                {(!currentFilter.includes('all') || searchTerm) && (
+                {(!(currentFilter && currentFilter.includes('all')) || searchTerm) && (
                   <motion.button
                     onClick={onResetFilters}
                     className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"

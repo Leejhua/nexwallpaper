@@ -310,7 +310,7 @@ const Modal = memo(({ isOpen, item, onClose, onTagClick }) => {
           transition={{ duration: 0.15 }}
           onClick={onClose}
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black dark:bg-opacity-80"
+          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 dark:bg-black dark:bg-opacity-80"
         >
           {/* Pixiv风格模态框容器 */}
           <motion.div

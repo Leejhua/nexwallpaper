@@ -118,19 +118,21 @@ function AppContent() {
           {/* Pixiv风格容器 - 在剩余空间中居中 */}
           <div className="pixiv-container flex justify-center min-h-screen" style={{ padding: '0 16px' }}>
             <div style={{ maxWidth: '1200px', width: '100%' }}>
-              {/* Pixiv风格头部 */}
-              <div className="pixiv-header w-full lg:pt-6 pt-0" style={{ 
-                marginBottom: '24px'
-              }}>
-                {/* 搜索框 */}
-                <Header 
-                  searchTerm={searchTerm}
-                  onSearchChange={handleSearch}
-                  onClearSearch={clearSearch}
-                  onSortChange={setSortMode}
-                  currentSort={sortMode}
-                />
-              </div>
+              {/* Pixiv风格头部 - 只在gallery页面显示 */}
+              {activeTab === 'gallery' && (
+                <div className="pixiv-header w-full lg:pt-6 pt-0" style={{ 
+                  marginBottom: '24px'
+                }}>
+                  {/* 搜索框 */}
+                  <Header 
+                    searchTerm={searchTerm}
+                    onSearchChange={handleSearch}
+                    onClearSearch={clearSearch}
+                    onSortChange={setSortMode}
+                    currentSort={sortMode}
+                  />
+                </div>
+              )}
 
               {/* Pixiv风格画廊内容 - 添加过渡效果和底部间距 */}
               <motion.main

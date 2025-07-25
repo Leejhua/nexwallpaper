@@ -1,0 +1,30 @@
+{
+  "polygon": [
+    {
+      "x": 165,
+      "y": 11
+    },
+    {
+      "x": 1071,
+      "y": 11
+    },
+    {
+      "x": 502,
+      "y": 1310
+    },
+    {
+      "x": 422,
+      "y": 1304
+    }
+  ],
+  "width": 1080,
+  "height": 1920,
+  "fps": 60,
+  "totalFrames": 60,
+  "annotatedFrame": 6,
+  "annotatedAt": "2025-07-16T10:39:09.899Z",
+  "version": "8.0.0",
+  "method": "manual-annotation",
+  "algorithm": "user-interactive-polygon-marking",
+  "annotationPoints": 4
+}

@@ -26,6 +26,22 @@ export default defineConfig({
       'gallery.local'
     ],
     proxy: {
+      // API代理配置
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log(`[API Proxy] ==> Request: ${req.method} ${proxyReq.path}`);
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log(`[API Proxy] <== Response: ${proxyRes.statusCode} ${req.url}`);
+          });
+          proxy.on('error', (err, req, res) => {
+            console.error('[API Proxy] Error: ', err);
+          });
+        }
+      },
       // 配置代理来解决CORS问题
       '/api': {
         target: 'http://127.0.0.1:3001',
