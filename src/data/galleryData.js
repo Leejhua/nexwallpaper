@@ -18,6 +18,11 @@ export const galleryData = [
       "Labubu",
       "高清壁纸",
       "精美设计"
+    ],
+    "backupUrls": [
+      "https://labubuwallpaper.com/cdn-cgi/image/width=350,height=525,fit=cover,quality=80,format=auto/hero-labubu.jpg",
+      "https://labubuwallpaper.com/cdn-cgi/image/width=300,height=450,fit=cover,quality=75,format=auto/hero-labubu.jpg",
+      "https://labubuwallpaper.com/hero-labubu.jpg"
     ]
   },
   {
@@ -37,6 +42,11 @@ export const galleryData = [
       "便携",
       "高清壁纸",
       "精美设计"
+    ],
+    "backupUrls": [
+      "https://labubuwallpaper.com/cdn-cgi/image/width=350,height=525,fit=cover,quality=80,format=auto/labubu-on-stone-bench-in-rose-garden,Labubu-iPhone-Wallpaper.png",
+      "https://labubuwallpaper.com/cdn-cgi/image/width=300,height=450,fit=cover,quality=75,format=auto/labubu-on-stone-bench-in-rose-garden,Labubu-iPhone-Wallpaper.png",
+      "https://labubuwallpaper.com/labubu-on-stone-bench-in-rose-garden,Labubu-iPhone-Wallpaper.png"
     ]
   },
   {

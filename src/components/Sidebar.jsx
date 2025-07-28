@@ -38,6 +38,41 @@ const Sidebar = ({
   const { t } = useLanguage();
   const { translateTag } = useTagTranslation();
   
+  // 移动端优化：快速响应点击
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [isToggling, setIsToggling] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 优化的切换函数，减少移动端延迟
+  const handleToggle = React.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isToggling) return; // 防止重复触发
+    
+    setIsToggling(true);
+    
+    // 立即响应，不等待动画
+    if (isMobile) {
+      // 移动端立即调用，减少延迟感知
+      onToggle();
+      setTimeout(() => setIsToggling(false), 100);
+    } else {
+      // 桌面端保持原有逻辑
+      onToggle();
+      setTimeout(() => setIsToggling(false), 250);
+    }
+  }, [onToggle, isMobile, isToggling]);
+  
   // 获取显示用的搜索词（翻译后的）
   const displaySearchTerm = React.useMemo(() => {
     if (!searchTerm) return '';
@@ -48,41 +83,85 @@ const Sidebar = ({
   
   return (
     <>
-      {/* Pixiv风格侧边栏切换按钮 - 仅桌面端显示 */}
+      {/* Pixiv风格侧边栏切换按钮 - 优化移动端性能 */}
       <motion.button
-        onClick={onToggle}
-        className={`fixed top-6 z-50 pixiv-btn-icon transition-all duration-300 no-focus-outline ${isOpen ? 'left-[260px]' : 'left-6'} bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-blue-500 dark:text-blue-400 shadow-lg rounded-lg w-10 h-10 flex items-center justify-center hidden lg:flex`}
-        whileHover={{ scale: 1.05 }}
+        onClick={handleToggle}
+        onTouchStart={isMobile ? handleToggle : undefined} // 移动端快速响应
+        disabled={isToggling}
+        className={`fixed top-6 z-50 pixiv-btn-icon no-focus-outline ${
+          isOpen ? 'left-[260px]' : 'left-6'
+        } ${isToggling ? 'pointer-events-none' : ''}`}
+        whileHover={!isMobile ? { scale: 1.05 } : {}} // 移动端禁用hover
         whileTap={{ scale: 0.95 }}
+        transition={{ duration: isMobile ? 0.1 : 0.2, ease: "easeOut" }}
+        style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '8px',
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          color: '#0096fa',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          outline: 'none',
+          transition: `left ${isMobile ? '0.2s' : '0.25s'} cubic-bezier(0.4, 0, 0.2, 1)`,
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          touchAction: 'manipulation' // 优化触摸响应
+        }}
       >
-        {isOpen ? (
-          <X className="w-5 h-5" />
-        ) : (
-          <Menu className="w-5 h-5" />
-        )}
+        <motion.div
+          initial={false}
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          {isOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
+        </motion.div>
       </motion.button>
 
       {/* 侧边栏主体 */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Pixiv风格移动端遮罩 */}
+            {/* Pixiv风格移动端遮罩 - 优化性能 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className="fixed inset-0 z-30 lg:hidden"
-              style={{ background: 'rgba(0, 0, 0, 0.3)' }}
+              style={{ 
+                background: 'rgba(0, 0, 0, 0.3)',
+                willChange: 'opacity',
+                backfaceVisibility: 'hidden'
+              }}
               onClick={onToggle}
             />
 
-            {/* Pixiv风格侧边栏内容 */}
+            {/* Pixiv风格侧边栏内容 - 移动端性能优化 */}
             <motion.div
-              initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="fixed left-0 top-0 h-full w-64 z-40 overflow-y-auto pixiv-sidebar flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg"
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ 
+                duration: isMobile ? 0.2 : 0.25, 
+                ease: "easeOut",
+                type: "tween" // 使用tween而非spring，移动端性能更好
+              }}
+              className="fixed left-0 top-0 h-full w-64 z-40 overflow-y-auto pixiv-sidebar flex flex-col scrollbar-hide"
+              style={{
+                background: 'white',
+                borderRight: '1px solid #e0e0e0',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-y', // 优化触摸滚动
+                overscrollBehavior: 'contain' // 防止过度滚动
+              }}
             >
               {/* 顶部区域 */}
               <div style={{ padding: '24px', flexShrink: 0 }}>
@@ -172,14 +251,21 @@ const Sidebar = ({
                         <motion.button
                           key={category.key}
                           onClick={() => onFilterChange(category.key)}
-                          className={`category-filter-btn no-focus-outline w-full flex items-center justify-between rounded-xl transition-all ${
+                          className={`category-filter-btn no-focus-outline w-full flex items-center justify-between rounded-xl ${
                             isSelected || (isAllSelected && category.key === 'all')
                               ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                               : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                           }`}
-                          style={{ height: '48px', padding: '0 12px' }} // 48px = 8 * 6
+                          style={{ 
+                            height: '48px', 
+                            padding: '0 12px',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', // 优化过渡
+                            willChange: 'transform', // 硬件加速
+                            backfaceVisibility: 'hidden'
+                          }}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
                         >
                           <div className="flex items-center gap-3">
                             {React.createElement(iconMap[category.icon], { size: 18 })}
@@ -211,10 +297,16 @@ const Sidebar = ({
                 {(!(currentFilter && currentFilter.includes('all')) || searchTerm) && (
                   <motion.button
                     onClick={onResetFilters}
-                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all mb-4"
-                    style={{ height: '48px' }} // 48px = 8 * 6
+                    className="reset-btn no-focus-outline w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 mb-4"
+                    style={{ 
+                      height: '48px',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      willChange: 'transform',
+                      backfaceVisibility: 'hidden'
+                    }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span className="font-medium">{t('buttons.reset')}</span>

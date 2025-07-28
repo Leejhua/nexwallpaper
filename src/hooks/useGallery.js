@@ -7,6 +7,8 @@ import { languages } from '../data/languages';
  * 提供筛选、搜索等功能，优化加载体验，避免闪屏
  */
 export const useGallery = () => {
+  console.log('useGallery');
+  console.log(galleryData);
   const [selectedFilters, setSelectedFilters] = useState(['all']); // 改为数组支持多选
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,12 +31,6 @@ export const useGallery = () => {
       }
     });
     
-    // Debug: 显示映射表构建情况
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🗺️ 反向翻译映射表构建完成，包含映射:', reverseMap.size);
-      console.log('📋 映射示例:', Array.from(reverseMap.entries()).slice(0, 5));
-    }
-    
     return reverseMap;
   }, []);
 
@@ -43,34 +39,20 @@ export const useGallery = () => {
     const lowerSearchTerm = searchTerm.toLowerCase().trim();
     const lowerItemTag = itemTag.toLowerCase();
     
-    // Debug: 记录搜索过程
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔍 搜索匹配: "${searchTerm}" vs 标签 "${itemTag}"`);
-    }
-    
     // 1. 直接匹配原始标签
     if (lowerItemTag.includes(lowerSearchTerm)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`✅ 直接匹配成功: ${itemTag} 包含 ${searchTerm}`);
-      }
       return true;
     }
     
     // 2. 检查搜索词是否是某个翻译，如果是，匹配对应的原始标签
     const originalTag = reverseTranslationMap.get(lowerSearchTerm);
     if (originalTag && originalTag === itemTag) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`✅ 反向翻译匹配: "${searchTerm}" -> "${originalTag}" === "${itemTag}"`);
-      }
       return true;
     }
     
     // 3. 检查搜索词的部分匹配
     for (const [translatedTag, origTag] of reverseTranslationMap.entries()) {
       if (translatedTag.includes(lowerSearchTerm) && origTag === itemTag) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ 部分翻译匹配: "${translatedTag}" 包含 "${searchTerm}" -> "${origTag}" === "${itemTag}"`);
-        }
         return true;
       }
     }

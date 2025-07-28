@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代理API测试页面</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007acc;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border-left: 4px solid #007acc;
+            background: #f8f9fa;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        img {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 代理API测试页面</h1>
+        
+        <div class="section">
+            <h2>📋 使用说明</h2>
+            <p>这个页面用于测试新的代理API接口访问方式。请确保：</p>
+            <ul>
+                <li>API服务器正在运行（<code>npm run dev:api</code>）</li>
+                <li>服务器端口为 3002</li>
+                <li>代理路由 <code>/api/proxy</code> 已正确配置</li>
+            </ul>
+        </div>
+
+        <!-- 健康检查 -->
+        <div class="test-item">
+            <h3>🏥 健康检查</h3>
+            <p>测试代理服务是否正常运行</p>
+            <button onclick="testHealth()">检查服务状态</button>
+            <div id="health-result" class="result"></div>
+        </div>
+
+        <!-- URL生成测试 -->
+        <div class="test-item">
+            <h3>🔗 URL生成测试</h3>
+            <p>测试代理URL的生成功能</p>
+            <button onclick="testUrlGeneration()">生成代理URL</button>
+            <div id="url-result" class="result"></div>
+        </div>
+
+        <!-- 图片加载测试 -->
+        <div class="test-item">
+            <h3>🖼️ 图片加载测试</h3>
+            <p>测试通过代理API加载图片</p>
+            <button onclick="testImageLoad()">加载测试图片</button>
+            <button onclick="clearImages()">清除图片</button>
+            <div id="image-result" class="result"></div>
+            <div id="image-display"></div>
+        </div>
+
+        <!-- 下载测试 -->
+        <div class="test-item">
+            <h3>⬇️ 下载测试</h3>
+            <p>测试通过代理API下载文件</p>
+            <button onclick="testDownload()">测试下载</button>
+            <div id="download-result" class="result"></div>
+        </div>
+
+        <!-- 代码示例 -->
+        <div class="section">
+            <h2>💻 代码示例</h2>
+            
+            <h3>原来的方式（代理访问）：</h3>
+            <div class="code">
+// 直接替换URL
+const proxyUrl = url.replace('https://labubuwallpaper.com', '/download-proxy');
+const response = await fetch(proxyUrl);</div>
+
+            <h3>新的方式（接口访问）：</h3>
+            <div class="code">
+// 方式1：使用proxyApi服务
+import proxyAPI from '@/services/proxyApi';
+const proxyUrl = proxyAPI.getProxyUrl(originalUrl);
+const response = await fetch(proxyUrl);
+
+// 方式2：直接下载
+const success = await proxyAPI.downloadProxyResource(originalUrl, filename);
+
+// 方式3：获取Blob
+const blob = await proxyAPI.getProxyBlob(originalUrl);</div>
+        </div>
+    </div>
+
+    <script>
+        // 代理API类 - 复制自 src/services/proxyApi.js
+        class ProxyAPI {
+            constructor() {
+                this.baseURL = 'http://localhost:3002/api';
+            }
+
+            getProxyUrl(originalUrl) {
+                if (!originalUrl || !originalUrl.includes('labubuwallpaper.com')) {
+                    return originalUrl;
+                }
+                const encodedUrl = encodeURIComponent(originalUrl);
+                return `${this.baseURL}/proxy?url=${encodedUrl}`;
+            }
+
+            async getProxyBlob(originalUrl) {
+                const proxyUrl = this.getProxyUrl(originalUrl);
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error(`代理请求失败: ${response.status} ${response.statusText}`);
+                }
+                return await response.blob();
+            }
+
+            async downloadProxyResource(originalUrl, filename) {
+                try {
+                    const blob = await this.getProxyBlob(originalUrl);
+                    const blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = filename;
+                    link.style.display = 'none';
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(blobUrl);
+                    }, 100);
+                    
+                    return true;
+                } catch (error) {
+                    console.error('代理下载失败:', error);
+                    return false;
+                }
+            }
+
+            async checkProxyHealth() {
+                try {
+                    const response = await fetch(`${this.baseURL}/health`);
+                    return response.ok;
+                } catch (error) {
+                    return false;
+                }
+            }
+        }
+
+        const proxyAPI = new ProxyAPI();
+
+        // 测试用的示例图片URL
+        const testImageUrl = 'https://labubuwallpaper.com/cdn-cgi/image/width=350,height=525,fit=cover,quality=80,format=auto/zh-CN/wp-content/uploads/2024/01/labubu-wallpaper-4k-11.png';
+
+        // 健康检查测试
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.textContent = '正在检查...';
+            resultDiv.className = 'result info';
+
+            try {
+                const isHealthy = await proxyAPI.checkProxyHealth();
+                if (isHealthy) {
+                    resultDiv.textContent = '✅ 代理服务正常运行';
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = '❌ 代理服务不可用，请检查API服务器是否启动';
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ 健康检查失败: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // URL生成测试
+        function testUrlGeneration() {
+            const resultDiv = document.getElementById('url-result');
+            
+            const originalUrls = [
+                'https://labubuwallpaper.com/test-image.jpg',
+                testImageUrl,
+                'https://example.com/other-image.jpg' // 应该不被代理
+            ];
+
+            let result = 'URL生成结果:\n\n';
+            originalUrls.forEach(url => {
+                const proxyUrl = proxyAPI.getProxyUrl(url);
+                result += `原始URL: ${url}\n`;
+                result += `代理URL: ${proxyUrl}\n`;
+                result += `是否被代理: ${proxyUrl !== url ? '是' : '否'}\n\n`;
+            });
+
+            resultDiv.textContent = result;
+            resultDiv.className = 'result info';
+        }
+
+        // 图片加载测试
+        async function testImageLoad() {
+            const resultDiv = document.getElementById('image-result');
+            const imageDiv = document.getElementById('image-display');
+            
+            resultDiv.textContent = '正在加载图片...';
+            resultDiv.className = 'result info';
+
+            try {
+                const proxyUrl = proxyAPI.getProxyUrl(testImageUrl);
+                
+                // 创建图片元素
+                const img = document.createElement('img');
+                img.onload = () => {
+                    resultDiv.textContent = `✅ 图片加载成功\n代理URL: ${proxyUrl}`;
+                    resultDiv.className = 'result success';
+                };
+                img.onerror = () => {
+                    resultDiv.textContent = `❌ 图片加载失败\n代理URL: ${proxyUrl}`;
+                    resultDiv.className = 'result error';
+                };
+                img.src = proxyUrl;
+                img.alt = '测试图片';
+                
+                imageDiv.appendChild(img);
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ 图片加载失败: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // 清除图片
+        function clearImages() {
+            const imageDiv = document.getElementById('image-display');
+            imageDiv.innerHTML = '';
+            
+            const resultDiv = document.getElementById('image-result');
+            resultDiv.textContent = '图片已清除';
+            resultDiv.className = 'result info';
+        }
+
+        // 下载测试
+        async function testDownload() {
+            const resultDiv = document.getElementById('download-result');
+            
+            resultDiv.textContent = '正在测试下载...';
+            resultDiv.className = 'result info';
+
+            try {
+                const success = await proxyAPI.downloadProxyResource(testImageUrl, 'test-labubu.png');
+                if (success) {
+                    resultDiv.textContent = '✅ 下载测试成功，文件应该已开始下载';
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = '❌ 下载测试失败';
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ 下载测试失败: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // 页面加载时自动执行健康检查
+        window.onload = function() {
+            setTimeout(testHealth, 1000);
+        };
+    </script>
+</body>
+</html> 

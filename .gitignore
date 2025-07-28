@@ -87,3 +87,42 @@ jspm_packages/
 # TernJS port file
 .tern-port
 .vercel
+
+# 项目文档和开发资料
+# Todo lists
+*todo*.md
+*TODO*.md
+
+# 流程图
+*流程图*.md
+*flowchart*.md
+*diagram*.md
+
+# 需求文档
+*需求文档*.md
+*requirement*.md
+*prd*.md
+*PRD*.md
+产品需求文档*.md
+技术方案及prd*.md
+
+# 开发清单
+*开发清单*.md
+*checklist*.md
+*清单*.md
+动态壁纸工作室*.md
+
+# 测试和修复文档
+*_TEST.md
+*_FIX*.md
+*_SUMMARY.md
+*修复*.md
+*测试*.md
+
+# 报告文件
+reports/
+*_REPORT*.md
+*_report*.md
+
+# 技术方案文档
+labubu_tech_solution.md

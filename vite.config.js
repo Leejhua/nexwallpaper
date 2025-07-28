@@ -12,7 +12,8 @@ export default defineConfig({
   },
   server: {
     port: 9090,
-    host: '0.0.0.0',  // 监听所有接�?    strictPort: true,
+    host: '0.0.0.0',  // 监听所有接口
+    strictPort: true,
     cors: true,       // 启用CORS
     // 允许的主机名
     allowedHosts: [

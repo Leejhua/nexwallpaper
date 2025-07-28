@@ -297,7 +297,7 @@ const ShareModal = ({ isOpen, onClose, item }) => {
             return;
           }
         } catch (error) {
-          console.log('Web Share API failed for Instagram');
+                      // Web Share API failed, fallback to copy
         }
         
         // 移动端尝试打开Instagram app

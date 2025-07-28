@@ -33,7 +33,6 @@ export const useClickStats = () => {
         if (saved) {
           initialStats = JSON.parse(saved) || {};
           setClickStats(initialStats);
-          console.log('📦 已加载本地缓存统计数据');
         }
       } catch (error) {
         console.error('Failed to load local stats:', error);
@@ -44,14 +43,11 @@ export const useClickStats = () => {
         try {
           const response = await statsAPI.healthCheck();
           if (response.success) {
-            console.log('🌐 服务器连接正常，开始同步统计数据');
             // 服务器正常，后续会通过loadBatchStats加载具体数据
           }
         } catch (error) {
           console.warn('🔄 服务器暂时不可用，使用本地数据:', error.message);
         }
-      } else {
-        console.log('📴 离线模式，使用本地数据');
       }
     };
     
@@ -112,11 +108,9 @@ export const useClickStats = () => {
     // 🌐 优先同步到服务器，实现跨浏览器实时同步
     if (isOnline) {
       try {
-        console.log(`🔄 正在同步操作到服务器: ${action} -> ${wallpaperId}`);
         const response = await statsAPI.recordAction(wallpaperId, action);
         
         if (response.success && response.data) {
-          console.log(`✅ 服务器同步成功: ${action}`);
           
           // 🎯 用服务器返回的权威数据更新本地状态
           setClickStats(prev => {
@@ -141,7 +135,6 @@ export const useClickStats = () => {
             // 同步保存到localStorage
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-              console.log('💾 已更新本地缓存');
             } catch (error) {
               console.error('Failed to save to localStorage:', error);
             }
@@ -151,11 +144,8 @@ export const useClickStats = () => {
         }
       } catch (error) {
         console.error('❌ 服务器同步失败:', error);
-        console.log('🔄 操作已记录到本地，下次在线时会同步');
         // 失败时保持本地状态，不影响用户体验
       }
-    } else {
-      console.log('📴 离线模式，操作已记录到本地');
     }
   }, [isOnline]); // 只依赖isOnline
 
@@ -165,18 +155,15 @@ export const useClickStats = () => {
     
     // 如果离线，只使用本地数据
     if (!isOnline) {
-      console.log('📴 离线模式，跳过服务器同步');
       return;
     }
     
     try {
       setIsLoading(true);
-      console.log(`🔄 正在从服务器同步 ${wallpaperIds.length} 个项目的统计数据...`);
       
       const response = await statsAPI.getBatchStats(wallpaperIds);
       
       if (response.success && response.data) {
-        console.log('✅ 服务器数据同步成功');
         
         setClickStats(prev => {
           const updated = { ...prev };
@@ -221,26 +208,21 @@ export const useClickStats = () => {
           });
           
           if (hasChanges) {
-            console.log(`📊 已同步 ${syncedCount} 个项目的统计数据`);
-            
             // 保存到localStorage作为缓存
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-              console.log('💾 统计数据已缓存到本地');
             } catch (error) {
               console.error('Failed to save stats to localStorage:', error);
             }
             
             return updated;
           } else {
-            console.log('📊 统计数据已是最新，无需更新');
             return prev;
           }
         });
       }
     } catch (error) {
       console.error('❌ 服务器数据同步失败:', error);
-      console.log('🔄 将继续使用本地缓存数据');
     } finally {
       setIsLoading(false);
     }
