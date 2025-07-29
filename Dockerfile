@@ -1,6 +1,21 @@
 # 多阶段构建：第一阶段 - 构建前端
 FROM node:18-alpine AS frontend-builder
 
+# 安装构建依赖
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
+
 # 设置工作目录
 WORKDIR /app
 
