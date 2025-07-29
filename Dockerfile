@@ -51,6 +51,11 @@ RUN apk add --no-cache \
     freetype-dev \
     nginx
 
+# 配置系统限制以解决 "Too many open files" 错误
+RUN echo "* soft nofile 65536" >> /etc/security/limits.conf && \
+    echo "* hard nofile 65536" >> /etc/security/limits.conf && \
+    echo "fs.file-max = 2097152" >> /etc/sysctl.conf
+
 # 设置工作目录
 WORKDIR /app
 
@@ -120,8 +125,16 @@ ENV PORT=9091
 # 启动脚本
 COPY <<EOF /app/start.sh
 #!/bin/sh
+# 设置文件描述符限制
+ulimit -n 65536
+
+# 禁用文件监控以减少文件描述符使用
+export CHOKIDAR_USEPOLLING=false
+export WATCHPACK_POLLING=false
+
 # 启动nginx
 nginx -g "daemon on;"
+
 # 启动API服务器
 node backend/dev-api-server-two-step.cjs
 EOF
