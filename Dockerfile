@@ -51,10 +51,10 @@ RUN apk add --no-cache \
     freetype-dev \
     nginx
 
-# 配置系统限制以解决 "Too many open files" 错误
-RUN echo "* soft nofile 65536" >> /etc/security/limits.conf && \
-    echo "* hard nofile 65536" >> /etc/security/limits.conf && \
-    echo "fs.file-max = 2097152" >> /etc/sysctl.conf
+# 创建必要的目录和配置文件以解决 "Too many open files" 错误
+RUN mkdir -p /etc/security && \
+    echo "* soft nofile 65536" > /etc/security/limits.conf && \
+    echo "* hard nofile 65536" >> /etc/security/limits.conf
 
 # 设置工作目录
 WORKDIR /app
