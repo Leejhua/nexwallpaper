@@ -1,11 +1,10 @@
 services:
-  # 全栈应用服务
-  app:
+  # 后端API服务
+  api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.backend
     ports:
-      - "8080:80"  # 改为 8080 避免与 Dokploy 冲突
       - "9091:9091"
     volumes:
       # 挂载临时文件目录
@@ -13,8 +12,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=9091
+      - CHOKIDAR_USEPOLLING=false
+      - WATCHPACK_POLLING=false
     restart: unless-stopped
-    # 添加资源限制和文件描述符限制
+    # 资源限制和文件描述符优化
     ulimits:
       nofile:
         soft: 65536
@@ -22,10 +23,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
           cpus: '1.0'
         reservations:
-          memory: 512M
+          memory: 256M
           cpus: '0.25'
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9091/api/health"]
@@ -33,3 +34,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    # 网络配置
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
