@@ -1,54 +1,22 @@
-version: '3.8'
-
 services:
-  # 后端API服务器
-  api:
+  # 全栈应用服务
+  app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
+      - "80:80"
       - "9091:9091"
     volumes:
       # 挂载临时文件目录
       - ./temp:/app/temp
-      # 挂载静态资源文件（如果存在）
-      - ./labubu-video.mov:/app/labubu-video.mov:ro
-      - ./trapezoid_beam_custom_1753676199463.png:/app/trapezoid_beam_custom_1753676199463.png:ro
-      # 挂载其他必要的静态文件
-      - ./trapezoid_beam_bright.png:/app/trapezoid_beam_bright.png:ro
-      - ./trapezoid_beam_default.png:/app/trapezoid_beam_default.png:ro
-      - ./trapezoid_beam_soft.png:/app/trapezoid_beam_soft.png:ro
     environment:
       - NODE_ENV=production
       - PORT=9091
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9091/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9091/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # 前端开发服务器（可选，用于开发环境）
-  frontend:
-    image: node:18-alpine
-    working_dir: /app
-    ports:
-      - "9090:9090"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    command: sh -c "npm install && npm run dev"
-    environment:
-      - NODE_ENV=development
-    depends_on:
-      - api
-    profiles:
-      - dev
-
-volumes:
-  node_modules:
-
-networks:
-  default:
-    name: labubu-gallery-network
