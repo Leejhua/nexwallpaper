@@ -122,6 +122,39 @@ export const isValidUrl = (url) => {
 };
 
 /**
+ * 获取高质量URL（用于Modal等详情页面）
+ * 将图片URL转换为高质量版本
+ */
+export const getHighQualityUrl = (originalUrl) => {
+  if (!originalUrl) return originalUrl;
+  
+  // 对于labubuwallpaper.com的图片进行高质量优化
+  if (originalUrl.includes('labubuwallpaper.com')) {
+    // 如果URL已经包含CDN参数，提取原始路径并重新生成高质量版本
+    if (originalUrl.includes('cdn-cgi/image/')) {
+      const imagePath = originalUrl.split('/cdn-cgi/image/')[1];
+      if (imagePath && imagePath.includes('/')) {
+        const actualPath = imagePath.substring(imagePath.indexOf('/') + 1);
+        const baseUrl = 'https://labubuwallpaper.com/cdn-cgi/image/';
+        const params = 'width=800,height=1200,fit=cover,quality=90,format=auto';
+        return `${baseUrl}${params}/${actualPath}`;
+      }
+    } else {
+      // 对于直接图片URL，添加高质量CDN优化
+      if (originalUrl.match(/\.(jpg|jpeg|png|webp)$/i)) {
+        const baseUrl = 'https://labubuwallpaper.com/cdn-cgi/image/';
+        const params = 'width=800,height=1200,fit=cover,quality=90,format=auto';
+        const imagePath = originalUrl.replace('https://labubuwallpaper.com/', '');
+        return `${baseUrl}${params}/${imagePath}`;
+      }
+    }
+  }
+  
+  // 对于其他图片，保持原URL
+  return originalUrl;
+};
+
+/**
  * 生成备用CDN URL
  * 如果主CDN失败，尝试不同的参数和编码处理
  */

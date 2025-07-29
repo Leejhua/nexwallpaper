@@ -126,3 +126,7 @@ reports/
 
 # 技术方案文档
 labubu_tech_solution.md
+
+# Custom beam generator files
+beam-generator.html
+beam-preview.html

@@ -28,7 +28,7 @@ export default defineConfig({
     proxy: {
       // API代理配置
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:9091',
         changeOrigin: true,
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {

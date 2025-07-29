@@ -3,6 +3,16 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const multer = require('multer');
+const formidable = require('formidable');
+
+// 配置multer用于文件上传
+const upload = multer({
+  dest: './temp/',
+  limits: {
+    fileSize: 100 * 1024 * 1024 // 100MB
+  }
+});
 
 const app = express();
 app.use((req, res, next) => {
@@ -38,6 +48,308 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     cropping: '两步处理版梯形裁切'
   });
+});
+
+// API健康检查端点（与前端代理路径匹配）
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    cropping: '两步处理版梯形裁切'
+  });
+});
+
+// 统计API - 记录统计数据
+app.post('/api/stats/record', async (req, res) => {
+  try {
+    const { wallpaperId, action } = req.body;
+
+    if (!wallpaperId || !action) {
+      return res.status(400).json({ error: 'Missing wallpaperId or action' });
+    }
+
+    // 简单的内存存储（生产环境应使用数据库）
+    if (!global.stats) {
+      global.stats = {};
+    }
+
+    if (!global.stats[wallpaperId]) {
+      global.stats[wallpaperId] = {
+        view_count: 0,
+        like_count: 0,
+        download_count: 0,
+        created: new Date().toISOString(),
+        last_updated: new Date().toISOString()
+      };
+    }
+
+    // 更新统计数据
+    switch (action) {
+      case 'view':
+        global.stats[wallpaperId].view_count += 1;
+        break;
+      case 'like':
+        global.stats[wallpaperId].like_count += 1;
+        break;
+      case 'unlike':
+        global.stats[wallpaperId].like_count = Math.max(0, global.stats[wallpaperId].like_count - 1);
+        break;
+      case 'download':
+        global.stats[wallpaperId].download_count += 1;
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid action' });
+    }
+
+    global.stats[wallpaperId].last_updated = new Date().toISOString();
+
+    res.status(200).json({
+      success: true,
+      data: global.stats[wallpaperId]
+    });
+  } catch (error) {
+    console.error('Stats API Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 统计API - 批量获取统计数据
+app.post('/api/stats/batch', async (req, res) => {
+  try {
+    const { wallpaperIds } = req.body;
+
+    if (!wallpaperIds || !Array.isArray(wallpaperIds)) {
+      return res.status(400).json({ error: 'Invalid wallpaperIds array' });
+    }
+
+    if (!global.stats) {
+      global.stats = {};
+    }
+
+    const requestedStats = {};
+    wallpaperIds.forEach(id => {
+      if (global.stats[id]) {
+        requestedStats[id] = global.stats[id];
+      } else {
+        requestedStats[id] = {
+          view_count: 0,
+          like_count: 0,
+          download_count: 0,
+          last_updated: new Date().toISOString()
+        };
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      data: requestedStats
+    });
+  } catch (error) {
+    console.error('Batch Stats API Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 格式转换API - 生成HEIF格式
+app.post('/api/make-heif', upload.single('mask'), async (req, res) => {
+  try {
+    const maskFile = req.file;
+    if (!maskFile) {
+      return res.status(400).json({ error: 'mask file required' });
+    }
+
+    let meta = null;
+    if (req.body.meta) {
+      try { 
+        meta = JSON.parse(req.body.meta); 
+      } catch (_) {}
+    }
+
+    const tmpDir = path.join('./temp', `labubu_${Date.now()}`);
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    
+    const maskPath = path.join(tmpDir, 'mask.png');
+    fs.copyFileSync(maskFile.path, maskPath);
+
+    // 使用项目中的视频文件
+    const videoSrc = './Labubu-White-Suit-Flashlight-iPhone-Dynamic-Lockscreen%2CLabubu-Live-Wallpaper.mov';
+    const outputMp4 = path.join(tmpDir, 'output.mp4');
+
+    // 获取视频信息
+    let videoDuration = 10;
+    let fps = 30;
+    
+    try {
+      const probeResult = await new Promise((resolve, reject) => {
+        const ffprobe = spawn('ffprobe', [
+          '-i', videoSrc, 
+          '-f', 'null', 
+          '-'
+        ]);
+        
+        let stderr = '';
+        ffprobe.stderr.on('data', (data) => {
+          stderr += data.toString();
+        });
+        
+        ffprobe.on('close', (code) => {
+          resolve({ stderr });
+        });
+        
+        ffprobe.on('error', reject);
+      });
+      
+      const output = probeResult.stderr || '';
+      const durationMatch = output.match(/Duration: (\d+):(\d+):(\d+)\.(\d+)/);
+      const fpsMatch = output.match(/(\d+(?:\.\d+)?) fps/);
+      
+      if (durationMatch) {
+        const [, hours, minutes, seconds, ms] = durationMatch;
+        videoDuration = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds) + parseInt(ms) / 100;
+      }
+      if (fpsMatch) {
+        fps = parseFloat(fpsMatch[1]);
+      }
+    } catch (probeError) {
+      console.warn('Failed to probe video, using defaults:', probeError.message);
+    }
+
+    // 计算覆盖时间区间
+    let overlayFilter = '[1:v]format=rgba[ov];[0:v][ov]overlay';
+    if (meta?.startFrame !== undefined && meta?.endFrame !== undefined) {
+      const start = meta.startFrame / fps;
+      const end = meta.endFrame / fps;
+      
+      const safeStart = Math.max(0, start);
+      const safeEnd = Math.min(videoDuration, end);
+      
+      overlayFilter += `:enable='between(t\,${start}\,${end})'`;
+      
+      console.log(`Applying overlay from ${safeStart}s to ${safeEnd}s (frames ${meta.startFrame}-${meta.endFrame} @ ${fps}fps)`);
+    }
+
+    await runFFmpeg([
+      '-i', videoSrc,
+      '-i', maskPath,
+      '-filter_complex', overlayFilter,
+      '-c:v', 'libx265', '-x265-params', 'hevc-aq=1',
+      '-movflags', '+faststart',
+      '-y', outputMp4
+    ], 'Video processing with mask overlay');
+
+    // 检查输出文件
+    if (!fs.existsSync(outputMp4)) {
+      throw new Error('Video processing failed - output file not generated');
+    }
+
+    const fileBuf = fs.readFileSync(outputMp4);
+    
+    // 清理临时文件
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.unlinkSync(maskFile.path);
+    
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Content-Disposition', 'attachment; filename="labubu-output.mp4"');
+    res.setHeader('Content-Length', fileBuf.length);
+    res.send(fileBuf);
+  } catch (err) {
+    console.error('HEIF conversion error:', err);
+    res.status(500).json({ 
+      error: 'Processing failed', 
+      details: err.message,
+      timestamp: new Date().toISOString() 
+    });
+  }
+});
+
+// 分享API
+app.post('/api/share', (req, res) => {
+  try {
+    const { wallpaperId, platform } = req.body;
+    
+    if (!wallpaperId) {
+      return res.status(400).json({ error: 'Missing wallpaperId' });
+    }
+    
+    // 记录分享统计
+    if (!global.shareStats) {
+      global.shareStats = {};
+    }
+    
+    if (!global.shareStats[wallpaperId]) {
+      global.shareStats[wallpaperId] = {
+        total: 0,
+        platforms: {}
+      };
+    }
+    
+    global.shareStats[wallpaperId].total += 1;
+    if (platform) {
+      global.shareStats[wallpaperId].platforms[platform] = 
+        (global.shareStats[wallpaperId].platforms[platform] || 0) + 1;
+    }
+    
+    // 生成分享链接
+    const shareUrl = `${req.protocol}://${req.get('host')}/?wallpaper=${wallpaperId}`;
+    
+    res.json({
+      success: true,
+      shareUrl,
+      message: 'Share link generated successfully',
+      stats: global.shareStats[wallpaperId]
+    });
+  } catch (error) {
+    console.error('Share API Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 下载API
+app.get('/api/download/:wallpaperId', (req, res) => {
+  try {
+    const { wallpaperId } = req.params;
+    
+    // 记录下载统计
+    if (!global.downloadStats) {
+      global.downloadStats = {};
+    }
+    
+    global.downloadStats[wallpaperId] = (global.downloadStats[wallpaperId] || 0) + 1;
+    
+    // 这里应该根据wallpaperId找到对应的文件
+    // 为了演示，我们使用一个示例图片
+    const imagePath = './Labubu-Solitude-in-Blossom-Haven%2CLabubu-Spring-Wallpaper.png';
+    
+    if (fs.existsSync(imagePath)) {
+      res.setHeader('Content-Disposition', `attachment; filename="labubu-wallpaper-${wallpaperId}.png"`);
+      res.sendFile(path.resolve(imagePath));
+    } else {
+      res.status(404).json({ error: 'Wallpaper not found' });
+    }
+  } catch (error) {
+    console.error('Download API Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 获取所有统计数据API
+app.get('/api/stats/all', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: {
+        viewStats: global.stats || {},
+        shareStats: global.shareStats || {},
+        downloadStats: global.downloadStats || {}
+      }
+    });
+  } catch (error) {
+    console.error('All Stats API Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // 创建梯形遮罩SVG
@@ -135,9 +447,9 @@ app.post('/generate-timed-video', async (req, res) => {
     fs.writeFileSync(imagePath, imageBuffer);
 
     // 覆盖图片路径
-    const overlayImagePath = './trapezoid_beam_1753430219451.png';
+    const overlayImagePath = './trapezoid_beam_custom_1753676199463.png';
     if (!fs.existsSync(overlayImagePath)) {
-      throw new Error('找不到覆盖图片文件: trapezoid_beam_1753430219451.png');
+      throw new Error('找不到覆盖图片文件: trapezoid_beam_custom_1753676199463.png');
     }
 
     // 创建梯形遮罩
