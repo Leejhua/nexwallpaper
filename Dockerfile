@@ -61,8 +61,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # 复制后端代码和配置文件
-COPY dev-api-server-two-step.cjs ./
-COPY api/ ./api/
+COPY backend/ ./backend/
 COPY *.json ./
 COPY *.js ./
 COPY *.cjs ./
@@ -124,7 +123,7 @@ COPY <<EOF /app/start.sh
 # 启动nginx
 nginx -g "daemon on;"
 # 启动API服务器
-node dev-api-server-two-step.cjs
+node backend/dev-api-server-two-step.cjs
 EOF
 
 RUN chmod +x /app/start.sh
