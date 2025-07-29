@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8081:80"
       - "9091:9091"
     volumes:
       # 挂载临时文件目录
