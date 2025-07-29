@@ -62,8 +62,8 @@ WORKDIR /app
 # 复制package.json和package-lock.json
 COPY package*.json ./
 
-# 只安装生产依赖
-RUN npm ci --only=production
+# 安装所有依赖，确保express模块安装完整
+RUN npm ci --include=dev
 
 # 复制后端代码和配置文件
 COPY backend/ ./backend/
