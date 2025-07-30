@@ -1,7 +1,9 @@
 // 统计API服务
 // 兼容不同的环境变量获取方式
 const getApiUrl = () => {
-  // 始终使用相对路径，以便Vite代理能够正确处理
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://lijhua-nexwallpaper-gtzm9-9lae9b-141-240-9-traefik.me/api';
+  }
   return '/api';
 };
 
