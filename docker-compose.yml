@@ -9,6 +9,7 @@ services:
     volumes:
       # 挂载临时文件目录
       - ./temp:/app/temp
+      - /app/node_modules
     environment:
       - NODE_ENV=production
       - PORT=9091
