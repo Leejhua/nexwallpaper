@@ -9,7 +9,7 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/((?!assets|.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|mp4|mov|webm)).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
