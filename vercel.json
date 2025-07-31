@@ -1,13 +1,17 @@
 {
   "version": 2,
-  "functions": {
-}
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
+  "functions": {},
+    "builds": [
+      {
+        "src": "backend/api/index.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "backend/api/index.js"
+      },
     {
       "src": "/assets/(.*)",
       "headers": { "cache-control": "max-age=31536000, immutable" }
