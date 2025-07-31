@@ -57,6 +57,7 @@ cd nexwallpaper-new
 npm install
 ```
 
+
 ### 开发模式
 ```bash
 # 启动开发服务器
