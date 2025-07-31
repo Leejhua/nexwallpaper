@@ -1,7 +1,7 @@
 {
   "version": 2,
   "functions": {
-    "api/generate-timed-video.js": {
+    "backend/api/generate-timed-video.js": {
       "maxDuration": 300
     }
   },
