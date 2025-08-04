@@ -26,6 +26,9 @@
     "precompute-beam": "node scripts/precompute-beam.mjs",
     "analyze-beam": "node scripts/analyze-video-beam.mjs"
   },
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
