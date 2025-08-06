@@ -28,19 +28,17 @@ RUN npm ci --only=production
 
 # 复制后端代码和必要文件
 COPY backend/ ./backend/
+COPY scripts/ ./scripts/
 COPY *.json ./
-COPY *.js ./
 COPY *.cjs ./
 
 # 创建必要的目录
 RUN mkdir -p temp
 
 # 复制静态资源文件（如果存在）
-COPY . /tmp/source/
-RUN cp /tmp/source/*.png /app/ 2>/dev/null || echo "Warning: PNG files not found" && \
-    cp /tmp/source/*.mov /app/ 2>/dev/null || echo "Warning: MOV files not found" && \
-    cp /tmp/source/*.mp4 /app/ 2>/dev/null || echo "Warning: MP4 files not found" && \
-    rm -rf /tmp/source
+RUN cp *.png . 2>/dev/null || true && \
+    cp *.mov . 2>/dev/null || true && \
+    cp *.mp4 . 2>/dev/null || true
 
 # 文件描述符限制通过 docker-compose.yml 的 ulimits 配置
 
