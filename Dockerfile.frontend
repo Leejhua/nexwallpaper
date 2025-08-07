@@ -7,7 +7,7 @@ RUN apk add --no-cache python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev 
 
 COPY package*.json ./
 
-RUN npm ci --legacy-peer-deps
+RUN npm install -g npm@latest && npm ci --legacy-peer-deps
 
 COPY src/ ./src/
 COPY public/ ./public/
