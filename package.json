@@ -26,17 +26,12 @@
     "precompute-beam": "node scripts/precompute-beam.mjs",
     "analyze-beam": "node scripts/analyze-video-beam.mjs"
   },
-  "engines": {
-    "node": "^20.0.0"
-  },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "canvas": "^3.1.2",
     "cheerio": "^1.1.0",
     "clsx": "^2.0.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
     "ffmpeg-static": "^5.2.0",
     "formidable": "^3.5.4",
     "framer-motion": "^10.16.4",
@@ -59,10 +54,12 @@
     "@vitejs/plugin-react": "^4.1.1",
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.0",
-    "eslint": "^9.6.1",
+    "cors": "^2.8.5",
+    "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
+    "express": "^4.17.1",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
     "vite": "^4.5.14",
