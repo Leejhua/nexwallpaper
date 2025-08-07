@@ -59,13 +59,16 @@
     "cors": "^2.8.5",
     "eslint": "^9.6.1",
     "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.4",
     "express": "^4.17.1",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
     "vite": "^4.5.14",
     "vite-plugin-vercel": "^9.0.7"
+  },
+  "overrides": {
+    "@vercel/nft": "^0.30.0"
   },
   "keywords": [
     "react",
